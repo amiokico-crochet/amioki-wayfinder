@@ -1,0 +1,1999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amioki ✿ Wayfinder</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --rose: #F472B6;
+  --rose-deep: #DB2777;
+  --rose-soft: #FCE7F3;
+  --rose-mid: #FBCFE8;
+  --peach: #FED7AA;
+  --peach-soft: #FFF7ED;
+  --lavender: #C4B5FD;
+  --lav-soft: #F5F3FF;
+  --lav-mid: #EDE9FE;
+  --mint: #A7F3D0;
+  --mint-soft: #ECFDF5;
+  --sky: #BAE6FD;
+  --sky-soft: #F0F9FF;
+  --yellow: #FDE68A;
+  --yellow-soft: #FFFBEB;
+  --coral: #FCA5A5;
+  --coral-soft: #FEF2F2;
+  --text: #1F1435;
+  --text-mid: #6B5A7E;
+  --text-soft: #9C8AAE;
+  --white: #FFFFFF;
+  --card-bg: rgba(255,255,255,0.92);
+  --border: rgba(244,114,182,0.2);
+  --shadow: 0 4px 24px rgba(244,114,182,0.12);
+  --shadow-lg: 0 8px 40px rgba(244,114,182,0.18);
+  --radius: 18px;
+  --radius-sm: 10px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: linear-gradient(135deg, #FFF0F8 0%, #FFF5FB 30%, #F5F0FF 60%, #F0F9FF 100%);
+  min-height: 100vh;
+  color: var(--text);
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at 20% 20%, rgba(244,114,182,0.08) 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 80%, rgba(196,181,253,0.08) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.app-wrap { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 20px 16px 60px; }
+
+/* ── HEADER ── */
+.app-header {
+  text-align: center;
+  padding: 32px 20px 24px;
+  margin-bottom: 8px;
+}
+.app-header h1 {
+  font-size: 2.1em;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--rose-deep), #9333EA, var(--rose));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.5px;
+}
+.app-header p {
+  color: var(--text-mid);
+  font-size: 0.95em;
+  font-weight: 600;
+  margin-top: 6px;
+}
+.header-deco { font-size: 1.8em; margin-bottom: 8px; }
+
+/* ── TABS ── */
+.tab-bar {
+  display: flex;
+  gap: 6px;
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 6px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tab-bar::-webkit-scrollbar { display: none; }
+.tab-btn {
+  flex: 1;
+  min-width: 80px;
+  padding: 10px 8px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.8em;
+  font-weight: 800;
+  cursor: pointer;
+  background: transparent;
+  color: var(--text-soft);
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.tab-btn.active {
+  background: linear-gradient(135deg, var(--rose), #C026D3);
+  color: white;
+  box-shadow: 0 3px 12px rgba(244,114,182,0.4);
+}
+.tab-btn:hover:not(.active) { background: var(--rose-soft); color: var(--rose-deep); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 22px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(8px);
+}
+.card-title {
+  font-size: 1.05em;
+  font-weight: 900;
+  color: var(--text);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-title span { font-size: 1.2em; }
+
+/* ── FORM ELEMENTS ── */
+label { font-size: 0.82em; font-weight: 800; color: var(--text-mid); display: block; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+input, select, textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid var(--rose-mid);
+  border-radius: var(--radius-sm);
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9em;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--white);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--rose);
+  box-shadow: 0 0 0 3px rgba(244,114,182,0.15);
+}
+textarea { resize: vertical; min-height: 80px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.form-group { margin-bottom: 14px; }
+
+/* ── BUTTONS ── */
+.btn {
+  padding: 11px 22px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 0.9em;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--rose), #C026D3);
+  color: white;
+  box-shadow: 0 3px 14px rgba(244,114,182,0.4);
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 5px 20px rgba(244,114,182,0.5); }
+.btn-secondary {
+  background: var(--rose-soft);
+  color: var(--rose-deep);
+  border: 2px solid var(--rose-mid);
+}
+.btn-secondary:hover { background: var(--rose-mid); }
+.btn-ghost { background: transparent; color: var(--text-mid); border: 2px solid rgba(0,0,0,0.08); }
+.btn-ghost:hover { background: var(--lav-soft); border-color: var(--lavender); }
+.btn-sm { padding: 7px 14px; font-size: 0.8em; }
+.btn-full { width: 100%; justify-content: center; }
+.btn-danger { background: var(--coral-soft); color: #DC2626; border: 2px solid var(--coral); }
+
+/* ── WEATHER PILLS ── */
+.pill-row { display: flex; flex-wrap: wrap; gap: 7px; }
+.pill {
+  padding: 7px 14px;
+  border-radius: 99px;
+  font-size: 0.8em;
+  font-weight: 800;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.15s;
+  background: rgba(0,0,0,0.04);
+  color: var(--text-mid);
+}
+.pill.active { border-color: var(--rose); background: var(--rose-soft); color: var(--rose-deep); }
+.pill:hover:not(.active) { background: var(--lav-soft); }
+
+/* ── STATS ── */
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.stat-box {
+  background: linear-gradient(135deg, var(--rose-soft), var(--lav-soft));
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  text-align: center;
+  border: 1px solid var(--border);
+}
+.stat-val { font-size: 1.5em; font-weight: 900; color: var(--rose-deep); }
+.stat-lbl { font-size: 0.72em; font-weight: 800; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 3px; }
+
+/* ── LEADERBOARD ── */
+.lb-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  transition: transform 0.15s;
+}
+.lb-item:hover { transform: translateX(3px); }
+.lb-rank {
+  font-size: 1em;
+  font-weight: 900;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.lb-rank.gold { background: #FDE68A; color: #92400E; }
+.lb-rank.silver { background: #E2E8F0; color: #475569; }
+.lb-rank.bronze { background: #FED7AA; color: #92400E; }
+.lb-rank.other { background: var(--lav-mid); color: var(--text-mid); font-size: 0.8em; }
+.lb-name { flex: 1; font-weight: 800; font-size: 0.9em; }
+.lb-meta { font-size: 0.78em; font-weight: 700; color: var(--text-soft); }
+.lb-val { font-weight: 900; font-size: 0.95em; color: var(--rose-deep); }
+.lb-bar-wrap { width: 100%; height: 5px; background: var(--rose-soft); border-radius: 99px; margin-top: 4px; }
+.lb-bar { height: 5px; border-radius: 99px; background: linear-gradient(90deg, var(--rose), #C026D3); }
+
+/* ── PREDICTION CARDS ── */
+.pred-scenario {
+  background: var(--white);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  border: 2px solid var(--border);
+}
+.pred-scenario.high { border-color: var(--mint); background: var(--mint-soft); }
+.pred-scenario.mid { border-color: var(--lavender); background: var(--lav-soft); }
+.pred-scenario.low { border-color: var(--sky); background: var(--sky-soft); }
+.pred-label { font-size: 0.78em; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-soft); }
+.pred-amt { font-size: 1.8em; font-weight: 900; color: var(--text); }
+.pred-bar { height: 6px; border-radius: 99px; background: var(--rose-mid); margin-top: 8px; }
+.pred-fill { height: 6px; border-radius: 99px; transition: width 0.6s ease; }
+
+/* ── TAGS ── */
+.tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 0.72em;
+  font-weight: 800;
+  background: var(--rose-soft);
+  color: var(--rose-deep);
+  border: 1px solid var(--rose-mid);
+}
+.tag.green { background: var(--mint-soft); color: #065F46; border-color: var(--mint); }
+.tag.purple { background: var(--lav-mid); color: #5B21B6; border-color: var(--lavender); }
+.tag.orange { background: var(--peach-soft); color: #92400E; border-color: var(--peach); }
+.tag.blue { background: var(--sky-soft); color: #075985; border-color: var(--sky); }
+.tag.red { background: var(--coral-soft); color: #991B1B; border-color: var(--coral); }
+
+/* ── PLANNER ── */
+.plan-event {
+  background: var(--white);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  margin-bottom: 10px;
+  border: 2px solid var(--border);
+  position: relative;
+}
+.plan-event-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.plan-event-name { font-weight: 900; font-size: 0.95em; color: var(--text); }
+.plan-event-date { font-size: 0.78em; font-weight: 700; color: var(--text-soft); }
+.plan-remove { background: none; border: none; cursor: pointer; color: var(--coral); font-size: 1.1em; padding: 0; }
+.plan-forecast { font-size: 0.82em; font-weight: 700; color: var(--text-mid); margin-top: 6px; }
+.plan-total-bar {
+  background: linear-gradient(135deg, var(--rose-soft), var(--lav-soft));
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  text-align: center;
+  border: 2px dashed var(--rose);
+  margin-top: 12px;
+}
+
+/* ── NOTES SECTION ── */
+.note-item {
+  padding: 12px 14px;
+  background: var(--yellow-soft);
+  border-radius: var(--radius-sm);
+  border-left: 4px solid var(--yellow);
+  margin-bottom: 8px;
+  font-size: 0.85em;
+  font-weight: 600;
+  color: var(--text);
+}
+.note-meta { font-size: 0.72em; font-weight: 800; color: var(--text-soft); margin-bottom: 4px; text-transform: uppercase; }
+
+/* ── AI LOADING ── */
+.ai-loading { display: flex; align-items: center; gap: 10px; padding: 18px; color: var(--text-soft); font-weight: 700; font-size: 0.85em; }
+.dots { display: flex; gap: 4px; }
+.dots span {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--rose);
+  animation: bounce 1.2s infinite;
+}
+.dots span:nth-child(2) { animation-delay: 0.2s; }
+.dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,80%,100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
+
+/* ── INSIGHT BOX ── */
+.insight-box {
+  background: linear-gradient(135deg, #FFF0F8, #F5F0FF);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  border: 2px solid var(--rose-mid);
+  font-size: 0.85em;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.6;
+}
+.insight-box .insight-label {
+  font-size: 0.72em;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-soft);
+  margin-bottom: 6px;
+}
+
+/* ── PRICE SUGGESTION ── */
+.price-sug {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-size: 0.78em;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.price-sug.up { background: var(--mint-soft); color: #065F46; border: 1px solid var(--mint); }
+.price-sug.down { background: var(--coral-soft); color: #991B1B; border: 1px solid var(--coral); }
+.price-sug:hover { transform: scale(1.05); }
+
+/* ── SECTION DIVIDER ── */
+.divider { height: 1px; background: var(--border); margin: 18px 0; }
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-soft);
+}
+.empty-state .empty-icon { font-size: 2.5em; margin-bottom: 10px; }
+.empty-state p { font-size: 0.88em; font-weight: 700; }
+
+/* ── CSV UPLOAD ── */
+.upload-zone {
+  border: 2px dashed var(--rose);
+  border-radius: var(--radius-sm);
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--rose-soft);
+}
+.upload-zone:hover { background: var(--rose-mid); border-color: var(--rose-deep); }
+.upload-zone input { display: none; }
+.upload-zone p { font-size: 0.85em; font-weight: 700; color: var(--text-mid); margin-top: 6px; }
+
+/* ── SCROLLABLE ── */
+.scroll-x { overflow-x: auto; }
+
+/* ── CHIPS ── */
+.chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.chip {
+  padding: 5px 12px;
+  background: var(--lav-mid);
+  border-radius: 99px;
+  font-size: 0.78em;
+  font-weight: 800;
+  color: #5B21B6;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: 1px solid var(--lavender);
+}
+.chip:hover { background: var(--lavender); color: white; }
+.chip.active { background: linear-gradient(135deg, var(--rose), #C026D3); color: white; border-color: transparent; }
+
+/* ── MONTH HEADER ── */
+.month-header {
+  font-size: 1em;
+  font-weight: 900;
+  color: var(--text);
+  padding: 10px 0 6px;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── TOAST ── */
+#toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: linear-gradient(135deg, var(--rose-deep), #9333EA);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 99px;
+  font-size: 0.88em;
+  font-weight: 800;
+  opacity: 0;
+  transition: all 0.3s;
+  pointer-events: none;
+  z-index: 9999;
+  white-space: nowrap;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  .tab-btn { font-size: 0.72em; padding: 8px 6px; }
+  .app-header h1 { font-size: 1.6em; }
+}
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<div class="app-wrap">
+  <div class="app-header">
+    <div class="header-deco">🗺️🌸✨</div>
+    <h1>Amioki Wayfinder</h1>
+    <p>Your market planner & predictor for your kawaii empire 🧶</p>
+  </div>
+
+  <!-- TAB BAR -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('log')">📋 Log Event</button>
+    <button class="tab-btn" onclick="switchTab('insights')">🏆 Insights</button>
+    <button class="tab-btn" onclick="switchTab('predict')">🧭 Predict</button>
+    <button class="tab-btn" onclick="switchTab('plan')">📅 Plan</button>
+    <button class="tab-btn" onclick="switchTab('notes')">📝 Notes</button>
+    <button class="tab-btn" onclick="switchTab('contractors')">🧶 Pay</button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- TAB 1: LOG EVENT -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div id="tab-log" class="tab-panel active">
+
+    <div class="card">
+      <div class="card-title"><span>📤</span> Import from Square CSV</div>
+      <div class="upload-zone" onclick="document.getElementById('csvInput').click()">
+        <input type="file" id="csvInput" accept=".csv" onchange="handleCSV(event)">
+        <div style="font-size:2em;">📂</div>
+        <strong style="font-size:0.95em;color:var(--rose-deep);">Drop Square CSV here or click to upload</strong>
+        <p>Items export OR Sales Summary — auto-maps item names & totals</p>
+      </div>
+      <div id="csvPreview" style="margin-top:12px;display:none;"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span>🎪</span> Event Details</div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Event Name</label>
+          <div style="display:flex;gap:8px;">
+            <input type="text" id="ev_name" placeholder="e.g., Cherry Blossom Fest 2026" list="eventNameList" style="flex:1;">
+            <datalist id="eventNameList"></datalist>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="ev_date">
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Market Type</label>
+          <select id="ev_type">
+            <option value="">Select type...</option>
+            <option value="vb_farmers_market">🌿 VB Farmers Market (Home Base)</option>
+            <option value="farmers_market">🌿 Farmers Market (Other)</option>
+            <option value="special_event">⭐ Special Event</option>
+            <option value="festival">🎡 Festival (Single Day)</option>
+            <option value="festival_multi">🎡 Premium Festival (Multi-Day)</option>
+            <option value="holiday_market">🎄 Holiday Market</option>
+            <option value="popup">🏪 Pop-Up / Indoor Venue</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Duration</label>
+          <select id="ev_duration">
+            <option value="1">1 Day</option>
+            <option value="2">2 Days</option>
+            <option value="3">3 Days</option>
+            <option value="4">4 Days</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="form-group">
+          <label>Actual Revenue ($)</label>
+          <input type="number" id="ev_revenue" placeholder="284.00" step="0.01">
+        </div>
+        <div class="form-group">
+          <label>Attendance (estimated)</label>
+          <input type="number" id="ev_attendance" placeholder="500">
+        </div>
+        <div class="form-group">
+          <label>Items Sold</label>
+          <input type="number" id="ev_items" placeholder="12">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Weather Conditions</label>
+        <div class="pill-row" id="weatherPills">
+          <div class="pill active" data-w="☀️ Sunny" onclick="togglePill(this,'weather')">☀️ Sunny</div>
+          <div class="pill" data-w="⛅ Partly Cloudy" onclick="togglePill(this,'weather')">⛅ Partly Cloudy</div>
+          <div class="pill" data-w="☁️ Overcast" onclick="togglePill(this,'weather')">☁️ Overcast</div>
+          <div class="pill" data-w="🌧️ Light Rain" onclick="togglePill(this,'weather')">🌧️ Light Rain</div>
+          <div class="pill" data-w="⛈️ Heavy Rain" onclick="togglePill(this,'weather')">⛈️ Heavy Rain</div>
+          <div class="pill" data-w="🥵 Hot (90°F+)" onclick="togglePill(this,'weather')">🥵 Hot (90°F+)</div>
+          <div class="pill" data-w="🥶 Cold (50°F-)" onclick="togglePill(this,'weather')">🥶 Cold (50°F-)</div>
+          <div class="pill" data-w="💨 Windy" onclick="togglePill(this,'weather')">💨 Windy</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Crowd Energy</label>
+        <div class="pill-row" id="crowdPills">
+          <div class="pill active" data-c="🔥 Packed" onclick="togglePill(this,'crowd')">🔥 Packed</div>
+          <div class="pill" data-c="😊 Good Turnout" onclick="togglePill(this,'crowd')">😊 Good Turnout</div>
+          <div class="pill" data-c="😐 Average" onclick="togglePill(this,'crowd')">😐 Average</div>
+          <div class="pill" data-c="😴 Slow" onclick="togglePill(this,'crowd')">😴 Slow</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Vendor Situation</label>
+        <div class="pill-row" id="vendorPills">
+          <div class="pill active" data-v="Solo (just me)" onclick="togglePill(this,'vendor')">🙋 Solo</div>
+          <div class="pill" data-v="With Ashley" onclick="togglePill(this,'vendor')">👩‍🤝‍👩 With Ashley</div>
+          <div class="pill" data-v="With Liz" onclick="togglePill(this,'vendor')">👩‍🤝‍👩 With Liz</div>
+          <div class="pill" data-v="Full Team" onclick="togglePill(this,'vendor')">👥 Full Team</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Item Sales Entry -->
+    <div class="card">
+      <div class="card-title"><span>📦</span> Item Sales (optional — or auto-filled from CSV)</div>
+      <div id="itemSalesWrap">
+        <div id="itemSalesRows"></div>
+        <button class="btn btn-secondary btn-sm" onclick="addItemRow()" style="margin-top:8px;">+ Add Item</button>
+      </div>
+      <div class="divider"></div>
+      <div class="form-group">
+        <label>Market Notes (AI will learn from these! 🧠)</label>
+        <textarea id="ev_notes" placeholder="e.g., Pikachus sold out in 2 hours — raise price! Terrible weather but still did $200. Families with kids loved the Axolotl..."></textarea>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="saveEvent()" style="margin-top:4px;">
+        ✨ Save Event
+      </button>
+    </div>
+
+    <!-- Recent Events -->
+    <div class="card">
+      <div class="card-title"><span>📖</span> Recent Events</div>
+      <div id="recentEvents">
+        <div class="empty-state"><div class="empty-icon">🌸</div><p>No events logged yet. Add your first one above!</p></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- TAB 2: INSIGHTS -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div id="tab-insights" class="tab-panel">
+
+    <div class="card">
+      <div class="card-title"><span>📊</span> Overall Stats</div>
+      <div class="stat-grid" id="overallStats">
+        <div class="stat-box"><div class="stat-val" id="stat-events">0</div><div class="stat-lbl">Events Logged</div></div>
+        <div class="stat-box"><div class="stat-val" id="stat-revenue">$0</div><div class="stat-lbl">Total Revenue</div></div>
+        <div class="stat-box"><div class="stat-val" id="stat-avg">$0</div><div class="stat-lbl">Avg per Event</div></div>
+        <div class="stat-box"><div class="stat-val" id="stat-items">0</div><div class="stat-lbl">Items Sold</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span>🔍</span> Filter by Market Type</div>
+      <div class="chip-row" id="typeChips">
+        <div class="chip active" data-filter="all" onclick="setFilter(this)">All Markets</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span>🏆</span> Item Leaderboard — Units Sold</div>
+      <div id="lbUnits">
+        <div class="empty-state"><div class="empty-icon">📦</div><p>Log events with item data to see rankings!</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span>💰</span> Item Leaderboard — Revenue</div>
+      <div id="lbRevenue">
+        <div class="empty-state"><div class="empty-icon">💸</div><p>Log events with item data to see revenue rankings!</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span>💡</span> AI Price Suggestions</div>
+      <div id="priceSuggestions">
+        <div class="empty-state"><div class="empty-icon">🏷️</div><p>Add notes like "Pikachu sold out — raise price!" and AI will surface suggestions here!</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span>📅</span> Performance by Event Name (YoY)</div>
+      <div id="yoyTable">
+        <div class="empty-state"><div class="empty-icon">📈</div><p>Log the same festival in multiple years to see year-over-year comparisons!</p></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- TAB 3: PREDICT -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div id="tab-predict" class="tab-panel">
+
+    <div class="card">
+      <div class="card-title"><span>🎪</span> Upcoming Event Details</div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Event Name</label>
+          <input type="text" id="pred_name" placeholder="e.g., Neptune Festival 2026" list="eventNameList2">
+          <datalist id="eventNameList2"></datalist>
+        </div>
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="pred_date">
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Market Type</label>
+          <select id="pred_type">
+            <option value="">Select type...</option>
+            <option value="vb_farmers_market">🌿 VB Farmers Market (Home Base)</option>
+            <option value="farmers_market">🌿 Farmers Market (Other)</option>
+            <option value="special_event">⭐ Special Event</option>
+            <option value="festival">🎡 Festival (Single Day)</option>
+            <option value="festival_multi">🎡 Premium Festival (Multi-Day)</option>
+            <option value="holiday_market">🎄 Holiday Market</option>
+            <option value="popup">🏪 Pop-Up / Indoor Venue</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Expected Attendance</label>
+          <input type="number" id="pred_attendance" placeholder="e.g., 1500">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Expected Weather</label>
+        <div class="pill-row" id="predWeatherPills">
+          <div class="pill active" data-pw="☀️ Sunny" onclick="togglePill(this,'predWeather')">☀️ Sunny</div>
+          <div class="pill" data-pw="⛅ Partly Cloudy" onclick="togglePill(this,'predWeather')">⛅ Partly Cloudy</div>
+          <div class="pill" data-pw="☁️ Overcast" onclick="togglePill(this,'predWeather')">☁️ Overcast</div>
+          <div class="pill" data-pw="🌧️ Light Rain" onclick="togglePill(this,'predWeather')">🌧️ Light Rain</div>
+          <div class="pill" data-pw="🥵 Hot (90°F+)" onclick="togglePill(this,'predWeather')">🥵 Hot (90°F+)</div>
+          <div class="pill" data-pw="🥶 Cold (50°F-)" onclick="togglePill(this,'predWeather')">🥶 Cold (50°F-)</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Expected Crowd</label>
+        <div class="pill-row" id="predCrowdPills">
+          <div class="pill active" data-pc="🔥 Packed" onclick="togglePill(this,'predCrowd')">🔥 Packed</div>
+          <div class="pill" data-pc="😊 Good Turnout" onclick="togglePill(this,'predCrowd')">😊 Good Turnout</div>
+          <div class="pill" data-pc="😐 Average" onclick="togglePill(this,'predCrowd')">😐 Average</div>
+          <div class="pill" data-pc="😴 Slow" onclick="togglePill(this,'predCrowd')">😴 Slow</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Additional Notes</label>
+        <textarea id="pred_notes" placeholder="e.g., First time at this venue, expect families, holiday theme..."></textarea>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="runPrediction()">
+        🧭 Generate Forecast
+      </button>
+    </div>
+
+    <div id="predResultsWrap" style="display:none;">
+      <div class="card">
+        <div class="card-title"><span>💰</span> Revenue Forecast</div>
+        <div id="predResults"></div>
+        <div id="predInsightBox" class="insight-box" style="margin-top:14px;display:none;">
+          <div class="insight-label">✨ AI Insight</div>
+          <div id="predInsightText"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span>📦</span> Recommended Inventory</div>
+        <div id="predInventory"></div>
+      </div>
+      <div class="card" id="yoyCard" style="display:none;">
+        <div class="card-title"><span>📈</span> Year-Over-Year Comparison</div>
+        <div id="yoyContent"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- TAB 4: PLAN -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div id="tab-plan" class="tab-panel">
+
+    <div class="card">
+      <div class="card-title"><span>➕</span> Add Market to Plan</div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Event Name</label>
+          <input type="text" id="plan_name" placeholder="e.g., Water Lantern Festival" list="eventNameList3">
+          <datalist id="eventNameList3"></datalist>
+        </div>
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="plan_date">
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Market Type</label>
+          <select id="plan_type">
+            <option value="">Select type...</option>
+            <option value="vb_farmers_market">🌿 VB Farmers Market</option>
+            <option value="farmers_market">🌿 Farmers Market (Other)</option>
+            <option value="special_event">⭐ Special Event</option>
+            <option value="festival">🎡 Festival</option>
+            <option value="festival_multi">🎡 Premium Festival (Multi-Day)</option>
+            <option value="holiday_market">🎄 Holiday Market</option>
+            <option value="popup">🏪 Pop-Up</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Expected Attendance</label>
+          <input type="number" id="plan_attendance" placeholder="500">
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="addToPlan()">+ Add to Plan</button>
+    </div>
+
+    <!-- View range selector -->
+    <div class="card" style="padding:14px 22px;">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <span style="font-weight:800;font-size:0.85em;color:var(--text-mid);">View Range:</span>
+        <button class="btn btn-secondary btn-sm" onclick="setPlanRange(1)" id="range1btn">1 Month</button>
+        <button class="btn btn-ghost btn-sm" onclick="setPlanRange(2)" id="range2btn">2 Months</button>
+        <button class="btn btn-ghost btn-sm" onclick="setPlanRange(3)" id="range3btn">3 Months</button>
+      </div>
+    </div>
+
+    <div id="planCalendar">
+      <div class="empty-state card"><div class="empty-icon">📅</div><p>Add upcoming markets above to start planning!</p></div>
+    </div>
+
+    <div id="planSummary" style="display:none;" class="card">
+      <div class="card-title"><span>🎯</span> Planning Summary</div>
+      <div id="planSummaryContent"></div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- TAB 5: NOTES -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div id="tab-notes" class="tab-panel">
+
+    <div class="card">
+      <div class="card-title"><span>📝</span> Add Quick Market Note</div>
+      <div class="form-group">
+        <label>Note (AI will reference this for future predictions!)</label>
+        <textarea id="quick_note" placeholder="e.g., Pikachus are always the first to go — we should raise the price by $2. Terrible rainy weather at Neptune still brought in $180. Axolotls do 3x better at family-friendly events..."></textarea>
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Related Event (optional)</label>
+          <input type="text" id="note_event" placeholder="e.g., Neptune Festival 2025" list="eventNameList4">
+          <datalist id="eventNameList4"></datalist>
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="note_cat">
+            <option value="pricing">💰 Pricing Insight</option>
+            <option value="item">📦 Item Performance</option>
+            <option value="weather">🌤️ Weather Impact</option>
+            <option value="crowd">👥 Crowd/Venue</option>
+            <option value="strategy">🧠 Strategy</option>
+            <option value="general">📌 General</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="saveNote()">💾 Save Note</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span>🗂️</span> All Market Notes</div>
+      <div class="chip-row" style="margin-bottom:14px;" id="noteCatChips">
+        <div class="chip active" data-nf="all" onclick="setNoteFilter(this)">All</div>
+        <div class="chip" data-nf="pricing" onclick="setNoteFilter(this)">💰 Pricing</div>
+        <div class="chip" data-nf="item" onclick="setNoteFilter(this)">📦 Items</div>
+        <div class="chip" data-nf="weather" onclick="setNoteFilter(this)">🌤️ Weather</div>
+        <div class="chip" data-nf="crowd" onclick="setNoteFilter(this)">👥 Crowd</div>
+        <div class="chip" data-nf="strategy" onclick="setNoteFilter(this)">🧠 Strategy</div>
+      </div>
+      <div id="allNotes">
+        <div class="empty-state"><div class="empty-icon">📝</div><p>No notes yet! Add observations above to teach the AI about your markets.</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span>🤖</span> Ask the AI About Your Markets</div>
+      <div class="form-group">
+        <textarea id="aiQuestion" placeholder="e.g., Which items should I make more of for summer festivals? When should I raise Pikachu prices? What's my best market type?"></textarea>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="askAI()">✨ Ask AI</button>
+      <div id="aiAnswer" style="margin-top:14px;display:none;" class="insight-box">
+        <div class="insight-label">🤖 AI Analysis</div>
+        <div id="aiAnswerText"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- TAB 6: CONTRACTOR PAY PLANNER -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div id="tab-contractors" class="tab-panel">
+
+    <!-- Contractor selector -->
+    <div class="card" style="padding:14px 22px;">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <span style="font-weight:800;font-size:0.85em;color:var(--text-mid);">Viewing:</span>
+        <button class="btn btn-primary btn-sm" onclick="setContractor('ashley')" id="ctr-ashley-btn">👩‍🎨 Ashley</button>
+        <button class="btn btn-ghost btn-sm" onclick="setContractor('liz')" id="ctr-liz-btn">👩‍🎨 Liz</button>
+      </div>
+      <div style="margin-top:10px;font-size:0.8em;font-weight:700;color:var(--text-soft);">
+        Rate: <strong style="color:var(--rose-deep);">$12.77/hr</strong> · Updated January 2026 · <span id="ctr-note" style="color:var(--text-soft);">High-volume producer · SKU prefix CA-</span>
+      </div>
+    </div>
+
+    <!-- Production order builder -->
+    <div class="card">
+      <div class="card-title"><span>📋</span> Build Production Order</div>
+      <p style="font-size:0.82em;font-weight:700;color:var(--text-mid);margin-bottom:14px;">Enter how many of each item you need made. Totals update live.</p>
+
+      <div id="ctrItemsWrap"></div>
+
+      <!-- Custom item row -->
+      <div style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);">
+        <div style="font-size:0.78em;font-weight:800;color:var(--text-soft);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Add Custom Item</div>
+        <div class="grid-3" style="gap:8px;align-items:end;">
+          <div><label>Item Name</label><input type="text" id="ctr_custom_name" placeholder="New pattern..."></div>
+          <div><label>Piece Rate ($)</label><input type="number" id="ctr_custom_rate" placeholder="5.00" step="0.01" min="0"></div>
+          <div><label>&nbsp;</label><button class="btn btn-secondary btn-sm btn-full" onclick="addCustomItem()">+ Add</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Running total -->
+    <div class="card" style="background:linear-gradient(135deg,#FFF0F8,#F5F0FF);border:2px solid var(--rose-mid);">
+      <div class="card-title"><span>💰</span> Payment Summary</div>
+
+      <div class="stat-grid" style="margin-bottom:16px;">
+        <div class="stat-box"><div class="stat-val" id="ctr-total-items">0</div><div class="stat-lbl">Items Ordered</div></div>
+        <div class="stat-box"><div class="stat-val" id="ctr-total-labor">$0.00</div><div class="stat-lbl">Labor Cost</div></div>
+        <div class="stat-box"><div class="stat-val" id="ctr-total-materials">$0.00</div><div class="stat-lbl">Material Cost</div></div>
+        <div class="stat-box" style="background:linear-gradient(135deg,var(--rose-soft),var(--lav-mid));border:2px solid var(--rose);">
+          <div class="stat-val" style="font-size:1.8em;" id="ctr-total-owed">$0.00</div>
+          <div class="stat-lbl">Total Owed</div>
+        </div>
+      </div>
+
+      <div id="ctr-breakdown" style="margin-bottom:14px;"></div>
+
+      <div class="grid-2" style="gap:10px;">
+        <div>
+          <label>Label this order (optional)</label>
+          <input type="text" id="ctr_order_label" placeholder="e.g., Chesapeake Jubilee Prep">
+        </div>
+        <div style="display:flex;align-items:flex-end;gap:8px;">
+          <button class="btn btn-primary btn-full" onclick="saveOrder()">💾 Save Order</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Month planner -->
+    <div class="card">
+      <div class="card-title"><span>📅</span> Monthly Pay Estimate</div>
+      <p style="font-size:0.82em;font-weight:700;color:var(--text-mid);margin-bottom:14px;">
+        Based on your saved orders, here's what you'd owe <span id="ctr-name-inline">Ashley</span> this month and next.
+      </p>
+      <div id="ctr-monthly-breakdown">
+        <div class="empty-state"><div class="empty-icon">📦</div><p>Save production orders to see monthly pay estimates!</p></div>
+      </div>
+    </div>
+
+    <!-- Saved orders -->
+    <div class="card">
+      <div class="card-title"><span>📂</span> Saved Orders</div>
+      <div id="ctr-saved-orders">
+        <div class="empty-state"><div class="empty-icon">🗂️</div><p>No saved orders yet.</p></div>
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- end app-wrap -->
+
+<script>
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let pillState = { weather:'☀️ Sunny', crowd:'🔥 Packed', vendor:'Solo (just me)', predWeather:'☀️ Sunny', predCrowd:'🔥 Packed' };
+let currentFilter = 'all';
+let planRange = 1;
+let noteFilter = 'all';
+let itemRows = 0;
+
+// ── Storage helpers ──
+const KEY_EVENTS = 'amioki_mkt_events';
+const KEY_NOTES  = 'amioki_mkt_notes';
+const KEY_PLAN   = 'amioki_mkt_plan';
+const KEY_NAMES  = 'amioki_event_names';
+const KEY_ORDERS = 'amioki_ctr_orders';
+
+function load(key, def) { try { return JSON.parse(localStorage.getItem(key)) || def; } catch { return def; } }
+function save(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) { console.warn(e); } }
+
+let events     = load(KEY_EVENTS, []);
+let notes      = load(KEY_NOTES,  []);
+let planEvents = load(KEY_PLAN,   []);
+let savedNames = load(KEY_NAMES,  ['Cherry Blossom Fest','Neptune Festival','Water Lantern Festival','Chesapeake Jubilee','VB Farmers Market','Strawberry Festival']);
+let savedOrders = load(KEY_ORDERS, []);
+
+// ── PIECE RATE DATA ──
+const CONTRACTORS = {
+  ashley: {
+    name: 'Ashley',
+    note: 'High-volume producer · SKU prefix CA-',
+    anniversary: 'May 15',
+    items: [
+      { name: 'Chickens',               labor: 5.32, materials: 1.43, total: 6.75, time: 25 },
+      { name: 'Baby Chicks',            labor: 3.62, materials: 0.78, total: 4.40, time: 17 },
+      { name: 'Octopi (Juicy Couture)', labor: 4.90, materials: 0.55, total: 5.45, time: 23 },
+      { name: 'Octopi (Bernat Blanket)',labor: 4.90, materials: 1.28, total: 6.18, time: 23 },
+      { name: 'Octopi (Skinny Chenille)',labor:4.90, materials: 0.25, total: 5.15, time: 23 },
+      { name: 'Mama Possum',            labor: 5.74, materials: 1.14, total: 6.88, time: 27 },
+      { name: 'Baby Possum',            labor: 5.74, materials: 0.87, total: 6.61, time: 27 },
+      { name: 'Heart Keychain',         labor: 0.64, materials: 0.11, total: 0.75, time:  3 },
+      { name: 'Bear Coasters',          labor: 2.35, materials: 0.17, total: 2.52, time: 11 },
+      { name: 'Cherry Blossom Pouch',   labor: 9.58, materials: 0.34, total: 9.92, time: 45 },
+      { name: 'Apple Coasters',         labor: 3.62, materials: 0.19, total: 3.81, time: 17 },
+      { name: 'Pet Rock',               labor: 1.91, materials: 0.53, total: 2.44, time:  9 },
+      { name: 'Mini Loaf Cat',          labor: 3.19, materials: 0.79, total: 3.98, time: 15 },
+      { name: 'Mini Loaf Cat (Yarn Given)', labor: 3.19, materials: 0.09, total: 3.28, time: 15 },
+      { name: 'Christmas Baby Chick',   labor: 7.03, materials: 1.65, total: 8.68, time: 33 },
+      { name: 'Baby Christmas Tree',    labor: 8.74, materials: 1.85, total:10.59, time: 41 },
+    ]
+  },
+  liz: {
+    name: 'Liz',
+    note: 'Premium items · SKU prefix CL- · Pungo & premium markets',
+    anniversary: 'May 8',
+    items: [
+      { name: 'Leggy Frog',         labor: 4.26, materials: 0.35, total: 4.61, time: 20 },
+      { name: 'Bees',               labor: 5.32, materials: 2.06, total: 7.38, time: 25 },
+      { name: 'Pastel Rainbow Birb',labor: 5.32, materials: 1.00, total: 6.32, time: 25 },
+      { name: 'Jellyfish',          labor: 5.32, materials: 0.33, total: 5.65, time: 25 },
+      { name: 'All Birb Designs',   labor: 5.32, materials: 0.42, total: 5.74, time: 25 },
+    ]
+  }
+};
+
+let activeContractor = 'ashley';
+let ctrCustomItems = []; // extra items added by user
+
+// ═══════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════
+function switchTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  event.target.classList.add('active');
+  if (id==='insights') renderInsights();
+  if (id==='notes') renderNotes();
+  if (id==='plan') renderPlan();
+  if (id==='contractors') { setContractor(activeContractor); }
+  refreshDataLists();
+}
+
+// ═══════════════════════════════════════════════
+// PILLS
+// ═══════════════════════════════════════════════
+function togglePill(el, group) {
+  const container = el.closest('.pill-row');
+  container.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  const dataKey = {weather:'w', crowd:'c', vendor:'v', predWeather:'pw', predCrowd:'pc'}[group];
+  pillState[group] = el.dataset[dataKey];
+}
+
+// ═══════════════════════════════════════════════
+// ITEM ROWS
+// ═══════════════════════════════════════════════
+function addItemRow(name='', qty='', price='') {
+  itemRows++;
+  const row = document.createElement('div');
+  row.className = 'grid-3';
+  row.id = 'irow_'+itemRows;
+  row.style.cssText = 'gap:8px;margin-bottom:8px;align-items:end;';
+  row.innerHTML = `
+    <div><label>Item Name</label><input type="text" placeholder="Pikachu" value="${name}" id="iname_${itemRows}" list="knownItems"></div>
+    <div><label>Qty Sold</label><input type="number" placeholder="3" value="${qty}" id="iqty_${itemRows}" min="0"></div>
+    <div><label>Price Each ($)</label><div style="display:flex;gap:6px;"><input type="number" placeholder="18" value="${price}" id="iprice_${itemRows}" min="0" step="0.01" style="flex:1;"><button class="btn btn-ghost btn-sm" onclick="document.getElementById('irow_${itemRows}').remove()" style="padding:8px 10px;">✕</button></div></div>
+  `;
+  document.getElementById('itemSalesRows').appendChild(row);
+}
+
+// ═══════════════════════════════════════════════
+// CSV IMPORT
+// ═══════════════════════════════════════════════
+function handleCSV(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const text = ev.target.result;
+      const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+      const headers = lines[0].split(',').map(h => h.replace(/"/g,'').trim().toLowerCase());
+      const rows = lines.slice(1).map(l => {
+        const cols = l.split(',').map(c => c.replace(/"/g,'').trim());
+        const obj = {};
+        headers.forEach((h,i) => obj[h] = cols[i]||'');
+        return obj;
+      });
+
+      // Detect type: items CSV vs sales summary
+      const hasItem = headers.some(h => h.includes('item') || h.includes('name') || h.includes('description'));
+      const hasGross = headers.some(h => h.includes('gross') || h.includes('total') || h.includes('net'));
+
+      let totalRev = 0, itemsMap = {};
+      let date = '';
+
+      if (hasItem) {
+        // Items export
+        rows.forEach(r => {
+          const name = r['item'] || r['name'] || r['description'] || r['item name'] || '';
+          const qty  = parseFloat(r['qty'] || r['quantity'] || r['units'] || '1') || 1;
+          const gross = parseFloat(r['gross sales'] || r['gross'] || r['price'] || r['net sales'] || '0') || 0;
+          const price = qty > 0 ? gross/qty : 0;
+          if (!name || name.toLowerCase()==='custom amount') return;
+          if (!itemsMap[name]) itemsMap[name] = {qty:0, rev:0};
+          itemsMap[name].qty += qty;
+          itemsMap[name].rev += gross;
+          totalRev += gross;
+        });
+        date = rows[0]?.['date'] || rows[0]?.['transaction date'] || '';
+      } else if (hasGross) {
+        // Summary export
+        rows.forEach(r => {
+          const gross = parseFloat(r['gross sales'] || r['total'] || r['net sales'] || '0') || 0;
+          totalRev += gross;
+          date = r['date'] || date;
+        });
+      }
+
+      // Populate form
+      if (totalRev) document.getElementById('ev_revenue').value = totalRev.toFixed(2);
+      if (date) {
+        const d = new Date(date);
+        if (!isNaN(d)) document.getElementById('ev_date').value = d.toISOString().split('T')[0];
+      }
+
+      // Populate item rows
+      document.getElementById('itemSalesRows').innerHTML = '';
+      itemRows = 0;
+      Object.entries(itemsMap).forEach(([name, {qty, rev}]) => {
+        addItemRow(name, qty, qty>0 ? (rev/qty).toFixed(2) : '');
+      });
+
+      const count = Object.keys(itemsMap).length;
+      document.getElementById('csvPreview').style.display = 'block';
+      document.getElementById('csvPreview').innerHTML = `<div class="insight-box" style="background:var(--mint-soft);border-color:var(--mint);">
+        <div class="insight-label">✅ CSV Imported!</div>
+        Found $${totalRev.toFixed(2)} revenue${count ? ` across ${count} item types` : ''}. Review and add any missing details below!
+      </div>`;
+      toast('✅ CSV imported — check the fields below!');
+    } catch(err) {
+      document.getElementById('csvPreview').style.display = 'block';
+      document.getElementById('csvPreview').innerHTML = `<div class="insight-box" style="background:var(--coral-soft);border-color:var(--coral);">
+        <div class="insight-label">⚠️ Import Issue</div>
+        Couldn't parse that CSV. Try the Square "Items" export instead. Error: ${err.message}
+      </div>`;
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ═══════════════════════════════════════════════
+// SAVE EVENT
+// ═══════════════════════════════════════════════
+function saveEvent() {
+  const name = document.getElementById('ev_name').value.trim();
+  const date = document.getElementById('ev_date').value;
+  const type = document.getElementById('ev_type').value;
+  if (!name || !date || !type) { toast('⚠️ Please fill in event name, date, and type!'); return; }
+
+  // Collect items
+  const items = [];
+  document.querySelectorAll('[id^="irow_"]').forEach(row => {
+    const id = row.id.replace('irow_','');
+    const n = document.getElementById('iname_'+id)?.value.trim();
+    const q = parseFloat(document.getElementById('iqty_'+id)?.value)||0;
+    const p = parseFloat(document.getElementById('iprice_'+id)?.value)||0;
+    if (n) items.push({name:n, qty:q, price:p, rev: q*p});
+  });
+
+  const ev = {
+    id: Date.now(),
+    name, date, type,
+    duration: parseInt(document.getElementById('ev_duration').value)||1,
+    revenue: parseFloat(document.getElementById('ev_revenue').value)||0,
+    attendance: parseInt(document.getElementById('ev_attendance').value)||0,
+    itemsSold: parseInt(document.getElementById('ev_items').value)||0,
+    weather: pillState.weather,
+    crowd: pillState.crowd,
+    vendor: pillState.vendor,
+    notes: document.getElementById('ev_notes').value.trim(),
+    items
+  };
+
+  events.unshift(ev);
+  save(KEY_EVENTS, events);
+
+  // Save event name for datalists
+  if (!savedNames.includes(name)) { savedNames.push(name); save(KEY_NAMES, savedNames); }
+
+  // Auto-save notes if any
+  if (ev.notes) {
+    notes.unshift({ id: Date.now()+1, text: ev.notes, event: name, cat: 'general', date });
+    save(KEY_NOTES, notes);
+  }
+
+  // Clear form
+  ['ev_name','ev_date','ev_revenue','ev_attendance','ev_items','ev_notes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('ev_type').value = '';
+  document.getElementById('itemSalesRows').innerHTML = '';
+  document.getElementById('csvPreview').style.display = 'none';
+  itemRows = 0;
+
+  toast('🌸 Event saved!');
+  renderRecentEvents();
+  refreshDataLists();
+}
+
+// ═══════════════════════════════════════════════
+// RENDER RECENT EVENTS
+// ═══════════════════════════════════════════════
+function renderRecentEvents() {
+  const wrap = document.getElementById('recentEvents');
+  if (!events.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">🌸</div><p>No events yet!</p></div>'; return; }
+  const typeLabel = {vb_farmers_market:'VB Farmers Market',farmers_market:'Farmers Market',special_event:'Special Event',festival:'Festival',festival_multi:'Premium Festival',holiday_market:'Holiday Market',popup:'Pop-Up'};
+  wrap.innerHTML = events.slice(0,10).map(ev => `
+    <div class="lb-item">
+      <div style="flex:1;">
+        <div style="font-weight:900;font-size:0.9em;">${ev.name}</div>
+        <div style="font-size:0.75em;color:var(--text-soft);margin-top:2px;">${ev.date} · <span class="tag">${typeLabel[ev.type]||ev.type}</span> · ${ev.weather}</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-weight:900;color:var(--rose-deep);">$${ev.revenue.toFixed(0)}</div>
+        <div style="font-size:0.72em;color:var(--text-soft);">${ev.itemsSold||ev.items?.reduce((s,i)=>s+i.qty,0)||0} items</div>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="deleteEvent(${ev.id})" style="margin-left:8px;">🗑</button>
+    </div>
+  `).join('') + (events.length>10 ? `<p style="text-align:center;font-size:0.8em;color:var(--text-soft);padding:10px;">+${events.length-10} more events</p>` : '');
+}
+
+function deleteEvent(id) {
+  if (!confirm('Delete this event?')) return;
+  events = events.filter(e => e.id !== id);
+  save(KEY_EVENTS, events);
+  renderRecentEvents();
+  toast('🗑 Event deleted');
+}
+
+// ═══════════════════════════════════════════════
+// INSIGHTS
+// ═══════════════════════════════════════════════
+function setFilter(el) {
+  document.querySelectorAll('#typeChips .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  currentFilter = el.dataset.filter;
+  renderInsights();
+}
+
+function renderInsights() {
+  const filtered = currentFilter === 'all' ? events : events.filter(e => e.type === currentFilter);
+
+  // Stats
+  const totalRev = filtered.reduce((s,e) => s+e.revenue, 0);
+  const totalItems = filtered.reduce((s,e) => s+(e.itemsSold||e.items?.reduce((x,i)=>x+i.qty,0)||0), 0);
+  document.getElementById('stat-events').textContent = filtered.length;
+  document.getElementById('stat-revenue').textContent = '$'+totalRev.toFixed(0);
+  document.getElementById('stat-avg').textContent = filtered.length ? '$'+(totalRev/filtered.length).toFixed(0) : '$0';
+  document.getElementById('stat-items').textContent = totalItems;
+
+  // Type chips
+  const types = [...new Set(events.map(e=>e.type))];
+  const typeLabel = {vb_farmers_market:'VB FM',farmers_market:'Other FM',special_event:'Special',festival:'Festival',festival_multi:'Premium Festival',holiday_market:'Holiday',popup:'Pop-Up'};
+  const chipsWrap = document.getElementById('typeChips');
+  chipsWrap.innerHTML = `<div class="chip ${currentFilter==='all'?'active':''}" data-filter="all" onclick="setFilter(this)">All Markets</div>`;
+  types.forEach(t => {
+    chipsWrap.innerHTML += `<div class="chip ${currentFilter===t?'active':''}" data-filter="${t}" onclick="setFilter(this)">${typeLabel[t]||t}</div>`;
+  });
+
+  // Item leaderboard
+  const itemAgg = {};
+  filtered.forEach(ev => {
+    ev.items?.forEach(item => {
+      if (!itemAgg[item.name]) itemAgg[item.name] = {qty:0, rev:0, prices:[], events:0};
+      itemAgg[item.name].qty  += item.qty;
+      itemAgg[item.name].rev  += item.rev;
+      if (item.price) itemAgg[item.name].prices.push(item.price);
+      itemAgg[item.name].events++;
+    });
+  });
+
+  const byQty = Object.entries(itemAgg).sort((a,b) => b[1].qty-a[1].qty);
+  const byRev = Object.entries(itemAgg).sort((a,b) => b[1].rev-a[1].rev);
+  const maxQty = byQty[0]?.[1]?.qty || 1;
+  const maxRev = byRev[0]?.[1]?.rev || 1;
+
+  const rankClass = i => i===0?'gold':i===1?'silver':i===2?'bronze':'other';
+
+  document.getElementById('lbUnits').innerHTML = byQty.length ? byQty.slice(0,10).map(([name,d],i) => `
+    <div class="lb-item">
+      <div class="lb-rank ${rankClass(i)}">${i<3?['🥇','🥈','🥉'][i]:i+1}</div>
+      <div style="flex:1;">
+        <div class="lb-name">${name}</div>
+        <div class="lb-bar-wrap"><div class="lb-bar" style="width:${Math.round(d.qty/maxQty*100)}%"></div></div>
+      </div>
+      <div class="lb-val">${d.qty} sold</div>
+    </div>
+  `).join('') : '<div class="empty-state"><div class="empty-icon">📦</div><p>Log events with item data to see rankings!</p></div>';
+
+  document.getElementById('lbRevenue').innerHTML = byRev.length ? byRev.slice(0,10).map(([name,d],i) => `
+    <div class="lb-item">
+      <div class="lb-rank ${rankClass(i)}">${i<3?['🥇','🥈','🥉'][i]:i+1}</div>
+      <div style="flex:1;">
+        <div class="lb-name">${name}</div>
+        <div class="lb-meta">$${d.rev>0?(d.rev/d.qty).toFixed(2):0} avg price · ${d.events} event${d.events!==1?'s':''}</div>
+        <div class="lb-bar-wrap"><div class="lb-bar" style="width:${Math.round(d.rev/maxRev*100)}%"></div></div>
+      </div>
+      <div class="lb-val">$${d.rev.toFixed(0)}</div>
+    </div>
+  `).join('') : '<div class="empty-state"><div class="empty-icon">💸</div><p>Log events with item data to see revenue rankings!</p></div>';
+
+  // Price suggestions from notes
+  const allNotes = notes.map(n=>n.text).join(' ') + ' ' + events.map(e=>e.notes||'').join(' ');
+  const priceSugs = [];
+  const raiseMatches = allNotes.matchAll(/(\w+(?:\s+\w+)?)\s*(?:sold out|always sells|going fast|raise price)/gi);
+  for (const m of raiseMatches) {
+    const item = m[1].trim();
+    if (item.length > 2 && !['we','they','it','the','sold','always'].includes(item.toLowerCase())) {
+      priceSugs.push({item, dir:'up', note:'Frequently mentioned as a top seller or sell-out'});
+    }
+  }
+  // Also flag items with 100% sell-through (all qty = max we track)
+  if (priceSugs.length) {
+    document.getElementById('priceSuggestions').innerHTML = priceSugs.slice(0,6).map(s => `
+      <div class="lb-item">
+        <div style="font-size:1.3em;">📈</div>
+        <div style="flex:1;">
+          <div class="lb-name">${s.item}</div>
+          <div class="lb-meta">${s.note}</div>
+        </div>
+        <div class="price-sug up">Consider raising price ↑</div>
+      </div>
+    `).join('');
+  } else {
+    document.getElementById('priceSuggestions').innerHTML = '<div class="empty-state"><div class="empty-icon">🏷️</div><p>Add notes like "Pikachu sold out fast — raise price!" to get suggestions here!</p></div>';
+  }
+
+  // YoY comparison
+  const byName = {};
+  events.forEach(ev => {
+    const key = ev.name.replace(/\d{4}/, '').trim().toLowerCase();
+    if (!byName[key]) byName[key] = [];
+    byName[key].push(ev);
+  });
+  const multiYear = Object.entries(byName).filter(([,evs]) => evs.length > 1);
+  if (multiYear.length) {
+    document.getElementById('yoyTable').innerHTML = multiYear.map(([key, evs]) => {
+      const sorted = [...evs].sort((a,b) => new Date(b.date)-new Date(a.date));
+      return `<div style="margin-bottom:14px;">
+        <div style="font-weight:900;font-size:0.9em;margin-bottom:8px;text-transform:capitalize;">${key}</div>
+        ${sorted.map((ev,i) => {
+          const prev = sorted[i+1];
+          const diff = prev ? ev.revenue - prev.revenue : null;
+          const diffStr = diff !== null ? (diff >= 0 ? `<span class="tag green">+$${diff.toFixed(0)} ↑</span>` : `<span class="tag red">-$${Math.abs(diff).toFixed(0)} ↓</span>`) : '';
+          return `<div class="lb-item" style="margin-bottom:6px;">
+            <div style="flex:1;"><div class="lb-name">${ev.name}</div><div class="lb-meta">${ev.date} · ${ev.weather} · ${ev.crowd}</div></div>
+            <div style="text-align:right;"><div class="lb-val">$${ev.revenue.toFixed(0)}</div>${diffStr}</div>
+          </div>`;
+        }).join('')}
+      </div>`;
+    }).join('');
+  } else {
+    document.getElementById('yoyTable').innerHTML = '<div class="empty-state"><div class="empty-icon">📈</div><p>Log the same festival 2+ years in a row to see year-over-year comparisons!</p></div>';
+  }
+}
+
+// ═══════════════════════════════════════════════
+// PREDICTION
+// ═══════════════════════════════════════════════
+async function runPrediction() {
+  const name = document.getElementById('pred_name').value.trim();
+  const type = document.getElementById('pred_type').value;
+  const date = document.getElementById('pred_date').value;
+  if (!name || !type) { toast('⚠️ Fill in event name and type!'); return; }
+
+  const attendance = parseInt(document.getElementById('pred_attendance').value)||0;
+  const weather = pillState.predWeather;
+  const crowd = pillState.predCrowd;
+  const extraNotes = document.getElementById('pred_notes').value;
+
+  // YoY context
+  const nameKey = name.replace(/\d{4}/,'').trim().toLowerCase();
+  const pastSame = events.filter(e => e.name.replace(/\d{4}/,'').trim().toLowerCase() === nameKey);
+
+  // Build summary
+  const recentEvents = events.slice(0,15);
+  const allNotesText = notes.map(n => `[${n.cat}] ${n.text}`).join('\n');
+  const itemAgg = {};
+  events.forEach(ev => ev.items?.forEach(item => {
+    if (!itemAgg[item.name]) itemAgg[item.name] = {qty:0, rev:0};
+    itemAgg[item.name].qty += item.qty;
+    itemAgg[item.name].rev += item.rev;
+  }));
+  const topItems = Object.entries(itemAgg).sort((a,b) => b[1].qty-a[1].qty).slice(0,8).map(([n,d]) => `${n}: ${d.qty} sold, avg $${d.qty>0?(d.rev/d.qty).toFixed(2):'?'}`).join(', ');
+
+  const historySummary = recentEvents.map(e => `${e.name} (${e.type}): $${e.revenue} revenue, ${e.weather}, ${e.crowd}, ${e.items?.length||0} item types`).join('\n');
+  const pastSameSummary = pastSame.length ? 'PAST SAME EVENT: ' + pastSame.map(e => `${e.name}: $${e.revenue}, ${e.weather}, ${e.crowd}`).join(' | ') : 'No past data for this specific event name.';
+
+  document.getElementById('predResultsWrap').style.display = 'block';
+  document.getElementById('predResults').innerHTML = '<div class="ai-loading"><div class="dots"><span></span><span></span><span></span></div> Forecasting revenue...</div>';
+  document.getElementById('predInventory').innerHTML = '<div class="ai-loading"><div class="dots"><span></span><span></span><span></span></div> Building inventory plan...</div>';
+  document.getElementById('predInsightBox').style.display = 'none';
+
+  // Revenue prediction
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: `You are a revenue forecasting assistant for Amioki, a kawaii amigurumi/crochet brand in Virginia Beach VA run by Ami. She sells handmade plushies (Kirby, Axolotl, Capybara, Mew, Pikachu, Snorlax, Miffy, Penguin) at markets and festivals. She has a pink branded tent and an experiential booth. Key data: even in bad weather/dreary days she still earns well at her home base VB Farmers Market. Pikachu is supply-constrained, not demand-weak. Respond ONLY with valid JSON, no markdown, no backticks:
+{"low":number,"mid":number,"high":number,"low_label":"string","mid_label":"string","high_label":"string","key_factors":["factor1","factor2","factor3"],"tip":"one actionable insight string"}`,
+        messages: [{ role: 'user', content: `Predict revenue for upcoming Amioki event:
+Event: ${name}
+Type: ${type}
+Date: ${date||'upcoming'}
+Attendance: ${attendance||'unknown'}
+Weather forecast: ${weather}
+Expected crowd: ${crowd}
+Extra notes: ${extraNotes||'none'}
+
+${pastSameSummary}
+
+Recent events history:
+${historySummary||'No prior events logged yet.'}
+
+Market notes/learnings:
+${allNotesText||'None yet.'}
+
+Return JSON prediction only.` }]
+      })
+    });
+    const data = await res.json();
+    let raw = (data.content?.find(c=>c.type==='text')?.text || '{}').replace(/```json|```/g,'').trim();
+    const pred = JSON.parse(raw);
+    const maxVal = pred.high || 500;
+
+    document.getElementById('predResults').innerHTML = `
+      <div class="pred-scenario high">
+        <div class="pred-label">🌟 Best Case · ${pred.high_label||''}</div>
+        <div class="pred-amt">$${(pred.high||0).toFixed(0)}</div>
+        <div class="pred-bar"><div class="pred-fill" style="width:100%;background:linear-gradient(90deg,#6EE7B7,#059669);"></div></div>
+      </div>
+      <div class="pred-scenario mid">
+        <div class="pred-label">📊 Expected · ${pred.mid_label||''}</div>
+        <div class="pred-amt">$${(pred.mid||0).toFixed(0)}</div>
+        <div class="pred-bar"><div class="pred-fill" style="width:${Math.round((pred.mid||0)/maxVal*100)}%;background:linear-gradient(90deg,var(--lavender),#9333EA);"></div></div>
+      </div>
+      <div class="pred-scenario low">
+        <div class="pred-label">📉 Conservative · ${pred.low_label||''}</div>
+        <div class="pred-amt" style="color:var(--text-mid);">$${(pred.low||0).toFixed(0)}</div>
+        <div class="pred-bar"><div class="pred-fill" style="width:${Math.round((pred.low||0)/maxVal*100)}%;background:linear-gradient(90deg,var(--sky),#0284C7);"></div></div>
+      </div>
+      ${pred.key_factors ? `<div style="margin-top:14px;display:flex;flex-wrap:wrap;gap:6px;">${pred.key_factors.map(f=>`<span class="tag purple">${f}</span>`).join('')}</div>` : ''}
+    `;
+    if (pred.tip) {
+      document.getElementById('predInsightBox').style.display = 'block';
+      document.getElementById('predInsightText').textContent = pred.tip;
+    }
+  } catch(e) {
+    document.getElementById('predResults').innerHTML = '<div class="insight-box" style="background:var(--coral-soft);border-color:var(--coral);">Could not get AI prediction — log more events for better results!</div>';
+  }
+
+  // Inventory prediction
+  try {
+    const res2 = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: `You are an inventory planner for Amioki, a kawaii amigurumi brand. Known items: Kirby, Axolotl, Capybara, Mew, Pikachu, Snorlax, Miffy, Penguin, Whale. Pikachu demand always exceeds supply. Axolotl is a bestseller. Family events favor cute recognizable characters. Respond ONLY with valid JSON array, no markdown:
+[{"item":"name","qty":number,"reason":"short reason string","priority":"high|medium|low"}]`,
+        messages: [{ role: 'user', content: `Plan inventory for: ${name} (${type}), attendance ~${attendance||'medium'}, weather: ${weather}, crowd: ${crowd}.
+Top historical items: ${topItems||'No item data yet.'}
+Past same event: ${pastSameSummary}
+Notes: ${extraNotes||'none'}
+Market learnings: ${allNotesText||'none'}
+Return a JSON array of 6-10 item recommendations.` }]
+      })
+    });
+    const data2 = await res2.json();
+    let raw2 = (data2.content?.find(c=>c.type==='text')?.text || '[]').replace(/```json|```/g,'').trim();
+    const inv = JSON.parse(raw2);
+    const priColors = {high:'var(--rose)',medium:'var(--lavender)',low:'var(--sky)'};
+    document.getElementById('predInventory').innerHTML = inv.length ? inv.map(i => `
+      <div class="lb-item">
+        <div style="flex:1;">
+          <div class="lb-name">${i.item}</div>
+          <div class="lb-meta">${i.reason}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-weight:900;font-size:1.2em;color:var(--rose-deep);">${i.qty}</div>
+          <span class="tag" style="background:${priColors[i.priority]}1a;color:${priColors[i.priority]};border-color:${priColors[i.priority]}66;">${i.priority}</span>
+        </div>
+      </div>
+    `).join('') : '<div class="empty-state"><p>No inventory data — add more events first!</p></div>';
+  } catch(e) {
+    document.getElementById('predInventory').innerHTML = '<div class="insight-box" style="background:var(--coral-soft);">Could not generate inventory plan.</div>';
+  }
+
+  // YoY card
+  const pastSameFiltered = events.filter(e => e.name.replace(/\d{4}/,'').trim().toLowerCase() === name.replace(/\d{4}/,'').trim().toLowerCase());
+  if (pastSameFiltered.length) {
+    document.getElementById('yoyCard').style.display = 'block';
+    document.getElementById('yoyContent').innerHTML = `
+      <p style="font-size:0.85em;font-weight:700;color:var(--text-mid);margin-bottom:12px;">Past data for "${name.replace(/\d{4}/,'').trim()}":</p>
+      ${pastSameFiltered.sort((a,b) => new Date(b.date)-new Date(a.date)).map(ev => `
+        <div class="lb-item">
+          <div style="flex:1;"><div class="lb-name">${ev.name}</div><div class="lb-meta">${ev.date} · ${ev.weather} · ${ev.crowd}</div></div>
+          <div style="font-weight:900;color:var(--rose-deep);">$${ev.revenue.toFixed(0)}</div>
+        </div>
+      `).join('')}
+    `;
+  } else {
+    document.getElementById('yoyCard').style.display = 'none';
+  }
+}
+
+// ═══════════════════════════════════════════════
+// PLAN TAB
+// ═══════════════════════════════════════════════
+function setPlanRange(n) {
+  planRange = n;
+  ['range1btn','range2btn','range3btn'].forEach((id,i) => {
+    document.getElementById(id).className = 'btn btn-sm ' + (i+1===n ? 'btn-primary' : 'btn-ghost');
+  });
+  renderPlan();
+}
+
+function addToPlan() {
+  const name = document.getElementById('plan_name').value.trim();
+  const date = document.getElementById('plan_date').value;
+  const type = document.getElementById('plan_type').value;
+  if (!name || !date || !type) { toast('⚠️ Fill in name, date, and type!'); return; }
+
+  const attendance = parseInt(document.getElementById('plan_attendance').value)||0;
+  // Quick revenue estimate from history
+  const similar = events.filter(e => e.type === type);
+  const avgRev = similar.length ? similar.reduce((s,e)=>s+e.revenue,0)/similar.length : null;
+
+  planEvents.push({ id: Date.now(), name, date, type, attendance, estRev: avgRev });
+  save(KEY_PLAN, planEvents);
+  ['plan_name','plan_date','plan_attendance'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('plan_type').value = '';
+  toast('📅 Added to plan!');
+  renderPlan();
+}
+
+function removePlanEvent(id) {
+  planEvents = planEvents.filter(e => e.id !== id);
+  save(KEY_PLAN, planEvents);
+  renderPlan();
+}
+
+function renderPlan() {
+  const now = new Date();
+  const cutoff = new Date(now);
+  cutoff.setMonth(cutoff.getMonth() + planRange);
+
+  const inRange = planEvents.filter(e => {
+    const d = new Date(e.date);
+    return d >= now && d <= cutoff;
+  }).sort((a,b) => new Date(a.date)-new Date(b.date));
+
+  const typeLabel = {vb_farmers_market:'VB Farmers Market',farmers_market:'Farmers Market',special_event:'Special Event',festival:'Festival',festival_multi:'Premium Festival',holiday_market:'Holiday Market',popup:'Pop-Up'};
+  const typeEmoji = {vb_farmers_market:'🌿',farmers_market:'🌿',special_event:'⭐',festival:'🎡',festival_multi:'🎡',holiday_market:'🎄',popup:'🏪'};
+
+  if (!inRange.length) {
+    document.getElementById('planCalendar').innerHTML = '<div class="empty-state card"><div class="empty-icon">📅</div><p>No events in the next '+(planRange===1?'month':planRange+' months')+'. Add some above!</p></div>';
+    document.getElementById('planSummary').style.display = 'none';
+    return;
+  }
+
+  // Group by month
+  const byMonth = {};
+  inRange.forEach(ev => {
+    const key = new Date(ev.date).toLocaleDateString('en-US', {month:'long', year:'numeric'});
+    if (!byMonth[key]) byMonth[key] = [];
+    byMonth[key].push(ev);
+  });
+
+  document.getElementById('planCalendar').innerHTML = Object.entries(byMonth).map(([month, evs]) => `
+    <div class="card">
+      <div class="month-header">📅 ${month}</div>
+      ${evs.map(ev => {
+        const similar = events.filter(e => e.type === ev.type);
+        const avg = similar.length ? similar.reduce((s,e)=>s+e.revenue,0)/similar.length : null;
+        const pastSame = events.filter(e => e.name.replace(/\d{4}/,'').trim().toLowerCase() === ev.name.replace(/\d{4}/,'').trim().toLowerCase());
+        const pastAvg = pastSame.length ? pastSame.reduce((s,e)=>s+e.revenue,0)/pastSame.length : null;
+        const estRev = pastAvg || avg;
+        return `<div class="plan-event">
+          <div class="plan-event-header">
+            <div>
+              <div class="plan-event-name">${typeEmoji[ev.type]||''} ${ev.name}</div>
+              <div class="plan-event-date">${new Date(ev.date+'T12:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})} · <span class="tag">${typeLabel[ev.type]||ev.type}</span>${ev.attendance ? ` · ~${ev.attendance.toLocaleString()} attendance` : ''}</div>
+            </div>
+            <button class="plan-remove" onclick="removePlanEvent(${ev.id})">✕</button>
+          </div>
+          <div class="plan-forecast">
+            ${estRev ? `💰 Est. revenue: <strong>$${(estRev*0.85).toFixed(0)}–$${(estRev*1.2).toFixed(0)}</strong> ${pastAvg ? '<span class="tag green">Based on past same event</span>' : '<span class="tag purple">Based on similar market type</span>'}` : `💰 Est. revenue: <span class="tag">Log similar events for forecast!</span>`}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  `).join('');
+
+  // Summary
+  const totalEst = inRange.reduce((s,ev) => {
+    const similar = events.filter(e => e.type === ev.type);
+    const avg = similar.length ? similar.reduce((x,e)=>x+e.revenue,0)/similar.length : 0;
+    const pastSame = events.filter(e => e.name.replace(/\d{4}/,'').trim().toLowerCase() === ev.name.replace(/\d{4}/,'').trim().toLowerCase());
+    const pastAvg = pastSame.length ? pastSame.reduce((x,e)=>x+e.revenue,0)/pastSame.length : 0;
+    return s + (pastAvg || avg || 0);
+  }, 0);
+
+  document.getElementById('planSummary').style.display = 'block';
+  document.getElementById('planSummaryContent').innerHTML = `
+    <div class="stat-grid">
+      <div class="stat-box"><div class="stat-val">${inRange.length}</div><div class="stat-lbl">Events Planned</div></div>
+      <div class="stat-box"><div class="stat-val">$${(totalEst*0.9).toFixed(0)}–$${(totalEst*1.15).toFixed(0)}</div><div class="stat-lbl">Est. Revenue Range</div></div>
+    </div>
+    <div class="insight-box" style="margin-top:12px;">
+      <div class="insight-label">💡 Planning Tip</div>
+      You have ${inRange.length} event${inRange.length!==1?'s':''} in the next ${planRange===1?'month':planRange+' months'}. ${totalEst > 0 ? `Based on your history, expect roughly $${totalEst.toFixed(0)} in total revenue for this period.` : 'Log past events to get revenue estimates!'}
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════
+// NOTES TAB
+// ═══════════════════════════════════════════════
+function setNoteFilter(el) {
+  document.querySelectorAll('#noteCatChips .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  noteFilter = el.dataset.nf;
+  renderNotes();
+}
+
+function saveNote() {
+  const text = document.getElementById('quick_note').value.trim();
+  if (!text) { toast('⚠️ Write a note first!'); return; }
+  const note = {
+    id: Date.now(),
+    text,
+    event: document.getElementById('note_event').value.trim(),
+    cat: document.getElementById('note_cat').value,
+    date: new Date().toISOString().split('T')[0]
+  };
+  notes.unshift(note);
+  save(KEY_NOTES, notes);
+  document.getElementById('quick_note').value = '';
+  document.getElementById('note_event').value = '';
+  toast('📝 Note saved! AI will learn from it.');
+  renderNotes();
+}
+
+function deleteNote(id) {
+  notes = notes.filter(n => n.id !== id);
+  save(KEY_NOTES, notes);
+  renderNotes();
+}
+
+function renderNotes() {
+  const filtered = noteFilter === 'all' ? notes : notes.filter(n => n.cat === noteFilter);
+  const catLabel = {pricing:'💰 Pricing',item:'📦 Item',weather:'🌤️ Weather',crowd:'👥 Crowd',strategy:'🧠 Strategy',general:'📌 General'};
+  const wrap = document.getElementById('allNotes');
+  if (!filtered.length) {
+    wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div><p>No notes in this category yet!</p></div>';
+    return;
+  }
+  wrap.innerHTML = filtered.map(n => `
+    <div class="note-item">
+      <div class="note-meta">${catLabel[n.cat]||n.cat}${n.event ? ' · '+n.event : ''} · ${n.date}</div>
+      <div style="display:flex;gap:8px;align-items:flex-start;">
+        <div style="flex:1;">${n.text}</div>
+        <button onclick="deleteNote(${n.id})" style="background:none;border:none;cursor:pointer;color:var(--coral);font-size:1em;flex-shrink:0;">🗑</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function askAI() {
+  const question = document.getElementById('aiQuestion').value.trim();
+  if (!question) { toast('⚠️ Type a question first!'); return; }
+
+  const answerBox = document.getElementById('aiAnswer');
+  const answerText = document.getElementById('aiAnswerText');
+  answerBox.style.display = 'block';
+  answerText.innerHTML = '<div class="ai-loading"><div class="dots"><span></span><span></span><span></span></div> Thinking...</div>';
+
+  const evSummary = events.slice(0,20).map(e => `${e.name} (${e.type}): $${e.revenue} revenue, ${e.weather}, ${e.crowd}${e.notes?' — notes: '+e.notes:''}`).join('\n');
+  const noteSummary = notes.map(n => `[${n.cat}] ${n.text}`).join('\n');
+  const itemAgg = {};
+  events.forEach(ev => ev.items?.forEach(item => {
+    if (!itemAgg[item.name]) itemAgg[item.name] = {qty:0, rev:0};
+    itemAgg[item.name].qty += item.qty;
+    itemAgg[item.name].rev += item.rev;
+  }));
+  const itemSummary = Object.entries(itemAgg).sort((a,b) => b[1].qty-a[1].qty).map(([n,d]) => `${n}: ${d.qty} sold`).join(', ');
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 800,
+        system: `You are a friendly business analyst for Amioki, a kawaii amigurumi crochet brand in Virginia Beach VA run by Ami. She sells handmade plushies at markets/festivals. Her best sellers are Pikachu (always demand-constrained), Axolotl, and Kirby. She has a pink branded tent. She works with contractors Ashley and Liz. Answer her question directly, warmly, and with specific actionable advice based on her data. Keep it concise.`,
+        messages: [{ role: 'user', content: `My question: ${question}
+
+My event history:
+${evSummary||'No events logged yet.'}
+
+My market notes:
+${noteSummary||'No notes yet.'}
+
+Item performance:
+${itemSummary||'No item data yet.'}` }]
+      })
+    });
+    const data = await res.json();
+    answerText.textContent = data.content?.find(c=>c.type==='text')?.text || 'Unable to get an answer right now. Log more events for better insights!';
+  } catch(e) {
+    answerText.textContent = 'Connection issue — try again!';
+  }
+}
+
+// ═══════════════════════════════════════════════
+// CONTRACTOR PAY PLANNER
+// ═══════════════════════════════════════════════
+function setContractor(who) {
+  activeContractor = who;
+  ctrCustomItems = [];
+  document.getElementById('ctr-ashley-btn').className = 'btn btn-sm ' + (who==='ashley' ? 'btn-primary' : 'btn-ghost');
+  document.getElementById('ctr-liz-btn').className    = 'btn btn-sm ' + (who==='liz'    ? 'btn-primary' : 'btn-ghost');
+  const ctr = CONTRACTORS[who];
+  document.getElementById('ctr-note').textContent = ctr.note + ' · Contract anniversary ' + ctr.anniversary;
+  document.getElementById('ctr-name-inline').textContent = ctr.name;
+  renderContractorItems();
+  renderSavedOrders();
+  renderMonthlyBreakdown();
+}
+
+function renderContractorItems() {
+  const ctr = CONTRACTORS[activeContractor];
+  const allItems = [...ctr.items, ...ctrCustomItems];
+  const wrap = document.getElementById('ctrItemsWrap');
+
+  wrap.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 90px 80px 80px 80px;gap:8px;padding:8px 10px;background:var(--lav-mid);border-radius:var(--radius-sm);margin-bottom:8px;">
+      <div style="font-size:0.72em;font-weight:900;text-transform:uppercase;color:var(--text-mid);">Item</div>
+      <div style="font-size:0.72em;font-weight:900;text-transform:uppercase;color:var(--text-mid);text-align:center;">Qty</div>
+      <div style="font-size:0.72em;font-weight:900;text-transform:uppercase;color:var(--text-mid);text-align:right;">Piece Rate</div>
+      <div style="font-size:0.72em;font-weight:900;text-transform:uppercase;color:var(--text-mid);text-align:right;">Labor</div>
+      <div style="font-size:0.72em;font-weight:900;text-transform:uppercase;color:var(--text-mid);text-align:right;">Subtotal</div>
+    </div>
+    ${allItems.map((item, i) => `
+      <div style="display:grid;grid-template-columns:1fr 90px 80px 80px 80px;gap:8px;align-items:center;padding:8px 10px;background:var(--white);border-radius:var(--radius-sm);margin-bottom:6px;border:1px solid var(--border);">
+        <div>
+          <div style="font-weight:800;font-size:0.88em;">${item.name}</div>
+          <div style="font-size:0.72em;color:var(--text-soft);">${item.time ? item.time+' min · ':''}$${item.labor.toFixed(2)} labor + $${item.materials.toFixed(2)} mat.</div>
+        </div>
+        <div style="text-align:center;">
+          <input type="number" min="0" value="0" id="ctr_qty_${i}"
+            oninput="updateCtrTotals()"
+            style="width:70px;padding:6px;border:2px solid var(--rose-mid);border-radius:8px;text-align:center;font-weight:900;font-size:0.9em;">
+        </div>
+        <div style="text-align:right;font-weight:800;font-size:0.88em;">$${item.total.toFixed(2)}</div>
+        <div style="text-align:right;font-weight:800;font-size:0.88em;color:var(--text-mid);">$${item.labor.toFixed(2)}</div>
+        <div style="text-align:right;font-weight:900;color:var(--rose-deep);" id="ctr_sub_${i}">$0.00</div>
+      </div>
+    `).join('')}
+  `;
+  updateCtrTotals();
+}
+
+function updateCtrTotals() {
+  const ctr = CONTRACTORS[activeContractor];
+  const allItems = [...ctr.items, ...ctrCustomItems];
+  let totalItems = 0, totalLabor = 0, totalMaterials = 0, totalOwed = 0;
+  const breakdownLines = [];
+
+  allItems.forEach((item, i) => {
+    const qty = parseInt(document.getElementById('ctr_qty_'+i)?.value)||0;
+    const subtotal = qty * item.total;
+    const laborSub = qty * item.labor;
+    const matSub   = qty * item.materials;
+    totalItems    += qty;
+    totalLabor    += laborSub;
+    totalMaterials+= matSub;
+    totalOwed     += subtotal;
+    const el = document.getElementById('ctr_sub_'+i);
+    if (el) el.textContent = '$'+subtotal.toFixed(2);
+    if (qty > 0) breakdownLines.push({ name: item.name, qty, subtotal, laborSub, matSub });
+  });
+
+  document.getElementById('ctr-total-items').textContent = totalItems;
+  document.getElementById('ctr-total-labor').textContent = '$'+totalLabor.toFixed(2);
+  document.getElementById('ctr-total-materials').textContent = '$'+totalMaterials.toFixed(2);
+  document.getElementById('ctr-total-owed').textContent = '$'+totalOwed.toFixed(2);
+
+  const bdWrap = document.getElementById('ctr-breakdown');
+  if (!breakdownLines.length) {
+    bdWrap.innerHTML = '';
+    return;
+  }
+  bdWrap.innerHTML = `
+    <div style="font-size:0.78em;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-soft);margin-bottom:8px;">Order Breakdown</div>
+    ${breakdownLines.map(l => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--white);border-radius:8px;margin-bottom:5px;border:1px solid var(--border);">
+        <div>
+          <span style="font-weight:800;font-size:0.88em;">${l.name}</span>
+          <span style="color:var(--text-soft);font-size:0.78em;"> × ${l.qty}</span>
+        </div>
+        <div style="text-align:right;">
+          <span style="font-weight:900;color:var(--rose-deep);">$${l.subtotal.toFixed(2)}</span>
+          <span style="color:var(--text-soft);font-size:0.72em;"> ($${l.laborSub.toFixed(2)} labor + $${l.matSub.toFixed(2)} mat.)</span>
+        </div>
+      </div>
+    `).join('')}
+  `;
+}
+
+function addCustomItem() {
+  const name  = document.getElementById('ctr_custom_name').value.trim();
+  const total = parseFloat(document.getElementById('ctr_custom_rate').value)||0;
+  if (!name || !total) { toast('⚠️ Enter item name and piece rate!'); return; }
+  ctrCustomItems.push({ name, labor: total, materials: 0, total, time: null });
+  document.getElementById('ctr_custom_name').value = '';
+  document.getElementById('ctr_custom_rate').value = '';
+  renderContractorItems();
+  toast('✅ Custom item added!');
+}
+
+function saveOrder() {
+  const ctr = CONTRACTORS[activeContractor];
+  const allItems = [...ctr.items, ...ctrCustomItems];
+  const label  = document.getElementById('ctr_order_label').value.trim() || 'Production Order';
+  const lines  = [];
+  let totalOwed = 0, totalItems = 0;
+
+  allItems.forEach((item, i) => {
+    const qty = parseInt(document.getElementById('ctr_qty_'+i)?.value)||0;
+    if (qty > 0) {
+      lines.push({ name: item.name, qty, rate: item.total, labor: item.labor, materials: item.materials, subtotal: qty*item.total });
+      totalOwed  += qty * item.total;
+      totalItems += qty;
+    }
+  });
+
+  if (!lines.length) { toast('⚠️ Add at least one item quantity first!'); return; }
+
+  const order = {
+    id: Date.now(),
+    label,
+    contractor: activeContractor,
+    date: new Date().toISOString().split('T')[0],
+    items: lines,
+    totalItems,
+    totalOwed,
+    paid: false
+  };
+  savedOrders.unshift(order);
+  save(KEY_ORDERS, savedOrders);
+  document.getElementById('ctr_order_label').value = '';
+  toast('💾 Order saved!');
+  renderSavedOrders();
+  renderMonthlyBreakdown();
+}
+
+function toggleOrderPaid(id) {
+  const order = savedOrders.find(o => o.id === id);
+  if (order) { order.paid = !order.paid; save(KEY_ORDERS, savedOrders); }
+  renderSavedOrders();
+  renderMonthlyBreakdown();
+}
+
+function deleteOrder(id) {
+  if (!confirm('Delete this order?')) return;
+  savedOrders = savedOrders.filter(o => o.id !== id);
+  save(KEY_ORDERS, savedOrders);
+  renderSavedOrders();
+  renderMonthlyBreakdown();
+}
+
+function renderSavedOrders() {
+  const wrap = document.getElementById('ctr-saved-orders');
+  const filtered = savedOrders.filter(o => o.contractor === activeContractor);
+  if (!filtered.length) {
+    wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">🗂️</div><p>No saved orders for this contractor yet.</p></div>';
+    return;
+  }
+  wrap.innerHTML = filtered.map(o => `
+    <div style="background:var(--white);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px;border:2px solid ${o.paid ? 'var(--mint)' : 'var(--border)'};">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+        <div>
+          <div style="font-weight:900;font-size:0.92em;">${o.label}</div>
+          <div style="font-size:0.75em;color:var(--text-soft);margin-top:2px;">${o.date} · ${o.totalItems} items</div>
+          <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;">
+            ${o.items.map(l => `<span class="tag">${l.name} ×${l.qty}</span>`).join('')}
+          </div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          <div style="font-weight:900;font-size:1.3em;color:var(--rose-deep);">$${o.totalOwed.toFixed(2)}</div>
+          <div style="display:flex;gap:6px;margin-top:6px;justify-content:flex-end;">
+            <button onclick="toggleOrderPaid(${o.id})" class="btn btn-sm ${o.paid ? 'btn-secondary' : 'btn-ghost'}" style="${o.paid ? 'background:var(--mint-soft);color:#065F46;border-color:var(--mint);' : ''}">
+              ${o.paid ? '✅ Paid' : '○ Mark Paid'}
+            </button>
+            <button onclick="deleteOrder(${o.id})" class="btn btn-danger btn-sm">🗑</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderMonthlyBreakdown() {
+  const wrap = document.getElementById('ctr-monthly-breakdown');
+  const ctrOrders = savedOrders.filter(o => o.contractor === activeContractor);
+  if (!ctrOrders.length) {
+    wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><p>Save production orders to see monthly estimates!</p></div>';
+    return;
+  }
+
+  const now = new Date();
+  const months = [0, 1].map(offset => {
+    const d = new Date(now.getFullYear(), now.getMonth() + offset, 1);
+    return { label: d.toLocaleDateString('en-US', {month:'long', year:'numeric'}), year: d.getFullYear(), month: d.getMonth() };
+  });
+
+  wrap.innerHTML = months.map(m => {
+    const monthOrders = ctrOrders.filter(o => {
+      const d = new Date(o.date);
+      return d.getFullYear() === m.year && d.getMonth() === m.month;
+    });
+    const owed   = monthOrders.filter(o => !o.paid).reduce((s,o) => s+o.totalOwed, 0);
+    const paid   = monthOrders.filter(o =>  o.paid).reduce((s,o) => s+o.totalOwed, 0);
+    const total  = owed + paid;
+
+    if (!monthOrders.length) return `
+      <div style="padding:12px 14px;background:var(--white);border-radius:var(--radius-sm);margin-bottom:10px;border:1px solid var(--border);">
+        <div style="font-weight:900;font-size:0.88em;color:var(--text-soft);">${m.label}</div>
+        <div style="font-size:0.8em;color:var(--text-soft);margin-top:4px;">No orders this month</div>
+      </div>`;
+
+    return `
+      <div style="background:var(--white);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px;border:2px solid var(--border);">
+        <div style="font-weight:900;font-size:0.9em;margin-bottom:10px;">${m.label}</div>
+        <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);">
+          <div class="stat-box"><div class="stat-val" style="font-size:1.2em;">$${total.toFixed(0)}</div><div class="stat-lbl">Total</div></div>
+          <div class="stat-box" style="background:var(--coral-soft);"><div class="stat-val" style="font-size:1.2em;color:#DC2626;">$${owed.toFixed(0)}</div><div class="stat-lbl">Unpaid</div></div>
+          <div class="stat-box" style="background:var(--mint-soft);"><div class="stat-val" style="font-size:1.2em;color:#065F46;">$${paid.toFixed(0)}</div><div class="stat-lbl">Paid</div></div>
+        </div>
+        <div style="margin-top:10px;font-size:0.78em;font-weight:700;color:var(--text-mid);">${monthOrders.length} order${monthOrders.length!==1?'s':''} · ${monthOrders.filter(o=>o.paid).length} paid · ${monthOrders.filter(o=>!o.paid).length} unpaid</div>
+      </div>`;
+  }).join('');
+}
+
+function refreshDataLists() {
+  const options = savedNames.map(n => `<option value="${n}">`).join('');
+  ['eventNameList','eventNameList2','eventNameList3','eventNameList4'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = options;
+  });
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+(function init() {
+  // Set today's date on date fields
+  const today = new Date().toISOString().split('T')[0];
+  ['ev_date','pred_date','plan_date'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = today;
+  });
+  renderRecentEvents();
+  refreshDataLists();
+  setPlanRange(1);
+  // Add default item rows for event log
+  ['Pikachu','Axolotl','Kirby','Capybara'].forEach(n => addItemRow(n));
+})();
+</script>
+</body>
+</html>
