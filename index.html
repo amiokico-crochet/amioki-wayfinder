@@ -738,6 +738,13 @@ textarea { resize: vertical; min-height: 80px; }
           <div class="pill" data-pcp="High — very similar" onclick="togglePill(this,'predCompetition')">🔴 High</div>
         </div>
       </div>
+      <!-- Who's available for this event -->
+      <div class="form-group">
+        <label>Who's crocheting for this event?</label>
+        <div id="predRosterToggles" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;"></div>
+        <div style="font-size:0.75em;font-weight:700;color:var(--text-soft);margin-top:6px;">Items only made by unavailable crocheters won't be suggested in the inventory plan.</div>
+      </div>
+
       <div class="form-group">
         <label>Additional Notes</label>
         <textarea id="pred_notes" placeholder="e.g., First time at this venue, expect families, holiday theme..."></textarea>
@@ -974,6 +981,38 @@ textarea { resize: vertical; min-height: 80px; }
       <div id="apiTestResult" style="margin-top:12px;display:none;" class="insight-box"></div>
     </div>
     <div class="card">
+      <div class="card-title"><span>🧶</span> Crocheter Roster</div>
+      <p style="font-size:0.82em;font-weight:700;color:var(--text-mid);margin-bottom:14px;">Manage who's on your team. The <strong>default active</strong> toggle sets who's assumed available for all events — you can override per-event in the Predict tab. Ami is always active.</p>
+
+      <div id="rosterList" style="margin-bottom:16px;"></div>
+
+      <div style="border-top:1px dashed var(--border);padding-top:14px;">
+        <div style="font-size:0.78em;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-soft);margin-bottom:10px;">➕ Add New Crocheter</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;">
+          <div style="flex:1;min-width:140px;">
+            <label>Name</label>
+            <input type="text" id="new_crocheter_name" placeholder="e.g., Brenna">
+          </div>
+          <div style="min-width:90px;">
+            <label>SKU Prefix</label>
+            <input type="text" id="new_crocheter_sku" placeholder="e.g., CB-" style="text-transform:uppercase;">
+          </div>
+          <div style="min-width:80px;">
+            <label>Lead Time</label>
+            <select id="new_crocheter_lead">
+              <option value="3">3 days</option>
+              <option value="5" selected>5 days</option>
+              <option value="7">7 days</option>
+              <option value="10">10 days</option>
+            </select>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="addCrocheter()" style="align-self:flex-end;">+ Add</button>
+        </div>
+        <p style="font-size:0.75em;font-weight:700;color:var(--text-soft);margin-top:8px;">Piece rates can be added in the Pay tab after you add them here. Item keywords can be edited once they're added.</p>
+      </div>
+    </div>
+
+    <div class="card">
       <div class="card-title"><span>🧠</span> AI Rules <span style="font-size:0.72em;font-weight:700;color:var(--text-soft);text-transform:none;letter-spacing:0;margin-left:6px;">hard overrides that always apply</span></div>
       <p style="font-size:0.82em;font-weight:700;color:var(--text-mid);margin-bottom:14px;">Rules are injected into every prediction with <strong>higher priority than historical data</strong>. Use them to correct outliers, flag supply constraints, or lock in known truths about your markets.</p>
       <div style="background:var(--lav-soft);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:14px;border:1px solid var(--lavender);">
@@ -1031,6 +1070,7 @@ const KEY_PLAN   = 'amioki_mkt_plan';
 const KEY_NAMES  = 'amioki_event_names';
 const KEY_ORDERS = 'amioki_ctr_orders';
 const KEY_RULES  = 'amioki_ai_rules';
+const KEY_ROSTER = 'amioki_roster';
 
 function load(key, def) { try { return JSON.parse(localStorage.getItem(key)) || def; } catch { return def; } }
 function save(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) { console.warn(e); } }
@@ -1041,6 +1081,20 @@ let planEvents = load(KEY_PLAN,   []);
 let savedNames = load(KEY_NAMES,  ['Cherry Blossom Fest','Neptune Festival','Water Lantern Festival','Chesapeake Jubilee','VB Farmers Market','Strawberry Festival']);
 let savedOrders = load(KEY_ORDERS, []);
 let aiRules    = load(KEY_RULES,  []);
+
+// ── CROCHETER ROSTER ──────────────────────────────────────────────────────
+// Each crocheter: { id, name, skuPrefix, active (default on/off), isAmi, leadDays, itemKeywords[] }
+// Ashley and Liz are seeded from CONTRACTORS; Ami is always active (can't be removed)
+const DEFAULT_ROSTER = [
+  { id:'ami',    name:'Ami',    skuPrefix:'',   active:true,  isAmi:true,  leadDays:1, itemKeywords:['pikachu','axolotl','kirby','capybara','snorlax','mew','miffy','penguin','whale','baby shark'] },
+  { id:'ashley', name:'Ashley', skuPrefix:'CA-',active:true,  isAmi:false, leadDays:5, itemKeywords:['chicken','baby chick','octop','heart keychain','mini loaf cat','bear coaster','cherry blossom pouch','apple coaster','pet rock','mama possum','baby possum','christmas baby chick','baby christmas tree'] },
+  { id:'liz',    name:'Liz',    skuPrefix:'CL-',active:true,  isAmi:false, leadDays:5, itemKeywords:['leggy frog','bee','birb','jellyfish'] },
+];
+let roster = load(KEY_ROSTER, DEFAULT_ROSTER);
+
+// Per-event availability state — reset each time Predict tab opens
+// Defaults to each crocheter's .active setting, then can be toggled per-event
+let eventRosterState = {}; // id → true/false
 
 const CONTRACTORS = {
   ashley: {
@@ -1097,6 +1151,7 @@ function switchTab(id) {
   if (id==='predict') {
     const badge = document.getElementById('aiKnowledgeBadge');
     if (badge) badge.textContent = `${events.length} event${events.length!==1?'s':''}${aiRules.length?' · '+aiRules.length+' rule'+(aiRules.length!==1?'s':''):''}`;
+    renderPredictRoster();
   }
   if (id==='contractors') { setContractor(activeContractor); setTimeout(loadPendingPayOrder, 200); }
   if (id==='settings') initSettingsTab();
@@ -1744,8 +1799,16 @@ Return JSON only.` }]
 
   // ── INVENTORY PLAN — CONTEXTUAL AI ───────────────────────────────────────
   try {
+    const availableCrochetersStr = roster
+      .filter(c => availableIds.includes(c.id))
+      .map(c => `${c.name}${c.isAmi ? ' (Ami — owner)' : ''}: ${c.itemKeywords?.slice(0,5).join(', ') || 'general items'}`)
+      .join('; ');
+    const unavailableCrochetersStr = roster
+      .filter(c => !availableIds.includes(c.id))
+      .map(c => c.name).join(', ');
+
     const invRes = await apiCall({
-      system: `You are an inventory planner for Amioki, a kawaii amigurumi brand in Virginia Beach VA. You have per-item historical data broken down by event type, weather, and conditions. Recommend specific CYCLE STOCK quantities for THIS event — the amount you expect to sell based on conditions. A separate formula will add safety stock buffer on top. Contractors: Ashley makes Chickens, Baby Chicks, Octopi, Heart Keychains, Mini Loaf Cat, Bear/Apple Coasters, Cherry Blossom Pouch, Pet Rock, Mama/Baby Possum. Liz makes Leggy Frog, Bees, Birb, Jellyfish. Ami makes the rest (Pikachu, Axolotl, Kirby, Capybara, Snorlax, Mew, Miffy, Penguin, Whale). Pikachu demand always exceeds supply — always recommend as many as possible. Respond with ONLY a raw JSON array. Start with [ end with ]. No other text.
+      system: `You are an inventory planner for Amioki, a kawaii amigurumi brand in Virginia Beach VA. You have per-item historical data broken down by event type, weather, and conditions. Recommend specific CYCLE STOCK quantities for THIS event — the amount you expect to sell based on conditions. A separate formula will add safety stock buffer on top. IMPORTANT: Only suggest items that can be made by the AVAILABLE crocheters listed below. Do NOT suggest items from unavailable crocheters. Respond with ONLY a raw JSON array. Start with [ end with ]. No other text.
 [{"item":"name","cycle_qty":number,"reason":"1-2 sentences specific to THIS event conditions","priority":"high|medium|low","signal":"the data point that most drove this qty"}]`,
       messages: [{ role: 'user', content: `Inventory plan for: ${name} (${type})
 Date: ${date||'upcoming'}, Location: ${location||'TBD'}
@@ -1753,6 +1816,9 @@ Attendance: ${attendance||'medium'}, Weather: ${weather}, Crowd: ${crowd}
 Juried: ${juried}, Monopoly: ${monopoly}, Competition: ${competition}
 ${predHours ? 'Duration: '+predHours+' hours' : ''}
 ${extraNotes ? 'Notes: '+extraNotes : ''}
+
+AVAILABLE CROCHETERS FOR THIS EVENT: ${availableCrochetersStr||'Ami only'}
+${unavailableCrochetersStr ? `UNAVAILABLE (do NOT suggest their items): ${unavailableCrochetersStr}` : ''}
 
 ITEM-LEVEL HISTORICAL DATA (reason per-item based on conditions match):
 ${itemDetailLines||'No item history yet — suggest baseline quantities based on event type and known bestsellers.'}
@@ -1764,7 +1830,7 @@ ${allNotesText||'None yet.'}
 
 ${aiRulesText}
 
-Return 8-12 items. For each, give the CYCLE STOCK quantity — what you expect to sell at this specific event based on conditions. Be specific about why.` }]
+Return 8-12 items only from available crocheters. For each, give the CYCLE STOCK quantity — what you expect to sell at this specific event. Be specific about why.` }]
     });
 
     const invData  = await invRes.json();
@@ -1772,23 +1838,24 @@ Return 8-12 items. For each, give the CYCLE STOCK quantity — what you expect t
 
     // ── SAFETY STOCK LAYER ────────────────────────────────────────────────
     // Z-score for 90% service level = 1.28
-    // Safety Stock = Z × σ(item sales) × √(lead_time_days / avg_event_days)
-    // Lead times: Ami items = 1 day (make herself), contractor items = 5 days
-    // σ computed from qtySamples if ≥3 data points; else use fallback coefficient
-    const Z = 1.28; // 90% service level — won't sell out 90% of the time
+    const Z = 1.28;
 
-    // Lead time by maker (days to restock)
-    const LEAD_TIMES = {
-      ashley: 5, liz: 5, ami: 1
-    };
-    const ASHLEY_ITEMS = ['chicken','baby chick','octop','heart keychain','mini loaf cat','bear coaster','cherry blossom pouch','apple coaster','pet rock','mama possum','baby possum','christmas baby chick','baby christmas tree'];
-    const LIZ_ITEMS    = ['leggy frog','bee','birb','jellyfish'];
+    // Build available crocheters for this event from eventRosterState
+    const availableIds = roster.filter(c => eventRosterState[c.id] !== false).map(c => c.id);
 
+    // Dynamic getMaker — checks each non-Ami crocheter's keywords in roster order
     function getMaker(itemName) {
       const n = itemName.toLowerCase();
-      if (ASHLEY_ITEMS.some(k => n.includes(k))) return 'ashley';
-      if (LIZ_ITEMS.some(k => n.includes(k))) return 'liz';
+      for (const c of roster) {
+        if (c.isAmi) continue;
+        if (c.itemKeywords && c.itemKeywords.some(k => n.includes(k))) return c.id;
+      }
       return 'ami';
+    }
+
+    function getLeadDays(makerId) {
+      const c = roster.find(r => r.id === makerId);
+      return c ? c.leadDays : 1;
     }
 
     function stdDev(samples) {
@@ -1800,7 +1867,7 @@ Return 8-12 items. For each, give the CYCLE STOCK quantity — what you expect t
 
     function computeSafetyStock(itemName, cycleQty, history) {
       const maker    = getMaker(itemName);
-      const leadDays = LEAD_TIMES[maker];
+      const leadDays = getLeadDays(maker);
 
       // Get the best sample set: prefer this event type, fall back to all events
       const h = history[itemName] || history[Object.keys(history).find(k => k.toLowerCase().includes(itemName.toLowerCase().split(' ')[0]))] || null;
@@ -1826,10 +1893,17 @@ Return 8-12 items. For each, give the CYCLE STOCK quantity — what you expect t
       return { safetyStock, sigma: Math.round(sigma*10)/10, leadDays, maker };
     }
 
-    const priColors = {high:'var(--rose)',medium:'var(--lavender)',low:'var(--sky)'};
-    const makerLabel = {ashley:'👩 Ashley',liz:'👩 Liz',ami:'🌸 Ami'};
-    const makerColor = {ashley:'var(--rose-soft)',liz:'var(--lav-soft)',ami:'var(--mint-soft)'};
-    const makerBorder= {ashley:'var(--rose-mid)',liz:'var(--lavender)',ami:'var(--mint)'};
+    const priColors  = {high:'var(--rose)',medium:'var(--lavender)',low:'var(--sky)'};
+    const makerColors= ['var(--rose-soft)','var(--lav-soft)','var(--mint-soft)','var(--peach-soft)','var(--sky-soft)','var(--yellow-soft)'];
+    const makerBords = ['var(--rose-mid)','var(--lavender)','var(--mint)','var(--peach)','var(--sky)','var(--yellow)'];
+    function getMakerLabel(makerId) {
+      const c = roster.find(r => r.id === makerId);
+      return c ? (c.isAmi ? '🌸 Ami' : '👩 '+c.name) : '🌸 Ami';
+    }
+    function getMakerStyle(makerId) {
+      const idx = roster.findIndex(r => r.id === makerId);
+      return { bg: makerColors[idx % makerColors.length] || 'var(--lav-soft)', border: makerBords[idx % makerBords.length] || 'var(--lavender)' };
+    }
 
     document.getElementById('predInventory').innerHTML = inv.length
       ? `<div style="font-size:0.75em;font-weight:800;color:var(--text-soft);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;padding:0 2px;">
@@ -1837,32 +1911,33 @@ Return 8-12 items. For each, give the CYCLE STOCK quantity — what you expect t
         </div>` +
         inv.map(i => {
           const cycleQty = i.cycle_qty || i.qty || 0;
-          const { safetyStock, sigma, leadDays, maker } = computeSafetyStock(i.item, cycleQty, itemHistory);
-          const bringTotal = cycleQty + safetyStock;
-          const cycleWidth = Math.round(cycleQty / bringTotal * 100);
+          const maker    = getMaker(i.item);
+
+          // Skip items whose maker is toggled off for this event
+          if (!availableIds.includes(maker)) return '';
+
+          const { safetyStock, sigma, leadDays } = computeSafetyStock(i.item, cycleQty, itemHistory);
+          const bringTotal  = cycleQty + safetyStock;
+          const cycleWidth  = Math.round(cycleQty / bringTotal * 100);
           const safetyWidth = 100 - cycleWidth;
+          const mStyle      = getMakerStyle(maker);
 
           return `
           <div style="background:var(--white);border-radius:var(--radius-sm);margin-bottom:10px;border:2px solid var(--border);overflow:hidden;">
-
-            <!-- Header row -->
             <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;gap:10px;">
               <div style="flex:1;">
                 <div style="font-weight:900;font-size:0.95em;">${i.item}</div>
                 <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:5px;">
                   <span class="tag" style="background:${priColors[i.priority]||'var(--lavender)'}1a;color:${priColors[i.priority]||'var(--lavender)'};border-color:${priColors[i.priority]||'var(--lavender)'}66;">${i.priority||'medium'}</span>
-                  <span class="tag" style="background:${makerColor[maker]};color:var(--text-mid);border-color:${makerBorder[maker]};">${makerLabel[maker]}</span>
+                  <span class="tag" style="background:${mStyle.bg};color:var(--text-mid);border-color:${mStyle.border};">${getMakerLabel(maker)}</span>
                   <span class="tag" style="background:var(--yellow-soft);color:#92400E;border-color:var(--yellow);">⏱️ ${leadDays}d lead</span>
                 </div>
               </div>
-              <!-- Bring total — the headline number -->
               <div style="text-align:center;background:linear-gradient(135deg,var(--rose-soft),var(--lav-soft));border-radius:10px;padding:8px 14px;border:2px solid var(--rose-mid);flex-shrink:0;">
                 <div style="font-size:0.65em;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-soft);">Bring</div>
                 <div style="font-size:1.8em;font-weight:900;color:var(--rose-deep);line-height:1;">${bringTotal}</div>
               </div>
             </div>
-
-            <!-- Cycle + Safety breakdown bar -->
             <div style="padding:0 16px 12px;">
               <div style="display:flex;border-radius:6px;overflow:hidden;height:20px;margin-bottom:6px;">
                 <div style="width:${cycleWidth}%;background:linear-gradient(90deg,var(--lavender),#9333EA);display:flex;align-items:center;justify-content:center;">
@@ -1877,11 +1952,9 @@ Return 8-12 items. For each, give the CYCLE STOCK quantity — what you expect t
                 <span>🎯 90% service level</span>
               </div>
             </div>
-
-            <!-- AI reasoning -->
             ${i.reason ? `<div style="padding:10px 16px 12px;border-top:1px solid var(--border);font-size:0.8em;font-weight:700;color:var(--text-mid);line-height:1.5;">${i.reason}${i.signal ? ` <span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:99px;font-size:0.85em;font-weight:800;background:var(--lav-mid);color:var(--text-mid);border:1px solid var(--lavender);margin-left:6px;">📊 ${i.signal}</span>` : ''}</div>` : ''}
           </div>
-        `}).join('')
+        `}).filter(Boolean).join('')
       : '<div class="empty-state"><p>Log events with item details to get contextual inventory plans!</p></div>';
 
   } catch(e) {
@@ -2437,8 +2510,8 @@ function clearAllData() {
 }
 
 function confirmClearAll() {
-  [KEY_EVENTS, KEY_NOTES, KEY_PLAN, KEY_ORDERS, KEY_NAMES, KEY_LOCATIONS, KEY_RULES].forEach(k => localStorage.removeItem(k));
-  events=[]; notes=[]; planEvents=[]; savedOrders=[]; aiRules=[];
+  [KEY_EVENTS, KEY_NOTES, KEY_PLAN, KEY_ORDERS, KEY_NAMES, KEY_LOCATIONS, KEY_RULES, KEY_ROSTER].forEach(k => localStorage.removeItem(k));
+  events=[]; notes=[]; planEvents=[]; savedOrders=[]; aiRules=[]; roster=[...DEFAULT_ROSTER]; eventRosterState={};
   savedNames = ['Cherry Blossom Fest','Neptune Festival','Water Lantern Festival','Chesapeake Jubilee','VB Farmers Market','Strawberry Festival'];
   savedLocations = ['Virginia Beach Farmers Market','Greenbrier Library','Central Library','Chesapeake City Park','Town Center Virginia Beach'];
   renderRecentEvents(); renderDataStats();
@@ -2586,9 +2659,113 @@ Write 4-6 bullet points summarizing the clearest patterns and what they mean for
   }
 }
 
+// ═══════════════════════════════════════════════
+// CROCHETER ROSTER
+// ═══════════════════════════════════════════════
+function renderRosterSettings() {
+  const wrap = document.getElementById('rosterList');
+  if (!wrap) return;
+  const colors = ['var(--rose-soft)','var(--lav-soft)','var(--mint-soft)','var(--peach-soft)','var(--sky-soft)','var(--yellow-soft)'];
+  const borders= ['var(--rose-mid)','var(--lavender)','var(--mint)','var(--peach)','var(--sky)','var(--yellow)'];
+
+  wrap.innerHTML = roster.map((c, idx) => `
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:${colors[idx%colors.length]};border-radius:var(--radius-sm);margin-bottom:8px;border:2px solid ${borders[idx%borders.length]};">
+      <div style="font-size:1.3em;">${c.isAmi ? '🌸' : '👩'}</div>
+      <div style="flex:1;">
+        <div style="font-weight:900;font-size:0.9em;">${c.name}${c.skuPrefix ? ` <span style="font-size:0.75em;font-weight:700;color:var(--text-soft);">${c.skuPrefix}</span>` : ''}</div>
+        <div style="font-size:0.72em;font-weight:800;color:var(--text-soft);margin-top:2px;">⏱️ ${c.leadDays}d lead time${c.isAmi ? ' · Always active' : ''}</div>
+        ${c.itemKeywords?.length ? `<div style="font-size:0.72em;color:var(--text-soft);margin-top:2px;">Makes: ${c.itemKeywords.slice(0,4).join(', ')}${c.itemKeywords.length>4?'…':''}</div>` : ''}
+      </div>
+      ${!c.isAmi ? `
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+          <div style="font-size:0.65em;font-weight:900;text-transform:uppercase;letter-spacing:0.4px;color:var(--text-soft);">Default</div>
+          <label style="position:relative;width:42px;height:24px;flex-shrink:0;display:block;text-transform:none;font-size:1em;letter-spacing:0;margin:0;">
+            <input type="checkbox" ${c.active?'checked':''} onchange="toggleRosterDefault('${c.id}',this.checked)"
+              style="opacity:0;width:0;height:0;position:absolute;">
+            <span onclick="" style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:${c.active?'linear-gradient(135deg,var(--rose),#C026D3)':'#ddd'};border-radius:24px;transition:.3s;">
+              <span style="position:absolute;height:18px;width:18px;left:${c.active?'21px':'3px'};bottom:3px;background:#fff;border-radius:50%;transition:.3s;box-shadow:0 1px 4px rgba(0,0,0,.2);"></span>
+            </span>
+          </label>
+        </div>
+        <button onclick="deleteRosterMember('${c.id}')" class="btn btn-danger btn-sm" style="padding:5px 8px;font-size:0.75em;">🗑</button>
+      ` : `<div style="font-size:0.75em;font-weight:800;color:var(--text-soft);padding:4px 8px;background:var(--mint-soft);border-radius:99px;border:1px solid var(--mint);">Always on</div>`}
+    </div>
+  `).join('');
+}
+
+function toggleRosterDefault(id, active) {
+  const c = roster.find(r => r.id === id);
+  if (c) { c.active = active; save(KEY_ROSTER, roster); }
+  renderRosterSettings();
+  renderPredictRoster();
+  toast((active ? '✅ ' : '⏸️ ') + (roster.find(r=>r.id===id)?.name||'') + (active ? ' set as active by default' : ' set as inactive by default'));
+}
+
+function addCrocheter() {
+  const name = document.getElementById('new_crocheter_name')?.value.trim();
+  const sku  = document.getElementById('new_crocheter_sku')?.value.trim().toUpperCase();
+  const lead = parseInt(document.getElementById('new_crocheter_lead')?.value) || 5;
+  if (!name) { toast('⚠️ Enter a name!'); return; }
+  const id = 'c_' + Date.now();
+  roster.push({ id, name, skuPrefix: sku||'', active: true, isAmi: false, leadDays: lead, itemKeywords: [] });
+  save(KEY_ROSTER, roster);
+  document.getElementById('new_crocheter_name').value = '';
+  document.getElementById('new_crocheter_sku').value  = '';
+  renderRosterSettings();
+  renderPredictRoster();
+
+  // Also add them to CONTRACTORS so Pay tab works
+  CONTRACTORS[id] = { name, note: `SKU prefix ${sku||'?'} · Added to roster`, anniversary: '', items: [] };
+
+  toast('🧶 ' + name + ' added to roster!');
+}
+
+function deleteRosterMember(id) {
+  const c = roster.find(r => r.id === id);
+  if (!c || c.isAmi) { toast('⚠️ Can\'t remove Ami!'); return; }
+  roster = roster.filter(r => r.id !== id);
+  save(KEY_ROSTER, roster);
+  renderRosterSettings();
+  renderPredictRoster();
+  toast('🗑 ' + (c.name||'Crocheter') + ' removed from roster');
+}
+
+// ── Per-event roster toggles in Predict tab ───────────────────────────────
+function renderPredictRoster() {
+  const wrap = document.getElementById('predRosterToggles');
+  if (!wrap) return;
+
+  // Init eventRosterState from each crocheter's default active setting
+  roster.forEach(c => {
+    if (eventRosterState[c.id] === undefined) eventRosterState[c.id] = c.active;
+  });
+
+  wrap.innerHTML = roster.map(c => {
+    const on = eventRosterState[c.id] !== false;
+    return `
+      <button onclick="toggleEventRoster('${c.id}')"
+        style="display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:99px;border:2px solid ${on?'var(--rose)':'rgba(0,0,0,0.1)'};background:${on?'var(--rose-soft)':'rgba(0,0,0,0.03)'};cursor:pointer;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82em;color:${on?'var(--rose-deep)':'var(--text-soft)'};transition:all .15s;">
+        <span style="font-size:1em;">${c.isAmi?'🌸':'👩'}</span>
+        <span>${c.name}</span>
+        ${c.isAmi ? '' : `<span style="font-size:0.85em;opacity:0.7;">${on?'✓':'✗'}</span>`}
+        ${c.isAmi ? `<span style="font-size:0.7em;opacity:0.6;">(always)</span>` : ''}
+      </button>
+    `;
+  }).join('');
+}
+
+function toggleEventRoster(id) {
+  const c = roster.find(r => r.id === id);
+  if (!c || c.isAmi) return; // Ami can never be toggled off
+  eventRosterState[id] = !eventRosterState[id];
+  renderPredictRoster();
+  toast((eventRosterState[id] ? '✅ ' : '⏸️ ') + c.name + (eventRosterState[id] ? ' available for this event' : ' unavailable for this event'));
+}
+
 function initSettingsTab() {
   renderDataStats();
   renderAIRules();
+  renderRosterSettings();
 }
 
 const PROXY_URL = 'https://amioki-wayfinder-proxy.amioki-co.workers.dev/';
@@ -2615,11 +2792,14 @@ function toast(msg) {
 (function init() {
   const today = new Date().toISOString().split('T')[0];
   ['ev_date','pred_date','plan_date'].forEach(id => { const el=document.getElementById(id); if(el) el.value=today; });
+  // Init eventRosterState from defaults
+  roster.forEach(c => { eventRosterState[c.id] = c.active; });
   renderRecentEvents();
   refreshDataLists();
   setPlanRange(1);
   rebuildTypeDropdowns();
   renderMarketTypesList();
+  renderPredictRoster();
 })();
 </script>
 </body>
