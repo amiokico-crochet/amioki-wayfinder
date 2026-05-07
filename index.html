@@ -1967,6 +1967,60 @@ function addToPlan() {
   renderPlan();
 }
 
+function editPlanEvent(id) {
+  const ev = planEvents.find(e => e.id === id);
+  if (!ev) return;
+  const card = document.getElementById('plev_'+id);
+  if (!card) return;
+
+  const typeOpts = marketTypes.map(t =>
+    `<option value="${t.id}" ${ev.type===t.id?'selected':''}>${t.emoji} ${t.label}</option>`
+  ).join('');
+  const locOpts = savedLocations.map(l =>
+    `<option value="${l}">`
+  ).join('');
+
+  card.innerHTML = `
+    <div style="background:var(--lav-soft);border-radius:10px;padding:14px;border:2px solid var(--lavender);">
+      <div style="font-size:0.78em;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-soft);margin-bottom:10px;">✏️ Edit Plan Event</div>
+      <div class="grid-2" style="gap:8px;margin-bottom:8px;">
+        <div><label>Event Name</label><input type="text" id="pedit_name_${id}" value="${ev.name}" list="eventNameList"></div>
+        <div><label>Date</label><input type="date" id="pedit_date_${id}" value="${ev.date}"></div>
+      </div>
+      <div class="grid-2" style="gap:8px;margin-bottom:8px;">
+        <div><label>Market Type</label><select id="pedit_type_${id}">${typeOpts}</select></div>
+        <div><label>Expected Attendance</label><input type="number" id="pedit_att_${id}" value="${ev.attendance||''}" placeholder="500"></div>
+      </div>
+      <div style="margin-bottom:10px;">
+        <label>Location</label>
+        <input type="text" id="pedit_loc_${id}" value="${ev.location||''}" placeholder="Virginia Beach Farmers Market..." list="pedit_loclist_${id}">
+        <datalist id="pedit_loclist_${id}">${locOpts}</datalist>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-primary btn-sm" onclick="savePlanEventEdit(${id})">✅ Save</button>
+        <button class="btn btn-ghost btn-sm" onclick="renderPlan()">✕ Cancel</button>
+      </div>
+    </div>
+  `;
+}
+
+function savePlanEventEdit(id) {
+  const idx = planEvents.findIndex(e => e.id === id);
+  if (idx === -1) return;
+  const name     = document.getElementById('pedit_name_'+id)?.value.trim();
+  const date     = document.getElementById('pedit_date_'+id)?.value;
+  const type     = document.getElementById('pedit_type_'+id)?.value;
+  const att      = parseInt(document.getElementById('pedit_att_'+id)?.value)||0;
+  const location = document.getElementById('pedit_loc_'+id)?.value.trim();
+  if (!name || !date || !type) { toast('⚠️ Fill in name, date and type!'); return; }
+  planEvents[idx] = { ...planEvents[idx], name, date, type, attendance: att, location };
+  save(KEY_PLAN, planEvents);
+  if (location) saveLocation(location);
+  if (!savedNames.includes(name)) { savedNames.push(name); save(KEY_NAMES, savedNames); }
+  renderPlan();
+  toast('✅ Plan event updated!');
+}
+
 function removePlanEvent(id) {
   planEvents = planEvents.filter(e => e.id !== id);
   save(KEY_PLAN, planEvents);
@@ -2021,7 +2075,10 @@ function renderPlan() {
               <div class="plan-event-name">${typeEmoji[ev.type]||''} ${ev.name}</div>
               <div class="plan-event-date">${new Date(ev.date+'T12:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})} · <span class="tag">${typeLabel[ev.type]||ev.type}</span>${ev.attendance ? ` · ~${ev.attendance.toLocaleString()} attendance` : ''}${ev.location ? ` · 📍 ${ev.location}` : ''}</div>
             </div>
-            <button class="plan-remove" onclick="removePlanEvent(${ev.id})">✕</button>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <button class="btn btn-secondary btn-sm" onclick="editPlanEvent(${ev.id})">✏️</button>
+              <button class="plan-remove" onclick="removePlanEvent(${ev.id})">✕</button>
+            </div>
           </div>
           <div class="plan-forecast">
             ${estRev ? `💰 Est. revenue: <strong>$${(estRev*0.85).toFixed(0)}–$${(estRev*1.2).toFixed(0)}</strong> ${estTag}` : `💰 Est. revenue: <span class="tag">Log similar events for forecast!</span>`}
@@ -2054,12 +2111,182 @@ function renderPlan() {
       <div class="insight-label">💡 Planning Tip</div>
       You have ${inRange.length} event${inRange.length!==1?'s':''} in the next ${planRange===1?'month':planRange+' months'}. ${totalEst > 0 ? `Based on your history, expect roughly $${totalEst.toFixed(0)} in total revenue for this period.` : 'Log past events to get revenue estimates!'}
     </div>
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+      <div style="font-weight:900;font-size:0.9em;margin-bottom:8px;">🗓️ Master Prep List</div>
+      <p style="font-size:0.82em;font-weight:700;color:var(--text-mid);margin-bottom:10px;">Get a combined prep list across all ${inRange.length} event${inRange.length!==1?'s':''} — totals per item with a priority breakdown by event.</p>
+      <button class="btn btn-primary btn-sm" onclick="getMasterPrepList()">🧭 Get ${planRange===1?'1-Month':planRange+'-Month'} Master Prep List</button>
+    </div>
+    <div id="masterPrepResult" style="margin-top:14px;display:none;"></div>
   `;
 }
 
-// ═══════════════════════════════════════════════
-// NOTES TAB
-// ═══════════════════════════════════════════════
+async function getMasterPrepList() {
+  const resultEl = document.getElementById('masterPrepResult');
+  if (!resultEl) return;
+  resultEl.style.display = 'block';
+  resultEl.innerHTML = `<div class="ai-loading"><div class="dots"><span></span><span></span><span></span></div> Building master prep list across all events...</div>`;
+
+  // Build event context
+  const now = new Date();
+  const cutoff = new Date(now);
+  cutoff.setMonth(cutoff.getMonth() + planRange);
+  const inRange = planEvents.filter(e => {
+    const d = new Date(e.date);
+    return d >= now && d <= cutoff;
+  }).sort((a,b) => new Date(a.date)-new Date(b.date));
+
+  if (!inRange.length) {
+    resultEl.innerHTML = `<div class="insight-box" style="background:var(--yellow-soft);border-color:var(--yellow);">No events in range — add some to your plan first!</div>`;
+    return;
+  }
+
+  // Past item history
+  const itemAgg = {};
+  events.forEach(ev => {
+    ev.items?.forEach(item => {
+      if (!itemAgg[item.name]) itemAgg[item.name] = { qty: 0, count: 0 };
+      itemAgg[item.name].qty += item.qty;
+      itemAgg[item.name].count++;
+    });
+  });
+  const historyStr = Object.entries(itemAgg)
+    .sort((a,b) => b[1].qty - a[1].qty)
+    .slice(0, 12)
+    .map(([n,d]) => `${n}: avg ${(d.qty/d.count).toFixed(1)}/event`)
+    .join(', ') || 'No past history yet';
+
+  const eventList = inRange.map((e,i) =>
+    `Event ${i+1}: ${e.name} on ${e.date} (${e.type}${e.location ? ', '+e.location : ''}${e.attendance ? ', ~'+e.attendance+' attendance' : ''})`
+  ).join('\n');
+
+  try {
+    const res = await apiCall({
+      system: `You are a prep planner for Amioki, a kawaii amigurumi brand in Virginia Beach VA.
+Known items: Pikachu, Axolotl, Kirby, Capybara, Snorlax, Mew, Miffy, Penguin, Whale, Baby Shark, Octopus, Jellyfish, Leggy Frog, Bee, Birb, Chicken, Baby Chick, Heart Keychain, Mini Loaf Cat.
+Contractors: Ashley makes Chickens, Baby Chicks, Octopi, Possum, Heart Keychain, Bear Coasters, Cherry Blossom Pouch, Apple Coasters, Pet Rock, Mini Loaf Cat, Christmas Baby Chick, Baby Christmas Tree.
+Liz makes Leggy Frog, Bees, Pastel Rainbow Birb, Jellyfish, Birbs.
+Ami makes the rest (Pikachu, Axolotl, Kirby, Capybara, Snorlax, Mew, Miffy, Penguin, Whale, Baby Shark).
+Respond ONLY with valid JSON, no markdown:
+{
+  "items": [
+    {
+      "name": "item name",
+      "who": "ashley|liz|ami",
+      "total": number,
+      "priority": "high|medium|low",
+      "events": [{"event": "event name", "qty": number, "reason": "brief reason"}]
+    }
+  ],
+  "summary": "one sentence overview"
+}`,
+      messages: [{ role: 'user', content: `Build a master prep list for these ${inRange.length} upcoming events over the next ${planRange} month${planRange>1?'s':''}:
+
+${eventList}
+
+Past item averages: ${historyStr}
+
+For each recommended item, break down how many to bring to EACH event specifically, then total them. Prioritize based on event type and past performance.` }]
+    });
+
+    const data = await res.json();
+    let raw = (data.content?.find(c=>c.type==='text')?.text || '{}').replace(/```json|```/g,'').trim();
+    const result = JSON.parse(raw);
+    renderMasterPrepList(result, inRange);
+
+  } catch(e) {
+    if (e.message === 'No API key') return;
+    resultEl.innerHTML = `<div class="insight-box" style="background:var(--coral-soft);border-color:var(--coral);">Could not generate master prep list. Check your API key in Settings.</div>`;
+  }
+}
+
+function renderMasterPrepList(result, inRange) {
+  const resultEl = document.getElementById('masterPrepResult');
+  if (!resultEl || !result.items) return;
+
+  const whoColors = { ashley: '#FCE7F3', liz: '#EDE9FE', ami: '#ECFDF5' };
+  const whoBorder = { ashley: '#F472B6', liz: '#C4B5FD', ami: '#6EE7B7' };
+  const whoLabel  = { ashley: '👩 Ashley', liz: '👩 Liz', ami: '🌸 Ami' };
+  const priColors = { high: '#FEF2F2', medium: '#FFFBEB', low: '#F0F9FF' };
+  const priBorder = { high: '#FCA5A5', medium: '#FDE68A', low: '#BAE6FD' };
+  const priLabel  = { high: '🔴 High', medium: '🟡 Medium', low: '🔵 Low' };
+
+  // Group by who
+  const byWho = { ashley: [], liz: [], ami: [] };
+  result.items.forEach(item => { if (byWho[item.who]) byWho[item.who].push(item); });
+
+  const renderGroup = (who, items) => {
+    if (!items.length) return '';
+    return `
+      <div style="margin-bottom:14px;">
+        <div style="font-weight:900;font-size:0.85em;margin-bottom:8px;padding:6px 10px;background:${whoColors[who]};border-radius:8px;border:1px solid ${whoBorder[who]};">
+          ${whoLabel[who]} — ${items.reduce((s,i)=>s+i.total,0)} items total
+        </div>
+        ${items.map(item => `
+          <div style="background:var(--white);border-radius:8px;margin-bottom:6px;border:2px solid ${priBorder[item.priority]||'var(--border)'};overflow:hidden;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:${priColors[item.priority]||'var(--white)'};">
+              <div>
+                <span style="font-weight:900;font-size:0.9em;">${item.name}</span>
+                <span style="font-size:0.72em;font-weight:700;color:var(--text-soft);margin-left:8px;">${priLabel[item.priority]||item.priority}</span>
+              </div>
+              <div style="font-weight:900;font-size:1.2em;color:var(--rose-deep);">${item.total} total</div>
+            </div>
+            <div style="padding:6px 12px 8px;">
+              ${item.events.map(ev => `
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px dashed var(--border);font-size:0.78em;font-weight:700;color:var(--text-mid);">
+                  <span>📅 ${ev.event}</span>
+                  <span style="color:var(--text);">${ev.qty} · <span style="color:var(--text-soft);font-weight:600;">${ev.reason||''}</span></span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  };
+
+  resultEl.innerHTML = `
+    ${result.summary ? `<div class="insight-box" style="margin-bottom:14px;"><div class="insight-label">📋 Overview</div>${result.summary}</div>` : ''}
+    ${renderGroup('ashley', byWho.ashley)}
+    ${renderGroup('liz', byWho.liz)}
+    ${renderGroup('ami', byWho.ami)}
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary btn-sm" onclick="sendMasterToPayTab('ashley')">💸 Send Ashley's to Pay</button>
+      <button class="btn btn-secondary btn-sm" onclick="sendMasterToPayTab('liz')">💸 Send Liz's to Pay</button>
+      <button class="btn btn-ghost btn-sm" onclick="getMasterPrepList()">🔄 Regenerate</button>
+    </div>
+  `;
+
+  // Store for pay tab use
+  window._masterPrepData = result;
+}
+
+function sendMasterToPayTab(who) {
+  const data = window._masterPrepData;
+  if (!data) { toast('⚠️ Generate master prep list first!'); return; }
+  const items = data.items.filter(i => i.who === who);
+  if (!items.length) { toast(`No items assigned to ${who} in this prep list!`); return; }
+
+  const entries = items.map(item => ({
+    itemName: item.name,
+    qty: item.total,
+    rate: 0, labor: 0, materials: 0
+  }));
+
+  window._pendingPayOrder = {
+    evName: `${planRange}-Month Master Prep`,
+    ashley: who === 'ashley' ? entries : [],
+    liz:    who === 'liz'    ? entries : []
+  };
+
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    if (b.textContent.includes('Pay')) b.click();
+  });
+  // Set correct contractor
+  setTimeout(() => { setContractor(who); loadPendingPayOrder(); }, 300);
+  toast(`💸 Sent ${who === 'ashley' ? 'Ashley' : 'Liz'}'s items to Pay tab!`);
+}
+
+
 function setNoteFilter(el) {
   document.querySelectorAll('#noteCatChips .chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
