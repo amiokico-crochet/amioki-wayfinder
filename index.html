@@ -480,6 +480,7 @@ textarea { resize: vertical; min-height: 80px; }
     <button class="tab-btn" onclick="switchTab('plan')">📅 Plan</button>
     <button class="tab-btn" onclick="switchTab('notes')">📝 Notes</button>
     <button class="tab-btn" onclick="switchTab('contractors')">🧶 Pay</button>
+    <button class="tab-btn" onclick="switchTab('settings')">⚙️ Settings</button>
   </div>
 
   <!-- ═══════════════════════════════════════════ -->
@@ -959,6 +960,59 @@ textarea { resize: vertical; min-height: 80px; }
 
   </div>
 
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- TAB 7: SETTINGS -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div id="tab-settings" class="tab-panel">
+
+    <div class="card" style="background:linear-gradient(135deg,var(--rose-soft),var(--lav-soft));border:2px solid var(--rose-mid);">
+      <div class="card-title"><span>🔑</span> Claude API Key</div>
+      <p style="font-size:0.85em;font-weight:700;color:var(--text-mid);margin-bottom:16px;line-height:1.6;">
+        Your API key is stored <strong>only in your browser</strong> — it never goes to GitHub or anywhere else. Required for AI predictions, forecasts, and inventory suggestions.
+      </p>
+
+      <div class="form-group">
+        <label>API Key</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." style="flex:1;font-family:monospace;letter-spacing:0.05em;">
+          <button class="btn btn-ghost btn-sm" onclick="toggleKeyVisibility()" id="toggleKeyBtn" style="flex-shrink:0;">👁 Show</button>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+        <button class="btn btn-primary" onclick="saveApiKey()">💾 Save Key</button>
+        <button class="btn btn-danger btn-sm" onclick="clearApiKey()">🗑 Clear Key</button>
+      </div>
+
+      <div id="apiKeyStatus" style="margin-top:14px;display:none;"></div>
+
+      <div class="divider"></div>
+
+      <div style="font-size:0.8em;font-weight:700;color:var(--text-soft);line-height:1.7;">
+        <div>📍 Get your key at <strong>console.anthropic.com</strong> → API Keys</div>
+        <div>💳 Load $5 credit — lasts ~150–300 AI calls</div>
+        <div>🔒 Key saves to localStorage only, never transmitted anywhere</div>
+        <div>🚫 Never paste your key in a chat or email</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span>🧪</span> Test Connection</div>
+      <p style="font-size:0.82em;font-weight:700;color:var(--text-mid);margin-bottom:14px;">Make sure your key is working before using the AI features.</p>
+      <button class="btn btn-secondary" onclick="testApiKey()">🧪 Test API Key</button>
+      <div id="apiTestResult" style="margin-top:12px;display:none;" class="insight-box"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span>🗄️</span> Data Management</div>
+      <p style="font-size:0.82em;font-weight:700;color:var(--text-mid);margin-bottom:14px;">All your Wayfinder data lives in your browser's local storage.</p>
+      <div id="dataStats" style="margin-bottom:14px;"></div>
+      <button class="btn btn-danger btn-sm" onclick="clearAllData()">⚠️ Clear All Data</button>
+      <p style="font-size:0.75em;color:var(--text-soft);margin-top:8px;font-weight:700;">This will delete all events, notes, orders and plans. Cannot be undone.</p>
+    </div>
+
+  </div>
+
 </div><!-- end app-wrap -->
 
 <script>
@@ -1040,7 +1094,8 @@ function switchTab(id) {
   if (id==='insights') renderInsights();
   if (id==='notes') { renderNotes(); renderMarketTypesList(); }
   if (id==='plan') renderPlan();
-  if (id==='contractors') { setContractor(activeContractor); }
+  if (id==='contractors') { setContractor(activeContractor); setTimeout(loadPendingPayOrder, 200); }
+  if (id==='settings') initSettingsTab();
   refreshDataLists();
 }
 
@@ -1772,12 +1827,7 @@ async function runPrediction() {
 
   // Revenue prediction
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
+    const res = await apiCall({
         system: `You are a revenue forecasting assistant for Amioki, a kawaii amigurumi/crochet brand in Virginia Beach VA run by Ami. She sells handmade plushies (Kirby, Axolotl, Capybara, Mew, Pikachu, Snorlax, Miffy, Penguin) at markets and festivals. She has a pink branded tent and an experiential booth. Key data: even in bad weather/dreary days she still earns well at her home base VB Farmers Market. Pikachu is supply-constrained, not demand-weak. Respond ONLY with valid JSON, no markdown, no backticks:
 {"low":number,"mid":number,"high":number,"low_label":"string","mid_label":"string","high_label":"string","key_factors":["factor1","factor2","factor3"],"tip":"one actionable insight string"}`,
         messages: [{ role: 'user', content: `Predict revenue for upcoming Amioki event:
@@ -1800,7 +1850,6 @@ Market notes/learnings:
 ${allNotesText||'None yet.'}
 
 Return JSON prediction only.` }]
-      })
     });
     const data = await res.json();
     let raw = (data.content?.find(c=>c.type==='text')?.text || '{}').replace(/```json|```/g,'').trim();
@@ -1835,12 +1884,7 @@ Return JSON prediction only.` }]
 
   // Inventory prediction
   try {
-    const res2 = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
+    const res2 = await apiCall({
         system: `You are an inventory planner for Amioki, a kawaii amigurumi brand. Known items: Kirby, Axolotl, Capybara, Mew, Pikachu, Snorlax, Miffy, Penguin, Whale. Pikachu demand always exceeds supply. Axolotl is a bestseller. Family events favor cute recognizable characters. Respond ONLY with valid JSON array, no markdown:
 [{"item":"name","qty":number,"reason":"short reason string","priority":"high|medium|low"}]`,
         messages: [{ role: 'user', content: `Plan inventory for: ${name} (${type}), attendance ~${attendance||'medium'}, weather: ${weather}, crowd: ${crowd}.
@@ -1849,7 +1893,6 @@ Past same event: ${pastSameSummary}
 Notes: ${extraNotes||'none'}
 Market learnings: ${allNotesText||'none'}
 Return a JSON array of 6-10 item recommendations.` }]
-      })
     });
     const data2 = await res2.json();
     let raw2 = (data2.content?.find(c=>c.type==='text')?.text || '[]').replace(/```json|```/g,'').trim();
@@ -1972,7 +2015,7 @@ function renderPlan() {
         const avg         = similar.length ? similar.reduce((s,e)=>s+e.revenue,0)/similar.length : null;
         const estRev      = pastLocAvg || pastAvg || avg;
         const estTag      = pastLocAvg ? '<span class="tag green">Same event + location</span>' : pastAvg ? '<span class="tag green">Same past event</span>' : avg ? '<span class="tag purple">Similar market type</span>' : '';
-        return `<div class="plan-event">
+        return `<div class="plan-event" id="plev_${ev.id}">
           <div class="plan-event-header">
             <div>
               <div class="plan-event-name">${typeEmoji[ev.type]||''} ${ev.name}</div>
@@ -1983,6 +2026,10 @@ function renderPlan() {
           <div class="plan-forecast">
             ${estRev ? `💰 Est. revenue: <strong>$${(estRev*0.85).toFixed(0)}–$${(estRev*1.2).toFixed(0)}</strong> ${estTag}` : `💰 Est. revenue: <span class="tag">Log similar events for forecast!</span>`}
           </div>
+          <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-primary btn-sm" onclick="getPrepList(${ev.id})">🧭 Get AI Prep List</button>
+          </div>
+          <div id="preplist_${ev.id}" style="display:none;margin-top:12px;"></div>
         </div>`;
       }).join('')}
     </div>
@@ -2083,12 +2130,7 @@ async function askAI() {
   const itemSummary = Object.entries(itemAgg).sort((a,b) => b[1].qty-a[1].qty).map(([n,d]) => `${n}: ${d.qty} sold`).join(', ');
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 800,
+    const res = await apiCall({
         system: `You are a friendly business analyst for Amioki, a kawaii amigurumi crochet brand in Virginia Beach VA run by Ami. She sells handmade plushies at markets/festivals. Her best sellers are Pikachu (always demand-constrained), Axolotl, and Kirby. She has a pink branded tent. She works with contractors Ashley and Liz. Answer her question directly, warmly, and with specific actionable advice based on her data. Keep it concise.`,
         messages: [{ role: 'user', content: `My question: ${question}
 
@@ -2100,7 +2142,6 @@ ${noteSummary||'No notes yet.'}
 
 Item performance:
 ${itemSummary||'No item data yet.'}` }]
-      })
     });
     const data = await res.json();
     answerText.textContent = data.content?.find(c=>c.type==='text')?.text || 'Unable to get an answer right now. Log more events for better insights!';
@@ -2341,8 +2382,205 @@ function renderMonthlyBreakdown() {
 }
 
 // ═══════════════════════════════════════════════
-// MARKET TYPES
+// PLAN → PREP → PAY PIPELINE
 // ═══════════════════════════════════════════════
+
+// Known piece rates for matching (Ashley = CA-, Liz = CL-)
+const ALL_PIECE_RATES = {
+  ashley: CONTRACTORS.ashley.items,
+  liz:    CONTRACTORS.liz.items
+};
+
+function findContractorForItem(itemName) {
+  // Check Ashley first
+  const ashleyMatch = CONTRACTORS.ashley.items.find(i =>
+    itemName.toLowerCase().includes(i.name.toLowerCase()) ||
+    i.name.toLowerCase().includes(itemName.toLowerCase().split(' ')[0])
+  );
+  if (ashleyMatch) return { who: 'ashley', item: ashleyMatch };
+  const lizMatch = CONTRACTORS.liz.items.find(i =>
+    itemName.toLowerCase().includes(i.name.toLowerCase()) ||
+    i.name.toLowerCase().includes(itemName.toLowerCase().split(' ')[0])
+  );
+  if (lizMatch) return { who: 'liz', item: lizMatch };
+  return null; // Ami makes it
+}
+
+async function getPrepList(planId) {
+  const ev = planEvents.find(e => e.id === planId);
+  if (!ev) return;
+  const wrap = document.getElementById('preplist_'+planId);
+  wrap.style.display = 'block';
+  wrap.innerHTML = `<div class="ai-loading"><div class="dots"><span></span><span></span><span></span></div> Building prep list...</div>`;
+
+  // Build context from history
+  const itemAgg = {};
+  const pastSame = events.filter(e =>
+    e.name.replace(/\d{4}/,'').trim().toLowerCase() === ev.name.replace(/\d{4}/,'').trim().toLowerCase()
+  );
+  const similar = events.filter(e => e.type === ev.type);
+  const relevantEvents = pastSame.length ? pastSame : similar;
+  relevantEvents.forEach(e => {
+    e.items?.forEach(item => {
+      if (!itemAgg[item.name]) itemAgg[item.name] = { qty: 0, rev: 0, count: 0 };
+      itemAgg[item.name].qty += item.qty;
+      itemAgg[item.name].rev += item.rev;
+      itemAgg[item.name].count++;
+    });
+  });
+  const historyStr = Object.entries(itemAgg)
+    .sort((a,b) => b[1].qty - a[1].qty)
+    .map(([n,d]) => `${n}: avg ${(d.qty/d.count).toFixed(1)} sold per event`)
+    .join(', ') || 'No past item history yet';
+
+  try {
+    const res = await apiCall({
+      system: `You are an inventory prep planner for Amioki, a kawaii amigurumi brand in Virginia Beach VA. 
+Known items Ami sells: Pikachu, Axolotl, Kirby, Capybara, Snorlax, Mew, Miffy, Penguin, Whale, Baby Shark, Octopus, Jellyfish, Leggy Frog, Bee, Birb, Chicken, Baby Chick, Heart Keychain, Mini Loaf Cat.
+Contractors: Ashley makes Chickens, Baby Chicks, Octopi, Mama/Baby Possum, Heart Keychain, Bear Coasters, Cherry Blossom Pouch, Apple Coasters, Pet Rock, Mini Loaf Cat, Christmas Baby Chick, Baby Christmas Tree.
+Liz makes Leggy Frog, Bees, Pastel Rainbow Birb, Jellyfish, all Birb designs.
+Ami makes the rest herself (Pikachu, Axolotl, Kirby, Capybara, Snorlax, Mew, Miffy, Penguin, Whale, Baby Shark).
+Respond ONLY with valid JSON array, no markdown:
+[{"item":"name","qty":number,"who":"ashley|liz|ami","reason":"brief reason"}]`,
+      messages: [{ role: 'user', content: `Suggest prep quantities for: ${ev.name}
+Type: ${ev.type}, Date: ${ev.date}, Location: ${ev.location||'TBD'}, Attendance: ${ev.attendance||'unknown'}
+Past item sales at similar events: ${historyStr}
+Return 8-12 items with realistic quantities. Consider who makes each item.` }]
+    });
+    const data = await res.json();
+    let raw = (data.content?.find(c=>c.type==='text')?.text || '[]').replace(/```json|```/g,'').trim();
+    const items = JSON.parse(raw);
+    renderPrepTable(planId, ev.name, items);
+  } catch(e) {
+    if (e.message === 'No API key') return;
+    // Fallback: build from history without AI
+    const fallback = Object.entries(itemAgg)
+      .sort((a,b) => b[1].qty - a[1].qty)
+      .slice(0, 10)
+      .map(([name, d]) => {
+        const match = findContractorForItem(name);
+        return { item: name, qty: Math.ceil(d.qty / d.count), who: match?.who || 'ami', reason: 'Based on past event averages' };
+      });
+    if (fallback.length) {
+      renderPrepTable(planId, ev.name, fallback);
+    } else {
+      wrap.innerHTML = `<div class="insight-box" style="background:var(--coral-soft);border-color:var(--coral);">Could not generate prep list. Log more events or check your API key in Settings.</div>`;
+    }
+  }
+}
+
+function renderPrepTable(planId, evName, items) {
+  const wrap = document.getElementById('preplist_'+planId);
+  const whoColors = { ashley: 'var(--rose)', liz: 'var(--lavender)', ami: 'var(--mint)' };
+  const whoLabels = { ashley: '👩 Ashley', liz: '👩 Liz', ami: '🌸 Ami' };
+
+  wrap.innerHTML = `
+    <div style="font-size:0.78em;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-soft);margin-bottom:8px;">
+      🧶 Prep List — edit quantities & assignments, then send to Pay
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 70px 110px;gap:6px;padding:6px 8px;background:var(--lav-mid);border-radius:8px;margin-bottom:6px;">
+      <div style="font-size:0.72em;font-weight:900;text-transform:uppercase;color:var(--text-mid);">Item</div>
+      <div style="font-size:0.72em;font-weight:900;text-transform:uppercase;color:var(--text-mid);text-align:center;">Qty</div>
+      <div style="font-size:0.72em;font-weight:900;text-transform:uppercase;color:var(--text-mid);">Made by</div>
+    </div>
+    ${items.map((item, i) => `
+      <div data-item="${item.item.replace(/"/g,'&quot;')}" style="display:grid;grid-template-columns:1fr 70px 110px;gap:6px;align-items:center;padding:6px 8px;background:var(--white);border-radius:8px;margin-bottom:5px;border:1px solid var(--border);">
+        <div>
+          <div style="font-weight:800;font-size:0.85em;">${item.item}</div>
+          <div style="font-size:0.7em;color:var(--text-soft);">${item.reason||''}</div>
+        </div>
+        <div style="text-align:center;">
+          <input type="number" min="0" value="${item.qty}" id="prep_qty_${planId}_${i}"
+            style="width:55px;padding:5px;border:2px solid var(--rose-mid);border-radius:6px;text-align:center;font-weight:900;font-size:0.9em;">
+        </div>
+        <div>
+          <select id="prep_who_${planId}_${i}"
+            style="width:100%;padding:5px;border:2px solid var(--rose-mid);border-radius:6px;font-size:0.8em;font-weight:700;">
+            <option value="ami" ${item.who==='ami'?'selected':''}>🌸 Ami</option>
+            <option value="ashley" ${item.who==='ashley'?'selected':''}>👩 Ashley</option>
+            <option value="liz" ${item.who==='liz'?'selected':''}>👩 Liz</option>
+          </select>
+        </div>
+      </div>
+    `).join('')}
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+      <button class="btn btn-primary btn-sm" onclick="sendToPayTab(${planId}, ${items.length}, '${evName.replace(/'/g,"\\'")}')">
+        💸 Send to Pay Tab
+      </button>
+      <button class="btn btn-ghost btn-sm" onclick="getPrepList(${planId})">🔄 Regenerate</button>
+    </div>
+  `;
+}
+
+function sendToPayTab(planId, itemCount, evName) {
+  const ashleyItems = [];
+  const lizItems    = [];
+  const rows = document.querySelectorAll(`#preplist_${planId} [data-item]`);
+
+  rows.forEach((row, i) => {
+    const name = row.dataset.item || '';
+    const qty  = parseInt(document.getElementById(`prep_qty_${planId}_${i}`)?.value) || 0;
+    const who  = document.getElementById(`prep_who_${planId}_${i}`)?.value || 'ami';
+    if (qty === 0 || who === 'ami') return;
+    const ctr   = who === 'ashley' ? CONTRACTORS.ashley : CONTRACTORS.liz;
+    const match = ctr.items.find(it =>
+      name.toLowerCase().includes(it.name.toLowerCase()) ||
+      it.name.toLowerCase().includes(name.toLowerCase().split(' ')[0])
+    );
+    const entry = { itemName: name, qty, rate: match?.total || 0, labor: match?.labor || 0, materials: match?.materials || 0 };
+    if (who === 'ashley') ashleyItems.push(entry);
+    if (who === 'liz')    lizItems.push(entry);
+  });
+
+  window._pendingPayOrder = { evName, ashley: ashleyItems, liz: lizItems };
+
+  // Switch to Pay tab
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    if (b.textContent.includes('Pay')) { b.click(); }
+  });
+  toast('💸 Sent to Pay tab!');
+}
+
+function loadPendingPayOrder() {
+  const order = window._pendingPayOrder;
+  if (!order) return;
+
+  const items = activeContractor === 'ashley' ? order.ashley : order.liz;
+  if (!items?.length) {
+    toast(`No ${activeContractor === 'ashley' ? 'Ashley' : 'Liz'} items in this prep list — switch contractors if needed.`);
+    return;
+  }
+
+  // Pre-fill the order label
+  document.getElementById('ctr_order_label').value = order.evName + ' Prep';
+
+  // Set quantities for matching items
+  const ctr = CONTRACTORS[activeContractor];
+  items.forEach(prep => {
+    ctr.items.forEach((ctrItem, idx) => {
+      const matches = prep.itemName.toLowerCase().includes(ctrItem.name.toLowerCase()) ||
+        ctrItem.name.toLowerCase().includes(prep.itemName.toLowerCase().split(' ')[0]);
+      if (matches) {
+        const qtyEl = document.getElementById('ctr_qty_'+idx);
+        if (qtyEl) qtyEl.value = prep.qty;
+      }
+    });
+  });
+
+  updateCtrTotals();
+
+  // Show banner
+  const banner = document.createElement('div');
+  banner.className = 'insight-box';
+  banner.style.cssText = 'background:var(--mint-soft);border-color:var(--mint);margin-bottom:12px;';
+  banner.innerHTML = `<div class="insight-label">✅ Loaded from Plan: ${order.evName}</div>
+    Quantities pre-filled from your prep list. Review, adjust if needed, then hit 💾 Save Order.`;
+  const wrap = document.getElementById('ctrItemsWrap');
+  if (wrap) wrap.parentNode.insertBefore(banner, wrap);
+  setTimeout(() => banner.remove(), 6000);
+}
+
+
 const KEY_MARKET_TYPES = 'amioki_market_types';
 
 const DEFAULT_MARKET_TYPES = [
@@ -2560,6 +2798,160 @@ function saveLocation(loc) {
   save(KEY_LOCATIONS, savedLocations);
   refreshDataLists();
 }
+
+// ═══════════════════════════════════════════════
+// SETTINGS — API KEY
+// ═══════════════════════════════════════════════
+const KEY_API = 'amioki_api_key';
+
+function getApiKey() {
+  return localStorage.getItem(KEY_API) || '';
+}
+
+function saveApiKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key) { toast('⚠️ Paste your API key first!'); return; }
+  if (!key.startsWith('sk-ant-')) { 
+    showApiStatus('⚠️ That doesn\'t look like a Claude API key — it should start with sk-ant-', 'coral');
+    return;
+  }
+  localStorage.setItem(KEY_API, key);
+  document.getElementById('apiKeyInput').value = '••••••••••••••••••••' + key.slice(-6);
+  showApiStatus('✅ API key saved! Your AI features are ready to use.', 'mint');
+  toast('🔑 API key saved!');
+}
+
+function clearApiKey() {
+  localStorage.removeItem(KEY_API);
+  document.getElementById('apiKeyInput').value = '';
+  showApiStatus('🗑 API key cleared.', 'yellow');
+  toast('🗑 Key cleared');
+}
+
+function toggleKeyVisibility() {
+  const input = document.getElementById('apiKeyInput');
+  const btn   = document.getElementById('toggleKeyBtn');
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.textContent = '🙈 Hide';
+  } else {
+    input.type = 'password';
+    btn.textContent = '👁 Show';
+  }
+}
+
+function showApiStatus(msg, color) {
+  const el = document.getElementById('apiKeyStatus');
+  el.style.display = 'block';
+  el.className = 'insight-box';
+  el.style.background = color === 'mint' ? 'var(--mint-soft)' : color === 'coral' ? 'var(--coral-soft)' : 'var(--yellow-soft)';
+  el.style.borderColor = color === 'mint' ? 'var(--mint)' : color === 'coral' ? 'var(--coral)' : 'var(--yellow)';
+  el.textContent = msg;
+}
+
+async function testApiKey() {
+  const key = getApiKey();
+  const resultEl = document.getElementById('apiTestResult');
+  resultEl.style.display = 'block';
+  resultEl.textContent = '⏳ Testing...';
+  resultEl.style.background = 'var(--lav-soft)';
+  resultEl.style.borderColor = 'var(--lavender)';
+
+  if (!key) {
+    resultEl.textContent = '⚠️ No API key saved yet — go save one first!';
+    resultEl.style.background = 'var(--yellow-soft)';
+    resultEl.style.borderColor = 'var(--yellow)';
+    return;
+  }
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 20,
+        messages: [{ role: 'user', content: 'Say "Wayfinder ready!" and nothing else.' }]
+      })
+    });
+    const data = await res.json();
+    if (data.content?.[0]?.text) {
+      resultEl.textContent = '✅ Connected! ' + data.content[0].text;
+      resultEl.style.background = 'var(--mint-soft)';
+      resultEl.style.borderColor = 'var(--mint)';
+    } else if (data.error) {
+      resultEl.textContent = '❌ Error: ' + data.error.message;
+      resultEl.style.background = 'var(--coral-soft)';
+      resultEl.style.borderColor = 'var(--coral)';
+    }
+  } catch(e) {
+    resultEl.textContent = '❌ Connection failed: ' + e.message;
+    resultEl.style.background = 'var(--coral-soft)';
+    resultEl.style.borderColor = 'var(--coral)';
+  }
+}
+
+function renderDataStats() {
+  const el = document.getElementById('dataStats');
+  if (!el) return;
+  el.innerHTML = `
+    <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);">
+      <div class="stat-box"><div class="stat-val">${events.length}</div><div class="stat-lbl">Events</div></div>
+      <div class="stat-box"><div class="stat-val">${notes.length}</div><div class="stat-lbl">Notes</div></div>
+      <div class="stat-box"><div class="stat-val">${savedOrders.length}</div><div class="stat-lbl">Orders</div></div>
+    </div>
+  `;
+}
+
+function clearAllData() {
+  // Use inline confirm since confirm() is blocked
+  const el = document.getElementById('dataStats');
+  el.innerHTML = `
+    <div style="background:var(--coral-soft);border:2px solid var(--coral);border-radius:10px;padding:14px;margin-bottom:10px;">
+      <div style="font-weight:900;color:#991B1B;margin-bottom:10px;">⚠️ Are you sure? This deletes ALL events, notes, orders and plans permanently.</div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-danger btn-sm" onclick="confirmClearAll()">Yes, delete everything</button>
+        <button class="btn btn-ghost btn-sm" onclick="renderDataStats()">Cancel</button>
+      </div>
+    </div>
+  `;
+}
+
+function confirmClearAll() {
+  [KEY_EVENTS, KEY_NOTES, KEY_PLAN, KEY_ORDERS, KEY_NAMES, KEY_LOCATIONS].forEach(k => localStorage.removeItem(k));
+  events = []; notes = []; planEvents = []; savedOrders = [];
+  savedNames = ['Cherry Blossom Fest','Neptune Festival','Water Lantern Festival','Chesapeake Jubilee','VB Farmers Market','Strawberry Festival'];
+  savedLocations = ['Virginia Beach Farmers Market','Greenbrier Library','Central Library','Chesapeake City Park','Town Center Virginia Beach'];
+  renderRecentEvents();
+  renderDataStats();
+  toast('🗑 All data cleared');
+}
+
+function initSettingsTab() {
+  const key = getApiKey();
+  const input = document.getElementById('apiKeyInput');
+  if (key && input) input.value = '••••••••••••••••••••' + key.slice(-6);
+  renderDataStats();
+}
+
+function apiCall(body) {
+  const key = getApiKey();
+  if (!key) {
+    toast('⚠️ Add your Claude API key in the Settings tab first!');
+    switchTab('settings');
+    throw new Error('No API key');
+  }
+  return fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': key,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({ ...body, model: 'claude-sonnet-4-20250514', max_tokens: 1000 })
+  });
+}
+
 
 function refreshDataLists() {
   const options = savedNames.map(n => `<option value="${n}">`).join('');
