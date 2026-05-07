@@ -538,6 +538,34 @@ textarea { resize: vertical; min-height: 80px; }
         </div>
       </div>
 
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Start Time</label>
+          <input type="time" id="ev_start_time" placeholder="09:00">
+        </div>
+        <div class="form-group">
+          <label>End Time</label>
+          <input type="time" id="ev_end_time" placeholder="15:00">
+        </div>
+      </div>
+      <div id="ev_hours_display" style="font-size:0.8em;font-weight:800;color:var(--text-soft);margin-top:-8px;margin-bottom:10px;display:none;">
+        ⏱️ <span id="ev_hours_text"></span>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Start Time</label>
+          <input type="time" id="ev_start_time" oninput="calcHours()">
+        </div>
+        <div class="form-group">
+          <label>End Time</label>
+          <input type="time" id="ev_end_time" oninput="calcHours()">
+        </div>
+      </div>
+      <div id="ev_hours_display" style="font-size:0.8em;font-weight:800;color:var(--text-soft);margin-top:-8px;margin-bottom:10px;display:none;">
+        ⏱️ <span id="ev_hours_val"></span> hours at this event
+      </div>
+
       <div class="grid-3">
         <div class="form-group">
           <label>Actual Revenue ($)</label>
@@ -697,6 +725,19 @@ textarea { resize: vertical; min-height: 80px; }
         <label>Location / Venue</label>
         <input type="text" id="pred_location" placeholder="e.g., Virginia Beach Farmers Market..." list="locationList2">
         <datalist id="locationList2"></datalist>
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Start Time</label>
+          <input type="time" id="pred_start_time" oninput="calcPredHours()">
+        </div>
+        <div class="form-group">
+          <label>End Time</label>
+          <input type="time" id="pred_end_time" oninput="calcPredHours()">
+        </div>
+      </div>
+      <div id="pred_hours_display" style="font-size:0.8em;font-weight:800;color:var(--text-soft);margin-top:-8px;margin-bottom:10px;display:none;">
+        ⏱️ <span id="pred_hours_val"></span> hours planned
       </div>
       <div class="form-group">
         <label>Expected Weather</label>
@@ -1172,6 +1213,33 @@ function calcFromGross(id) {
   if (taxEl)   taxEl.innerHTML = `🏷️ Tax portion: <strong>$${tax}</strong> per item &nbsp;·&nbsp; Shelf price: <strong>$${shelf}</strong>`;
 }
 
+function calcHours() {
+  const start = document.getElementById('ev_start_time')?.value;
+  const end   = document.getElementById('ev_end_time')?.value;
+  const disp  = document.getElementById('ev_hours_display');
+  const val   = document.getElementById('ev_hours_val');
+  if (!start || !end || !disp || !val) return;
+  const [sh, sm] = start.split(':').map(Number);
+  const [eh, em] = end.split(':').map(Number);
+  const hours = ((eh * 60 + em) - (sh * 60 + sm)) / 60;
+  if (hours > 0) {
+    val.textContent = hours.toFixed(1);
+    disp.style.display = 'block';
+  } else {
+    disp.style.display = 'none';
+  }
+}
+
+function getEventHours() {
+  const start = document.getElementById('ev_start_time')?.value;
+  const end   = document.getElementById('ev_end_time')?.value;
+  if (!start || !end) return null;
+  const [sh, sm] = start.split(':').map(Number);
+  const [eh, em] = end.split(':').map(Number);
+  const hours = ((eh * 60 + em) - (sh * 60 + sm)) / 60;
+  return hours > 0 ? hours : null;
+}
+
 function syncItemsTotal() {
   let total = 0;
   document.querySelectorAll('[id^="iqty_"]').forEach(input => {
@@ -1416,7 +1484,13 @@ function saveEvent() {
   const evData = {
     name, date, type,
     location: document.getElementById('ev_location').value.trim(),
+    startTime: document.getElementById('ev_start_time').value,
+    endTime:   document.getElementById('ev_end_time').value,
+    hours:     calcHours(document.getElementById('ev_start_time').value, document.getElementById('ev_end_time').value),
     duration: parseInt(document.getElementById('ev_duration').value)||1,
+    startTime: document.getElementById('ev_start_time').value || '',
+    endTime:   document.getElementById('ev_end_time').value || '',
+    hours:     getEventHours(),
     revenue: parseFloat(document.getElementById('ev_revenue').value)||0,
     attendance: parseInt(document.getElementById('ev_attendance').value)||0,
     itemsSold: parseInt(document.getElementById('ev_items').value)||0,
@@ -1458,7 +1532,8 @@ function saveEvent() {
   }
 
   // Clear form
-  ['ev_name','ev_date','ev_location','ev_revenue','ev_attendance','ev_items','ev_notes'].forEach(id => document.getElementById(id).value = '');
+  ['ev_name','ev_date','ev_location','ev_start_time','ev_end_time','ev_revenue','ev_attendance','ev_items','ev_notes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('ev_hours_display').style.display = 'none';
   document.getElementById('ev_type').value = '';
   document.getElementById('itemSalesRows').innerHTML = '';
   document.getElementById('csvPreview').style.display = 'none';
@@ -1479,11 +1554,11 @@ function renderRecentEvents() {
     <div class="lb-item">
       <div style="flex:1;">
         <div style="font-weight:900;font-size:0.9em;">${ev.name}</div>
-        <div style="font-size:0.75em;color:var(--text-soft);margin-top:2px;">${ev.date} · <span class="tag">${typeLabel[ev.type]||ev.type}</span> · ${ev.weather}${ev.location ? ` · 📍 ${ev.location}` : ''}</div>
+        <div style="font-size:0.75em;color:var(--text-soft);margin-top:2px;">${ev.date}${ev.startTime ? ` · ⏱️ ${ev.startTime}–${ev.endTime} (${ev.hours}hrs)` : ''} · <span class="tag">${typeLabel[ev.type]||ev.type}</span> · ${ev.weather}${ev.location ? ` · 📍 ${ev.location}` : ''}${ev.hours && ev.revenue ? ` · 💰 $${(ev.revenue/parseFloat(ev.hours)).toFixed(0)}/hr` : ''}</div>
       </div>
       <div style="text-align:right;">
         <div style="font-weight:900;color:var(--rose-deep);">$${ev.revenue.toFixed(0)}</div>
-        <div style="font-size:0.72em;color:var(--text-soft);">${ev.itemsSold||ev.items?.reduce((s,i)=>s+i.qty,0)||0} items</div>
+        <div style="font-size:0.72em;color:var(--text-soft);">${ev.hours ? `$${(ev.revenue/ev.hours).toFixed(0)}/hr · ` : ''}${ev.itemsSold||ev.items?.reduce((s,i)=>s+i.qty,0)||0} items</div>
       </div>
       <button class="btn btn-secondary btn-sm" onclick="editEvent(${ev.id})" style="margin-left:6px;">✏️</button>
       <button class="btn btn-danger btn-sm" onclick="deleteEvent(${ev.id})" style="margin-left:4px;">🗑</button>
@@ -1505,8 +1580,14 @@ function editEvent(id) {
   document.getElementById('ev_name').value     = ev.name || '';
   document.getElementById('ev_date').value     = ev.date || '';
   document.getElementById('ev_location').value = ev.location || '';
+  document.getElementById('ev_start_time').value = ev.startTime || '';
+  document.getElementById('ev_end_time').value   = ev.endTime   || '';
+  updateHoursDisplay();
   document.getElementById('ev_type').value     = ev.type || '';
   document.getElementById('ev_duration').value = ev.duration || 1;
+  document.getElementById('ev_start_time').value = ev.startTime || '';
+  document.getElementById('ev_end_time').value   = ev.endTime   || '';
+  calcHours();
   document.getElementById('ev_revenue').value  = ev.revenue || '';
   document.getElementById('ev_attendance').value = ev.attendance || '';
   document.getElementById('ev_items').value    = ev.itemsSold || '';
@@ -1553,7 +1634,7 @@ function editEvent(id) {
 function cancelEdit() {
   window._editingEventId = null;
   document.getElementById('editBanner')?.remove();
-  ['ev_name','ev_date','ev_location','ev_revenue','ev_attendance','ev_items','ev_notes'].forEach(id => document.getElementById(id).value = '');
+  ['ev_name','ev_date','ev_location','ev_start_time','ev_end_time','ev_revenue','ev_attendance','ev_items','ev_notes'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('ev_type').value = '';
   document.getElementById('itemSalesRows').innerHTML = '';
   itemRows = 0;
@@ -1801,6 +1882,9 @@ async function runPrediction() {
 
   const attendance = parseInt(document.getElementById('pred_attendance').value)||0;
   const location   = document.getElementById('pred_location').value.trim();
+  const predStart  = document.getElementById('pred_start_time')?.value || '';
+  const predEnd    = document.getElementById('pred_end_time')?.value || '';
+  const predHours  = calcHours(predStart, predEnd);
   const weather = pillState.predWeather;
   const crowd = pillState.predCrowd;
   const extraNotes = document.getElementById('pred_notes').value;
@@ -1831,7 +1915,11 @@ async function runPrediction() {
     </div>`;
   }
 
-  const historySummary = recentEvents.map(e => `${e.name} (${e.type}): $${e.revenue} revenue, ${e.weather}, ${e.crowd}, ${e.items?.length||0} item types`).join('\n');
+  const historySummary = recentEvents.map(e => {
+    const rph = e.hours ? ` ($${(e.revenue/e.hours).toFixed(0)}/hr)` : '';
+    const timeStr = e.startTime ? ` ${e.startTime}–${e.endTime} (${e.hours?.toFixed(1)}hrs)` : '';
+    return `${e.name} (${e.type}): $${e.revenue} revenue${rph},${timeStr} ${e.weather}, ${e.crowd}, ${e.items?.length||0} item types`;
+  }).join('\n');
   const pastSameSummary = pastSame.length ? 'PAST SAME EVENT: ' + pastSame.map(e => `${e.name}: $${e.revenue}, ${e.weather}, ${e.crowd}`).join(' | ') : 'No past data for this specific event name.';
 
   document.getElementById('predResultsWrap').style.display = 'block';
@@ -1849,6 +1937,7 @@ Event: ${name}
 Type: ${type}
 Date: ${date||'upcoming'}
 Location: ${location||'not specified'}
+Hours: ${predHours ? predHours+' hours ('+predStart+'–'+predEnd+')' : 'not specified'}
 Attendance: ${attendance||'unknown'}
 Weather forecast: ${weather}
 Expected crowd: ${crowd}
@@ -3040,9 +3129,46 @@ function saveLocation(loc) {
   refreshDataLists();
 }
 
-// ═══════════════════════════════════════════════
-// SETTINGS — API KEY
-// ═══════════════════════════════════════════════
+function calcPredHours() {
+  const start = document.getElementById('pred_start_time')?.value;
+  const end   = document.getElementById('pred_end_time')?.value;
+  const hours = calcHours(start, end);
+  const display = document.getElementById('pred_hours_display');
+  const val     = document.getElementById('pred_hours_val');
+  if (display && val) {
+    if (hours) { display.style.display = 'block'; val.textContent = hours; }
+    else { display.style.display = 'none'; }
+  }
+}
+
+
+function calcHours(start, end) {
+  if (!start || !end) return null;
+  const [sh, sm] = start.split(':').map(Number);
+  const [eh, em] = end.split(':').map(Number);
+  const mins = (eh * 60 + em) - (sh * 60 + sm);
+  return mins > 0 ? (mins / 60).toFixed(1) : null;
+}
+
+function updateHoursDisplay() {
+  const start = document.getElementById('ev_start_time')?.value;
+  const end   = document.getElementById('ev_end_time')?.value;
+  const hours = calcHours(start, end);
+  const display = document.getElementById('ev_hours_display');
+  const text    = document.getElementById('ev_hours_text');
+  if (!display || !text) return;
+  if (hours) {
+    display.style.display = 'block';
+    // Also calc revenue per hour if revenue is filled
+    const rev = parseFloat(document.getElementById('ev_revenue')?.value) || 0;
+    const rph = rev > 0 ? ` · 💰 $${(rev/parseFloat(hours)).toFixed(0)}/hr` : '';
+    text.textContent = `${hours} hours at this event${rph}`;
+  } else {
+    display.style.display = 'none';
+  }
+}
+
+
 const KEY_API = 'amioki_api_key';
 
 function getApiKey() {
@@ -3223,6 +3349,11 @@ function toast(msg) {
   ['ev_date','pred_date','plan_date'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = today;
+  });
+  // Auto-calc hours when times change
+  ['ev_start_time','ev_end_time'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('change', updateHoursDisplay);
   });
   renderRecentEvents();
   refreshDataLists();
