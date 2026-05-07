@@ -515,6 +515,12 @@ textarea { resize: vertical; min-height: 80px; }
         </div>
       </div>
 
+      <div class="form-group">
+        <label>Location / Venue</label>
+        <input type="text" id="ev_location" placeholder="e.g., Virginia Beach Farmers Market, Town Center, Chesapeake City Park..." list="locationList">
+        <datalist id="locationList"></datalist>
+      </div>
+
       <div class="grid-2">
         <div class="form-group">
           <label>Market Type</label>
@@ -687,6 +693,11 @@ textarea { resize: vertical; min-height: 80px; }
         </div>
       </div>
       <div class="form-group">
+        <label>Location / Venue</label>
+        <input type="text" id="pred_location" placeholder="e.g., Virginia Beach Farmers Market..." list="locationList2">
+        <datalist id="locationList2"></datalist>
+      </div>
+      <div class="form-group">
         <label>Expected Weather</label>
         <div class="pill-row" id="predWeatherPills">
           <div class="pill active" data-pw="☀️ Sunny" onclick="togglePill(this,'predWeather')">☀️ Sunny</div>
@@ -836,7 +847,7 @@ textarea { resize: vertical; min-height: 80px; }
     </div>
 
     <div class="card">
-      <div class="card-title"><span>🗂️</span> Manage Market Types</div>
+      <div class="card-title"><span>🗂️</span> Manage Market Types & Locations</div>
       <p style="font-size:0.82em;font-weight:700;color:var(--text-mid);margin-bottom:14px;">Add your own market types — they'll appear in all dropdowns across the app.</p>
       <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
         <input type="text" id="mt_emoji" placeholder="🌿" style="width:60px;text-align:center;">
@@ -846,7 +857,8 @@ textarea { resize: vertical; min-height: 80px; }
       <div id="marketTypesList"></div>
     </div>
 
-
+    <div class="card">
+      <div class="card-title"><span>🤖</span> Ask the AI About Your Markets</div>
       <div class="form-group">
         <textarea id="aiQuestion" placeholder="e.g., Which items should I make more of for summer festivals? When should I raise Pikachu prices? What's my best market type?"></textarea>
       </div>
@@ -1320,6 +1332,7 @@ function saveEvent() {
   const ev = {
     id: Date.now(),
     name, date, type,
+    location: document.getElementById('ev_location').value.trim(),
     duration: parseInt(document.getElementById('ev_duration').value)||1,
     revenue: parseFloat(document.getElementById('ev_revenue').value)||0,
     attendance: parseInt(document.getElementById('ev_attendance').value)||0,
@@ -1344,7 +1357,7 @@ function saveEvent() {
   }
 
   // Clear form
-  ['ev_name','ev_date','ev_revenue','ev_attendance','ev_items','ev_notes'].forEach(id => document.getElementById(id).value = '');
+  ['ev_name','ev_date','ev_location','ev_revenue','ev_attendance','ev_items','ev_notes'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('ev_type').value = '';
   document.getElementById('itemSalesRows').innerHTML = '';
   document.getElementById('csvPreview').style.display = 'none';
@@ -1366,7 +1379,7 @@ function renderRecentEvents() {
     <div class="lb-item">
       <div style="flex:1;">
         <div style="font-weight:900;font-size:0.9em;">${ev.name}</div>
-        <div style="font-size:0.75em;color:var(--text-soft);margin-top:2px;">${ev.date} · <span class="tag">${typeLabel[ev.type]||ev.type}</span> · ${ev.weather}</div>
+        <div style="font-size:0.75em;color:var(--text-soft);margin-top:2px;">${ev.date} · <span class="tag">${typeLabel[ev.type]||ev.type}</span> · ${ev.weather}${ev.location ? ` · 📍 ${ev.location}` : ''}</div>
       </div>
       <div style="text-align:right;">
         <div style="font-weight:900;color:var(--rose-deep);">$${ev.revenue.toFixed(0)}</div>
@@ -1521,9 +1534,13 @@ async function runPrediction() {
   if (!name || !type) { toast('⚠️ Fill in event name and type!'); return; }
 
   const attendance = parseInt(document.getElementById('pred_attendance').value)||0;
+  const location   = document.getElementById('pred_location').value.trim();
   const weather = pillState.predWeather;
   const crowd = pillState.predCrowd;
   const extraNotes = document.getElementById('pred_notes').value;
+
+  // Find past events at same location for extra context
+  const pastSameLocation = location ? events.filter(e => e.location && e.location.toLowerCase().includes(location.toLowerCase().split(' ')[0])) : [];
 
   // YoY context
   const nameKey = name.replace(/\d{4}/,'').trim().toLowerCase();
@@ -1570,12 +1587,14 @@ async function runPrediction() {
 Event: ${name}
 Type: ${type}
 Date: ${date||'upcoming'}
+Location: ${location||'not specified'}
 Attendance: ${attendance||'unknown'}
 Weather forecast: ${weather}
 Expected crowd: ${crowd}
 Extra notes: ${extraNotes||'none'}
 
 ${pastSameSummary}
+${pastSameLocation.length ? `PAST EVENTS AT SAME LOCATION: ${pastSameLocation.map(e=>`${e.name}: $${e.revenue}, ${e.weather}, ${e.crowd}`).join(' | ')}` : ''}
 
 Recent events history:
 ${historySummary||'No prior events logged yet.'}
@@ -2220,6 +2239,13 @@ function refreshDataLists() {
   ['eventNameList','eventNameList2','eventNameList3','eventNameList4'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.innerHTML = options;
+  });
+  // Location datalists
+  const savedLocations = [...new Set(events.map(e => e.location).filter(Boolean))];
+  const locOptions = savedLocations.map(l => `<option value="${l}">`).join('');
+  ['locationList','locationList2'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = locOptions;
   });
 }
 
