@@ -612,6 +612,37 @@ textarea { resize: vertical; min-height: 80px; }
           <div class="pill" data-v="Kara" onclick="togglePill(this,'vendor')">🌸 Kara</div>
         </div>
       </div>
+
+      <div class="form-group">
+        <label>Was this event juried?</label>
+        <div class="pill-row" id="juriedPills">
+          <div class="pill active" data-j="Not juried" onclick="togglePill(this,'juried')">🔓 Not Juried</div>
+          <div class="pill" data-j="Juried — accepted" onclick="togglePill(this,'juried')">✅ Juried — Accepted</div>
+          <div class="pill" data-j="Juried — waitlisted" onclick="togglePill(this,'juried')">⏳ Waitlisted</div>
+          <div class="pill" data-j="Juried — rejected" onclick="togglePill(this,'juried')">❌ Rejected</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Did you have the monopoly? <span style="font-weight:600;font-size:0.85em;color:var(--text-soft);">(only amigurumi vendor)</span></label>
+        <div class="pill-row" id="monopolyPills">
+          <div class="pill active" data-m="Unknown" onclick="togglePill(this,'monopoly')">❓ Unknown</div>
+          <div class="pill" data-m="Yes — only one" onclick="togglePill(this,'monopoly')">👑 Yes — Only One</div>
+          <div class="pill" data-m="Mostly — 1-2 others" onclick="togglePill(this,'monopoly')">🟡 Mostly (1–2 others)</div>
+          <div class="pill" data-m="No — many similar" onclick="togglePill(this,'monopoly')">🔴 No — Many Similar</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>How was the competition?</label>
+        <div class="pill-row" id="competitionPills">
+          <div class="pill active" data-k="Not assessed" onclick="togglePill(this,'competition')">➖ Not Assessed</div>
+          <div class="pill" data-k="None" onclick="togglePill(this,'competition')">🏆 None</div>
+          <div class="pill" data-k="Low — different styles" onclick="togglePill(this,'competition')">🟢 Low</div>
+          <div class="pill" data-k="Medium — some overlap" onclick="togglePill(this,'competition')">🟡 Medium</div>
+          <div class="pill" data-k="High — very similar" onclick="togglePill(this,'competition')">🔴 High</div>
+        </div>
+      </div>
     </div>
 
     <!-- Item Sales Entry -->
@@ -757,6 +788,33 @@ textarea { resize: vertical; min-height: 80px; }
           <div class="pill" data-pc="😊 Good Turnout" onclick="togglePill(this,'predCrowd')">😊 Good Turnout</div>
           <div class="pill" data-pc="😐 Average" onclick="togglePill(this,'predCrowd')">😐 Average</div>
           <div class="pill" data-pc="😴 Slow" onclick="togglePill(this,'predCrowd')">😴 Slow</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Expected Juried Status</label>
+        <div class="pill-row" id="predJuriedPills">
+          <div class="pill active" data-pj="Not juried" onclick="togglePill(this,'predJuried')">🔓 Not Juried</div>
+          <div class="pill" data-pj="Juried — accepted" onclick="togglePill(this,'predJuried')">✅ Juried</div>
+          <div class="pill" data-pj="Unknown" onclick="togglePill(this,'predJuried')">❓ Unknown</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Likely Monopoly?</label>
+        <div class="pill-row" id="predMonopolyPills">
+          <div class="pill active" data-pmn="Unknown" onclick="togglePill(this,'predMonopoly')">❓ Unknown</div>
+          <div class="pill" data-pmn="Yes — only one" onclick="togglePill(this,'predMonopoly')">👑 Yes</div>
+          <div class="pill" data-pmn="Mostly — 1-2 others" onclick="togglePill(this,'predMonopoly')">🟡 Mostly</div>
+          <div class="pill" data-pmn="No — many similar" onclick="togglePill(this,'predMonopoly')">🔴 No</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Expected Competition</label>
+        <div class="pill-row" id="predCompetitionPills">
+          <div class="pill active" data-pcp="Not assessed" onclick="togglePill(this,'predCompetition')">➖ Unknown</div>
+          <div class="pill" data-pcp="None" onclick="togglePill(this,'predCompetition')">🏆 None</div>
+          <div class="pill" data-pcp="Low — different styles" onclick="togglePill(this,'predCompetition')">🟢 Low</div>
+          <div class="pill" data-pcp="Medium — some overlap" onclick="togglePill(this,'predCompetition')">🟡 Medium</div>
+          <div class="pill" data-pcp="High — very similar" onclick="togglePill(this,'predCompetition')">🔴 High</div>
         </div>
       </div>
       <div class="form-group">
@@ -1060,7 +1118,7 @@ textarea { resize: vertical; min-height: 80px; }
 // ═══════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════
-let pillState = { weather:'☀️ Sunny', crowd:'🔥 Packed', vendor:'Ami', predWeather:'☀️ Sunny', predCrowd:'🔥 Packed' };
+let pillState = { weather:'☀️ Sunny', crowd:'🔥 Packed', vendor:'Ami', predWeather:'☀️ Sunny', predCrowd:'🔥 Packed', juried:'Not juried', monopoly:'Unknown', competition:'Not assessed', predJuried:'Not juried', predMonopoly:'Unknown', predCompetition:'Not assessed' };
 let currentFilter = 'all';
 let planRange = 1;
 let noteFilter = 'all';
@@ -1147,7 +1205,7 @@ function togglePill(el, group) {
   const container = el.closest('.pill-row');
   container.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
   el.classList.add('active');
-  const dataKey = {weather:'w', crowd:'c', vendor:'v', predWeather:'pw', predCrowd:'pc'}[group];
+  const dataKey = {weather:'w', crowd:'c', vendor:'v', predWeather:'pw', predCrowd:'pc', juried:'j', monopoly:'m', competition:'k', predJuried:'pj', predMonopoly:'pmn', predCompetition:'pcp'}[group];
   pillState[group] = el.dataset[dataKey];
 }
 
@@ -1497,6 +1555,9 @@ function saveEvent() {
     weather: pillState.weather,
     crowd: pillState.crowd,
     vendor: pillState.vendor,
+    juried: pillState.juried,
+    monopoly: pillState.monopoly,
+    competition: pillState.competition,
     notes: document.getElementById('ev_notes').value.trim(),
     items
   };
@@ -1600,6 +1661,12 @@ function editEvent(id) {
   if (crowdPill) { document.querySelectorAll('#crowdPills .pill').forEach(p=>p.classList.remove('active')); crowdPill.classList.add('active'); pillState.crowd = ev.crowd; }
   const vendorPill = document.querySelector(`#vendorPills [data-v="${ev.vendor}"]`);
   if (vendorPill) { document.querySelectorAll('#vendorPills .pill').forEach(p=>p.classList.remove('active')); vendorPill.classList.add('active'); pillState.vendor = ev.vendor; }
+  const juriedPill = document.querySelector(`#juriedPills [data-j="${ev.juried}"]`);
+  if (juriedPill) { document.querySelectorAll('#juriedPills .pill').forEach(p=>p.classList.remove('active')); juriedPill.classList.add('active'); pillState.juried = ev.juried; }
+  const monopolyPill = document.querySelector(`#monopolyPills [data-m="${ev.monopoly}"]`);
+  if (monopolyPill) { document.querySelectorAll('#monopolyPills .pill').forEach(p=>p.classList.remove('active')); monopolyPill.classList.add('active'); pillState.monopoly = ev.monopoly; }
+  const competitionPill = document.querySelector(`#competitionPills [data-k="${ev.competition}"]`);
+  if (competitionPill) { document.querySelectorAll('#competitionPills .pill').forEach(p=>p.classList.remove('active')); competitionPill.classList.add('active'); pillState.competition = ev.competition; }
 
   // Pre-fill item rows
   document.getElementById('itemSalesRows').innerHTML = '';
@@ -1918,7 +1985,8 @@ async function runPrediction() {
   const historySummary = recentEvents.map(e => {
     const rph = e.hours ? ` ($${(e.revenue/e.hours).toFixed(0)}/hr)` : '';
     const timeStr = e.startTime ? ` ${e.startTime}–${e.endTime} (${e.hours?.toFixed(1)}hrs)` : '';
-    return `${e.name} (${e.type}): $${e.revenue} revenue${rph},${timeStr} ${e.weather}, ${e.crowd}, ${e.items?.length||0} item types`;
+    const competStr = [e.juried, e.monopoly, e.competition].filter(x => x && x !== 'Not juried' && x !== 'Unknown' && x !== 'Not assessed').join(', ');
+    return `${e.name} (${e.type}): $${e.revenue} revenue${rph},${timeStr} ${e.weather}, ${e.crowd}${competStr ? ', '+competStr : ''}, ${e.items?.length||0} item types`;
   }).join('\n');
   const pastSameSummary = pastSame.length ? 'PAST SAME EVENT: ' + pastSame.map(e => `${e.name}: $${e.revenue}, ${e.weather}, ${e.crowd}`).join(' | ') : 'No past data for this specific event name.';
 
@@ -1941,6 +2009,9 @@ Hours: ${predHours ? predHours+' hours ('+predStart+'–'+predEnd+')' : 'not spe
 Attendance: ${attendance||'unknown'}
 Weather forecast: ${weather}
 Expected crowd: ${crowd}
+Juried event: ${pillState.predJuried}
+Monopoly on amigurumi: ${pillState.predMonopoly}
+Competition level: ${pillState.predCompetition}
 Extra notes: ${extraNotes||'none'}
 
 ${pastSameSummary}
