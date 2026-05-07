@@ -2317,31 +2317,16 @@ async function getMasterPrepList() {
 
   try {
     const res = await apiCall({
-      system: `You are a prep planner for Amioki, a kawaii amigurumi brand in Virginia Beach VA.
-Known items: Pikachu, Axolotl, Kirby, Capybara, Snorlax, Mew, Miffy, Penguin, Whale, Baby Shark, Octopus, Jellyfish, Leggy Frog, Bee, Birb, Chicken, Baby Chick, Heart Keychain, Mini Loaf Cat.
-Contractors: Ashley makes Chickens, Baby Chicks, Octopi, Possum, Heart Keychain, Bear Coasters, Cherry Blossom Pouch, Apple Coasters, Pet Rock, Mini Loaf Cat, Christmas Baby Chick, Baby Christmas Tree.
-Liz makes Leggy Frog, Bees, Pastel Rainbow Birb, Jellyfish, Birbs.
-Ami makes the rest (Pikachu, Axolotl, Kirby, Capybara, Snorlax, Mew, Miffy, Penguin, Whale, Baby Shark).
-You MUST respond with ONLY raw JSON. No words before or after. No markdown. No backticks. No explanation. Start your response with { and end with }.
-{
-  "items": [
-    {
-      "name": "item name",
-      "who": "ashley|liz|ami",
-      "total": number,
-      "priority": "high|medium|low",
-      "events": [{"event": "event name", "qty": number, "reason": "brief reason"}]
-    }
-  ],
-  "summary": "one sentence overview"
-}`,
-      messages: [{ role: 'user', content: `Build a master prep list for these ${inRange.length} upcoming events over the next ${planRange} month${planRange>1?'s':''}:
-
+      system: `Prep planner for Amioki amigurumi brand. 
+Ashley makes: Chickens, Baby Chicks, Octopi, Heart Keychain, Mini Loaf Cat, Bear Coasters, Pet Rock.
+Liz makes: Leggy Frog, Bees, Birbs, Jellyfish.
+Ami makes: Pikachu, Axolotl, Kirby, Capybara, Snorlax, Mew, Miffy, Penguin, Whale, Baby Shark.
+You MUST respond with ONLY raw JSON. Start with { end with }. No other text.
+Schema: {"items":[{"name":"string","who":"ashley|liz|ami","total":number,"priority":"high|medium|low","events":[{"event":"string","qty":number,"reason":"string"}]}],"summary":"string"}`,
+      messages: [{ role: 'user', content: `Master prep for ${inRange.length} events (${planRange} month):
 ${eventList}
-
-Past item averages: ${historyStr}
-
-For each recommended item, break down how many to bring to EACH event specifically, then total them. Prioritize based on event type and past performance.` }]
+History: ${historyStr}
+Return top 6 items max. Keep event reasons under 5 words.` }]
     });
 
     const data = await res.json();
