@@ -1980,7 +1980,7 @@ async function runPrediction() {
   // Revenue prediction
   try {
     const res = await apiCall({
-        system: `You are a revenue forecasting assistant for Amioki, a kawaii amigurumi/crochet brand in Virginia Beach VA run by Ami. She sells handmade plushies (Kirby, Axolotl, Capybara, Mew, Pikachu, Snorlax, Miffy, Penguin) at markets and festivals. She has a pink branded tent and an experiential booth. Key data: even in bad weather/dreary days she still earns well at her home base VB Farmers Market. Pikachu is supply-constrained, not demand-weak. Respond ONLY with valid JSON, no markdown, no backticks:
+        system: `You are a revenue forecasting assistant for Amioki, a kawaii amigurumi/crochet brand in Virginia Beach VA run by Ami. She sells handmade plushies (Kirby, Axolotl, Capybara, Mew, Pikachu, Snorlax, Miffy, Penguin) at markets and festivals. She has a pink branded tent and an experiential booth. Key data: even in bad weather/dreary days she still earns well at her home base VB Farmers Market. Pikachu is supply-constrained, not demand-weak. You MUST respond with ONLY raw JSON. No words before or after. No markdown. No backticks. No explanation. Start your response with { and end with }.
 {"low":number,"mid":number,"high":number,"low_label":"string","mid_label":"string","high_label":"string","key_factors":["factor1","factor2","factor3"],"tip":"one actionable insight string"}`,
         messages: [{ role: 'user', content: `Predict revenue for upcoming Amioki event:
 Event: ${name}
@@ -2008,8 +2008,8 @@ ${allNotesText||'None yet.'}
 Return JSON prediction only.` }]
     });
     const data = await res.json();
-    let raw = (data.content?.find(c=>c.type==='text')?.text || '{}').replace(/```json|```/g,'').trim();
-    const pred = JSON.parse(raw);
+    let raw = (data.content?.find(c=>c.type==='text')?.text || '');
+    const pred = extractJSON(raw, {});
     const maxVal = pred.high || 500;
 
     document.getElementById('predResults').innerHTML = `
@@ -2041,7 +2041,7 @@ Return JSON prediction only.` }]
   // Inventory prediction
   try {
     const res2 = await apiCall({
-        system: `You are an inventory planner for Amioki, a kawaii amigurumi brand. Known items: Kirby, Axolotl, Capybara, Mew, Pikachu, Snorlax, Miffy, Penguin, Whale. Pikachu demand always exceeds supply. Axolotl is a bestseller. Family events favor cute recognizable characters. Respond ONLY with valid JSON array, no markdown:
+        system: `You are an inventory planner for Amioki, a kawaii amigurumi brand. Known items: Kirby, Axolotl, Capybara, Mew, Pikachu, Snorlax, Miffy, Penguin, Whale. Pikachu demand always exceeds supply. Axolotl is a bestseller. Family events favor cute recognizable characters. You MUST respond with ONLY a raw JSON array. No words before or after. No markdown. No backticks. No explanation. Start your response with [ and end with ].
 [{"item":"name","qty":number,"reason":"short reason string","priority":"high|medium|low"}]`,
         messages: [{ role: 'user', content: `Plan inventory for: ${name} (${type}), attendance ~${attendance||'medium'}, weather: ${weather}, crowd: ${crowd}.
 Top historical items: ${topItems||'No item data yet.'}
@@ -2051,8 +2051,8 @@ Market learnings: ${allNotesText||'none'}
 Return a JSON array of 6-10 item recommendations.` }]
     });
     const data2 = await res2.json();
-    let raw2 = (data2.content?.find(c=>c.type==='text')?.text || '[]').replace(/```json|```/g,'').trim();
-    const inv = JSON.parse(raw2);
+    let raw2 = (data2.content?.find(c=>c.type==='text')?.text || '');
+    const inv = extractJSON(raw2, []);
     const priColors = {high:'var(--rose)',medium:'var(--lavender)',low:'var(--sky)'};
     document.getElementById('predInventory').innerHTML = inv.length ? inv.map(i => `
       <div class="lb-item">
@@ -2322,7 +2322,7 @@ Known items: Pikachu, Axolotl, Kirby, Capybara, Snorlax, Mew, Miffy, Penguin, Wh
 Contractors: Ashley makes Chickens, Baby Chicks, Octopi, Possum, Heart Keychain, Bear Coasters, Cherry Blossom Pouch, Apple Coasters, Pet Rock, Mini Loaf Cat, Christmas Baby Chick, Baby Christmas Tree.
 Liz makes Leggy Frog, Bees, Pastel Rainbow Birb, Jellyfish, Birbs.
 Ami makes the rest (Pikachu, Axolotl, Kirby, Capybara, Snorlax, Mew, Miffy, Penguin, Whale, Baby Shark).
-Respond ONLY with valid JSON, no markdown:
+You MUST respond with ONLY raw JSON. No words before or after. No markdown. No backticks. No explanation. Start your response with { and end with }.
 {
   "items": [
     {
@@ -2345,8 +2345,8 @@ For each recommended item, break down how many to bring to EACH event specifical
     });
 
     const data = await res.json();
-    let raw = (data.content?.find(c=>c.type==='text')?.text || '{}').replace(/```json|```/g,'').trim();
-    const result = JSON.parse(raw);
+    let raw = (data.content?.find(c=>c.type==='text')?.text || '');
+    const result = extractJSON(raw, {});
     renderMasterPrepList(result, inRange);
 
   } catch(e) {
@@ -2823,7 +2823,7 @@ Known items Ami sells: Pikachu, Axolotl, Kirby, Capybara, Snorlax, Mew, Miffy, P
 Contractors: Ashley makes Chickens, Baby Chicks, Octopi, Mama/Baby Possum, Heart Keychain, Bear Coasters, Cherry Blossom Pouch, Apple Coasters, Pet Rock, Mini Loaf Cat, Christmas Baby Chick, Baby Christmas Tree.
 Liz makes Leggy Frog, Bees, Pastel Rainbow Birb, Jellyfish, all Birb designs.
 Ami makes the rest herself (Pikachu, Axolotl, Kirby, Capybara, Snorlax, Mew, Miffy, Penguin, Whale, Baby Shark).
-Respond ONLY with valid JSON array, no markdown:
+You MUST respond with ONLY a raw JSON array. No words before or after. No markdown. No backticks. No explanation. Start your response with [ and end with ].
 [{"item":"name","qty":number,"who":"ashley|liz|ami","reason":"brief reason"}]`,
       messages: [{ role: 'user', content: `Suggest prep quantities for: ${ev.name}
 Type: ${ev.type}, Date: ${ev.date}, Location: ${ev.location||'TBD'}, Attendance: ${ev.attendance||'unknown'}
@@ -2831,8 +2831,8 @@ Past item sales at similar events: ${historyStr}
 Return 8-12 items with realistic quantities. Consider who makes each item.` }]
     });
     const data = await res.json();
-    let raw = (data.content?.find(c=>c.type==='text')?.text || '[]').replace(/```json|```/g,'').trim();
-    const items = JSON.parse(raw);
+    let raw = (data.content?.find(c=>c.type==='text')?.text || '');
+    const items = extractJSON(raw, []);
     renderPrepTable(planId, ev.name, items);
   } catch(e) {
     if (e.message === 'No API key') return;
@@ -3181,6 +3181,31 @@ function saveLocation(loc) {
   save(KEY_LOCATIONS, savedLocations);
   refreshDataLists();
 }
+
+// ── Robust JSON extractor for Llama output ──
+// Llama often adds prose before/after JSON — this pulls just the JSON
+function extractJSON(text, fallback) {
+  if (!text) return fallback;
+  // Strip markdown code fences
+  text = text.replace(/```json|```/g, '').trim();
+  // Try parsing directly first
+  try { return JSON.parse(text); } catch(e) {}
+  // Try extracting first {...} or [...] block
+  const objMatch = text.match(/\{[\s\S]*\}/);
+  const arrMatch = text.match(/\[[\s\S]*\]/);
+  // Use whichever comes first
+  const obj = objMatch ? { idx: text.indexOf(objMatch[0]), str: objMatch[0] } : null;
+  const arr = arrMatch ? { idx: text.indexOf(arrMatch[0]), str: arrMatch[0] } : null;
+  let candidate = null;
+  if (obj && arr) candidate = obj.idx < arr.idx ? obj.str : arr.str;
+  else if (obj) candidate = obj.str;
+  else if (arr) candidate = arr.str;
+  if (candidate) {
+    try { return JSON.parse(candidate); } catch(e) {}
+  }
+  return fallback;
+}
+
 
 function calcPredHours() {
   const start = document.getElementById('pred_start_time')?.value;
