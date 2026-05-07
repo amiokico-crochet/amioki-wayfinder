@@ -958,6 +958,79 @@ textarea { resize: vertical; min-height: 80px; }
       <div class="card-title"><span>📂</span> Saved Orders</div>
       <div id="ctr-saved-orders"><div class="empty-state"><div class="empty-icon">🗂️</div><p>No saved orders yet.</p></div></div>
     </div>
+
+    <!-- CONTRACT GAP ANALYSIS -->
+    <div class="card" style="border:2px solid var(--lavender);">
+      <div class="card-title"><span>📊</span> Contract Gap Analysis
+        <span style="font-size:0.7em;font-weight:700;color:var(--text-soft);text-transform:none;letter-spacing:0;margin-left:6px;">contracted vs. needed</span>
+      </div>
+      <p style="font-size:0.82em;font-weight:700;color:var(--text-mid);margin-bottom:16px;">
+        Enter what's locked into the current contract. The gap is measured against your AI demand targets — red means you're short, green means you have surplus. If they finish early, the fill list tells you exactly what to prioritize next.
+      </p>
+
+      <!-- Contract entry -->
+      <div style="background:var(--lav-soft);border-radius:var(--radius-sm);padding:14px;margin-bottom:16px;border:1px solid var(--lavender);">
+        <div style="font-size:0.78em;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-soft);margin-bottom:10px;">📋 Enter Current Contract</div>
+        <div class="grid-2" style="gap:10px;margin-bottom:10px;">
+          <div>
+            <label>Contract Label</label>
+            <input type="text" id="contract_label" placeholder="e.g., May Markets Contract">
+          </div>
+          <div class="grid-2" style="gap:8px;">
+            <div>
+              <label>From</label>
+              <input type="date" id="contract_from">
+            </div>
+            <div>
+              <label>To</label>
+              <input type="date" id="contract_to">
+            </div>
+          </div>
+        </div>
+
+        <!-- Contract items — auto-populated from current contractor's item list -->
+        <div style="font-size:0.78em;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-soft);margin-bottom:8px;">
+          Contracted Quantities <span style="font-weight:700;text-transform:none;font-size:1em;color:var(--text-mid);">— enter 0 if not in this contract</span>
+        </div>
+        <div id="contractItemsWrap"></div>
+
+        <div style="margin-top:12px;border-top:1px dashed var(--border);padding-top:12px;">
+          <div style="font-size:0.78em;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-soft);margin-bottom:8px;">
+            📌 Demand Targets <span style="font-weight:700;text-transform:none;font-size:1em;color:var(--text-mid);">— what you actually need (from AI prediction or your own number)</span>
+          </div>
+          <div id="contractTargetsWrap"></div>
+          <p style="font-size:0.72em;font-weight:700;color:var(--text-soft);margin-top:6px;">
+            💡 Leave blank to auto-use AI prediction averages from your event history. Override any item with your own target.
+          </p>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="saveContract()">💾 Save Contract & Analyze</button>
+          <button class="btn btn-ghost btn-sm" onclick="resetContractForm()">✕ Clear</button>
+        </div>
+
+        <!-- Contract tool hook — placeholder for future embed -->
+        <div style="margin-top:12px;padding:8px 12px;background:var(--yellow-soft);border-radius:8px;border:1px solid var(--yellow);font-size:0.75em;font-weight:800;color:#92400E;">
+          🔗 Contract tool coming soon — once built, contracted quantities will auto-populate here
+        </div>
+      </div>
+
+      <!-- Gap results -->
+      <div id="gapResults" style="display:none;">
+        <div style="font-size:0.78em;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-soft);margin-bottom:10px;">📊 Gap Analysis</div>
+        <div id="gapChart"></div>
+
+        <div style="margin-top:16px;">
+          <div style="font-size:0.78em;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-soft);margin-bottom:10px;">⚡ If They Finish Early — Make These Next</div>
+          <div id="fillList"></div>
+        </div>
+
+        <div id="gapSummaryBar" style="margin-top:14px;"></div>
+      </div>
+
+      <!-- Saved contracts -->
+      <div id="savedContractsList" style="margin-top:4px;"></div>
+    </div>
   </div>
 
   <!-- TAB 7: SETTINGS -->
@@ -1064,13 +1137,14 @@ let planRange = 1;
 let noteFilter = 'all';
 let itemRows = 0;
 
-const KEY_EVENTS = 'amioki_mkt_events';
-const KEY_NOTES  = 'amioki_mkt_notes';
-const KEY_PLAN   = 'amioki_mkt_plan';
-const KEY_NAMES  = 'amioki_event_names';
-const KEY_ORDERS = 'amioki_ctr_orders';
-const KEY_RULES  = 'amioki_ai_rules';
-const KEY_ROSTER = 'amioki_roster';
+const KEY_EVENTS    = 'amioki_mkt_events';
+const KEY_NOTES     = 'amioki_mkt_notes';
+const KEY_PLAN      = 'amioki_mkt_plan';
+const KEY_NAMES     = 'amioki_event_names';
+const KEY_ORDERS    = 'amioki_ctr_orders';
+const KEY_RULES     = 'amioki_ai_rules';
+const KEY_ROSTER    = 'amioki_roster';
+const KEY_CONTRACTS = 'amioki_contracts'; // { id, contractor, label, dateFrom, dateTo, items:[{name,qty}], targets:[{name,qty}] }
 
 function load(key, def) { try { return JSON.parse(localStorage.getItem(key)) || def; } catch { return def; } }
 function save(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) { console.warn(e); } }
@@ -1080,7 +1154,8 @@ let notes      = load(KEY_NOTES,  []);
 let planEvents = load(KEY_PLAN,   []);
 let savedNames = load(KEY_NAMES,  ['Cherry Blossom Fest','Neptune Festival','Water Lantern Festival','Chesapeake Jubilee','VB Farmers Market','Strawberry Festival']);
 let savedOrders = load(KEY_ORDERS, []);
-let aiRules    = load(KEY_RULES,  []);
+let aiRules    = load(KEY_RULES,      []);
+let contracts  = load(KEY_CONTRACTS,  []);
 
 // ── CROCHETER ROSTER ──────────────────────────────────────────────────────
 // Each crocheter: { id, name, skuPrefix, active (default on/off), isAmi, leadDays, itemKeywords[] }
@@ -2159,6 +2234,7 @@ function setContractor(who) {
   document.getElementById('ctr-note').textContent = ctr.note + ' · Contract anniversary ' + ctr.anniversary;
   document.getElementById('ctr-name-inline').textContent = ctr.name;
   renderContractorItems(); renderSavedOrders(); renderMonthlyBreakdown();
+  renderContractForm(); renderSavedContracts();
 }
 
 function renderContractorItems() {
@@ -2510,8 +2586,8 @@ function clearAllData() {
 }
 
 function confirmClearAll() {
-  [KEY_EVENTS, KEY_NOTES, KEY_PLAN, KEY_ORDERS, KEY_NAMES, KEY_LOCATIONS, KEY_RULES, KEY_ROSTER].forEach(k => localStorage.removeItem(k));
-  events=[]; notes=[]; planEvents=[]; savedOrders=[]; aiRules=[]; roster=[...DEFAULT_ROSTER]; eventRosterState={};
+  [KEY_EVENTS, KEY_NOTES, KEY_PLAN, KEY_ORDERS, KEY_NAMES, KEY_LOCATIONS, KEY_RULES, KEY_ROSTER, KEY_CONTRACTS].forEach(k => localStorage.removeItem(k));
+  events=[]; notes=[]; planEvents=[]; savedOrders=[]; aiRules=[]; roster=[...DEFAULT_ROSTER]; eventRosterState={}; contracts=[];
   savedNames = ['Cherry Blossom Fest','Neptune Festival','Water Lantern Festival','Chesapeake Jubilee','VB Farmers Market','Strawberry Festival'];
   savedLocations = ['Virginia Beach Farmers Market','Greenbrier Library','Central Library','Chesapeake City Park','Town Center Virginia Beach'];
   renderRecentEvents(); renderDataStats();
@@ -2760,6 +2836,375 @@ function toggleEventRoster(id) {
   eventRosterState[id] = !eventRosterState[id];
   renderPredictRoster();
   toast((eventRosterState[id] ? '✅ ' : '⏸️ ') + c.name + (eventRosterState[id] ? ' available for this event' : ' unavailable for this event'));
+}
+
+// ═══════════════════════════════════════════════
+// CONTRACT GAP ANALYSIS
+// ═══════════════════════════════════════════════
+
+function getAITargetsForContractor(contractorId) {
+  // Build per-item demand targets from event history + safety stock heuristic
+  // Uses same logic as safety stock: avg sold per event × upcoming event count estimate
+  const ctr      = CONTRACTORS[contractorId];
+  if (!ctr) return {};
+  const targets  = {};
+  const upcoming = planEvents.filter(e => new Date(e.date) >= new Date()).length || 3; // default 3 events if none planned
+
+  // Aggregate item sales from event history
+  const itemAgg = {};
+  events.forEach(ev => {
+    ev.items?.forEach(item => {
+      if (!itemAgg[item.name]) itemAgg[item.name] = { qty: 0, count: 0 };
+      itemAgg[item.name].qty   += item.qty;
+      itemAgg[item.name].count += 1;
+    });
+  });
+
+  // For each contractor item, compute: avg/event × upcoming events × 1.2 safety multiplier
+  ctr.items.forEach(item => {
+    // Try exact match first, then keyword match
+    const exact   = itemAgg[item.name];
+    const keyMatch= Object.keys(itemAgg).find(k =>
+      k.toLowerCase().includes(item.name.toLowerCase().split(' ')[0]) ||
+      item.name.toLowerCase().includes(k.toLowerCase().split(' ')[0])
+    );
+    const hist    = exact || (keyMatch ? itemAgg[keyMatch] : null);
+    if (hist && hist.count > 0) {
+      const avgPerEvent = hist.qty / hist.count;
+      targets[item.name] = Math.ceil(avgPerEvent * upcoming * 1.2); // 20% safety buffer
+    } else {
+      targets[item.name] = null; // no history — show as unknown
+    }
+  });
+  return targets;
+}
+
+function renderContractForm() {
+  const ctr        = CONTRACTORS[activeContractor];
+  if (!ctr) return;
+  const aiTargets  = getAITargetsForContractor(activeContractor);
+
+  // Contract quantities — one input per item
+  const contractWrap = document.getElementById('contractItemsWrap');
+  const targetWrap   = document.getElementById('contractTargetsWrap');
+  if (!contractWrap || !targetWrap) return;
+
+  contractWrap.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 100px;gap:8px;padding:6px 8px;background:var(--lav-mid);border-radius:8px;margin-bottom:6px;">
+      <div style="font-size:0.72em;font-weight:900;text-transform:uppercase;color:var(--text-mid);">Item</div>
+      <div style="font-size:0.72em;font-weight:900;text-transform:uppercase;color:var(--text-mid);text-align:center;">Contracted</div>
+    </div>
+    ${ctr.items.map((item, i) => `
+      <div style="display:grid;grid-template-columns:1fr 100px;gap:8px;align-items:center;padding:7px 8px;background:var(--white);border-radius:8px;margin-bottom:5px;border:1px solid var(--border);">
+        <div style="font-weight:800;font-size:0.85em;">${item.name}</div>
+        <input type="number" min="0" value="0" id="cqty_${i}"
+          style="padding:6px;border:2px solid var(--rose-mid);border-radius:6px;text-align:center;font-weight:900;font-size:0.9em;"
+          oninput="liveUpdateGap()">
+      </div>
+    `).join('')}
+  `;
+
+  targetWrap.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 110px 110px;gap:8px;padding:6px 8px;background:var(--lav-mid);border-radius:8px;margin-bottom:6px;">
+      <div style="font-size:0.72em;font-weight:900;text-transform:uppercase;color:var(--text-mid);">Item</div>
+      <div style="font-size:0.72em;font-weight:900;text-transform:uppercase;color:var(--text-mid);text-align:center;">AI Target</div>
+      <div style="font-size:0.72em;font-weight:900;text-transform:uppercase;color:var(--text-mid);text-align:center;">My Target</div>
+    </div>
+    ${ctr.items.map((item, i) => {
+      const aiQty = aiTargets[item.name];
+      return `
+      <div style="display:grid;grid-template-columns:1fr 110px 110px;gap:8px;align-items:center;padding:7px 8px;background:var(--white);border-radius:8px;margin-bottom:5px;border:1px solid var(--border);">
+        <div style="font-weight:800;font-size:0.85em;">${item.name}</div>
+        <div style="text-align:center;font-weight:900;font-size:0.88em;color:${aiQty?'var(--rose-deep)':'var(--text-soft)'};">
+          ${aiQty != null ? aiQty : '<span style="font-size:0.85em;">no data</span>'}
+        </div>
+        <input type="number" min="0" placeholder="${aiQty != null ? aiQty : '—'}" id="ctgt_${i}"
+          style="padding:6px;border:2px solid var(--lavender);border-radius:6px;text-align:center;font-weight:900;font-size:0.9em;background:var(--lav-soft);"
+          oninput="liveUpdateGap()">
+      </div>
+    `}).join('')}
+  `;
+
+  // Set today as default from-date, +30 days as to-date
+  const today = new Date().toISOString().split('T')[0];
+  const plus30 = new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0];
+  const fromEl = document.getElementById('contract_from');
+  const toEl   = document.getElementById('contract_to');
+  if (fromEl && !fromEl.value) fromEl.value = today;
+  if (toEl   && !toEl.value)   toEl.value   = plus30;
+
+  // Show existing gap results if a contract is saved for this contractor
+  const existing = contracts.filter(c => c.contractor === activeContractor);
+  if (existing.length) {
+    document.getElementById('gapResults').style.display = 'block';
+    renderGapResults(existing[existing.length - 1]);
+  } else {
+    document.getElementById('gapResults').style.display = 'none';
+  }
+}
+
+function liveUpdateGap() {
+  // Compute gap in real time as user types — no save needed
+  const ctr       = CONTRACTORS[activeContractor];
+  if (!ctr) return;
+  const aiTargets = getAITargetsForContractor(activeContractor);
+
+  const items = ctr.items.map((item, i) => {
+    const contracted = parseInt(document.getElementById('cqty_'+i)?.value) || 0;
+    const manualTgt  = parseInt(document.getElementById('ctgt_'+i)?.value) || null;
+    const target     = manualTgt != null ? manualTgt : (aiTargets[item.name] ?? 0);
+    const gap        = contracted - target; // negative = short, positive = surplus
+    return { name: item.name, contracted, target, gap, total: item.total, time: item.time || 0 };
+  }).filter(item => item.target > 0 || item.contracted > 0);
+
+  if (!items.length) return;
+
+  renderGapVisual(items);
+  renderFillList(items);
+  renderGapSummaryBar(items, ctr.name);
+  document.getElementById('gapResults').style.display = 'block';
+}
+
+function saveContract() {
+  const label    = document.getElementById('contract_label')?.value.trim() || 'Contract';
+  const dateFrom = document.getElementById('contract_from')?.value;
+  const dateTo   = document.getElementById('contract_to')?.value;
+  const ctr      = CONTRACTORS[activeContractor];
+  if (!ctr) return;
+  const aiTargets = getAITargetsForContractor(activeContractor);
+
+  const items = ctr.items.map((item, i) => ({
+    name:       item.name,
+    contracted: parseInt(document.getElementById('cqty_'+i)?.value) || 0,
+    target:     parseInt(document.getElementById('ctgt_'+i)?.value) || aiTargets[item.name] || 0,
+    total:      item.total,
+    time:       item.time || 0
+  })).filter(item => item.contracted > 0 || item.target > 0);
+
+  if (!items.length) { toast('⚠️ Enter at least one contracted quantity!'); return; }
+
+  const contract = {
+    id: Date.now(), contractor: activeContractor,
+    label, dateFrom, dateTo, items,
+    savedAt: new Date().toISOString().split('T')[0]
+  };
+  contracts = contracts.filter(c => !(c.contractor === activeContractor && c.label === label)); // replace same-label
+  contracts.push(contract);
+  save(KEY_CONTRACTS, contracts);
+  toast('💾 Contract saved!');
+  renderGapResults(contract);
+  document.getElementById('gapResults').style.display = 'block';
+  renderSavedContracts();
+}
+
+function resetContractForm() {
+  const ctr = CONTRACTORS[activeContractor];
+  if (!ctr) return;
+  ctr.items.forEach((_, i) => {
+    const cEl = document.getElementById('cqty_'+i);
+    const tEl = document.getElementById('ctgt_'+i);
+    if (cEl) cEl.value = 0;
+    if (tEl) tEl.value = '';
+  });
+  document.getElementById('contract_label').value = '';
+  document.getElementById('gapResults').style.display = 'none';
+  toast('✕ Contract form cleared');
+}
+
+function renderGapResults(contract) {
+  const items = contract.items.map(item => ({
+    ...item,
+    gap: item.contracted - item.target
+  }));
+  renderGapVisual(items);
+  renderFillList(items);
+  renderGapSummaryBar(items, CONTRACTORS[activeContractor]?.name || activeContractor);
+}
+
+function renderGapVisual(items) {
+  const wrap = document.getElementById('gapChart');
+  if (!wrap) return;
+
+  wrap.innerHTML = items.map(item => {
+    const gap         = item.gap ?? (item.contracted - item.target);
+    const isShort     = gap < 0;
+    const isSurplus   = gap > 0;
+    const isExact     = gap === 0;
+    const target      = item.target || 1;
+    const contracted  = item.contracted;
+
+    // Bar: contracted portion in purple, shortfall in red, surplus in green
+    const contractedPct = Math.min(100, Math.round(contracted / Math.max(target, contracted) * 100));
+    const statusColor   = isShort ? '#EF4444' : isSurplus ? '#10B981' : '#8B5CF6';
+    const statusBg      = isShort ? 'var(--coral-soft)' : isSurplus ? 'var(--mint-soft)' : 'var(--lav-soft)';
+    const statusBorder  = isShort ? 'var(--coral)' : isSurplus ? 'var(--mint)' : 'var(--lavender)';
+    const gapLabel      = isShort
+      ? `<span style="color:#EF4444;font-weight:900;">▼ ${Math.abs(gap)} short</span>`
+      : isSurplus
+      ? `<span style="color:#10B981;font-weight:900;">▲ ${gap} surplus</span>`
+      : `<span style="color:#8B5CF6;font-weight:900;">✓ exact</span>`;
+
+    return `
+      <div style="padding:10px 12px;background:${statusBg};border-radius:var(--radius-sm);margin-bottom:8px;border:2px solid ${statusBorder};">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;gap:8px;flex-wrap:wrap;">
+          <div style="font-weight:900;font-size:0.88em;">${item.name}</div>
+          <div style="display:flex;gap:10px;align-items:center;font-size:0.8em;font-weight:800;flex-wrap:wrap;">
+            <span style="color:var(--text-soft);">contracted <strong style="color:var(--text);">${contracted}</strong></span>
+            <span style="color:var(--text-soft);">needed <strong style="color:var(--text);">${item.target}</strong></span>
+            ${gapLabel}
+          </div>
+        </div>
+        <div style="background:rgba(0,0,0,0.06);border-radius:99px;height:10px;overflow:hidden;">
+          <div style="height:10px;border-radius:99px;width:${contractedPct}%;background:${statusColor};transition:width .4s ease;"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderFillList(items) {
+  const wrap = document.getElementById('fillList');
+  if (!wrap) return;
+
+  // Only show items with shortfalls, sorted by severity (biggest gap first)
+  const shorts = items
+    .map(item => ({ ...item, gap: item.gap ?? (item.contracted - item.target) }))
+    .filter(item => item.gap < 0)
+    .sort((a, b) => a.gap - b.gap); // most negative first
+
+  if (!shorts.length) {
+    wrap.innerHTML = `<div style="padding:12px 14px;background:var(--mint-soft);border-radius:var(--radius-sm);border:2px solid var(--mint);font-size:0.85em;font-weight:800;color:#065F46;">
+      🎉 No shortfalls! Contract covers all demand targets. If they finish early, any extra items are pure surplus.
+    </div>`;
+    return;
+  }
+
+  wrap.innerHTML = `
+    <div style="font-size:0.75em;font-weight:800;color:var(--text-soft);margin-bottom:8px;padding:0 2px;">
+      Sorted by urgency — make the top items first if time opens up
+    </div>
+    ${shorts.map((item, rank) => {
+      const needed     = Math.abs(item.gap);
+      const payEst     = (needed * (item.total || 0)).toFixed(2);
+      const timeEst    = item.time ? Math.ceil(needed * item.time) : null;
+      const timeHrs    = timeEst ? (timeEst / 60).toFixed(1) : null;
+      const urgency    = rank === 0 ? { label:'🔴 Most urgent', bg:'var(--coral-soft)', border:'var(--coral)' }
+                       : rank === 1 ? { label:'🟠 High',        bg:'var(--peach-soft)', border:'var(--peach)' }
+                       :              { label:'🟡 Medium',      bg:'var(--yellow-soft)', border:'var(--yellow)' };
+      return `
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:${urgency.bg};border-radius:var(--radius-sm);margin-bottom:8px;border:2px solid ${urgency.border};">
+          <div style="font-size:1.5em;font-weight:900;color:var(--rose-deep);min-width:32px;text-align:center;line-height:1.2;">${rank+1}</div>
+          <div style="flex:1;">
+            <div style="font-weight:900;font-size:0.92em;">${item.name}</div>
+            <div style="font-size:0.78em;font-weight:800;color:var(--text-mid);margin-top:3px;">
+              Make <strong>${needed}</strong> more
+              ${timeHrs ? ` · ~${timeHrs} hrs` : ''}
+              · <strong>+$${payEst}</strong> owed
+            </div>
+            <div style="font-size:0.72em;font-weight:800;color:var(--text-soft);margin-top:2px;">${urgency.label}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-size:1.3em;font-weight:900;color:var(--rose-deep);">+${needed}</div>
+            <div style="font-size:0.72em;color:var(--text-soft);font-weight:700;">units</div>
+          </div>
+        </div>
+      `;
+    }).join('')}
+  `;
+}
+
+function renderGapSummaryBar(items, ctrName) {
+  const wrap = document.getElementById('gapSummaryBar');
+  if (!wrap) return;
+
+  const gapItems    = items.map(item => ({ ...item, gap: item.gap ?? (item.contracted - item.target) }));
+  const totalNeeded = gapItems.reduce((s, i) => s + Math.max(0, i.target), 0);
+  const totalContr  = gapItems.reduce((s, i) => s + i.contracted, 0);
+  const totalShort  = gapItems.filter(i => i.gap < 0).reduce((s, i) => s + Math.abs(i.gap), 0);
+  const totalSurp   = gapItems.filter(i => i.gap > 0).reduce((s, i) => s + i.gap, 0);
+  const shortPay    = gapItems.filter(i => i.gap < 0).reduce((s, i) => s + Math.abs(i.gap) * (i.total || 0), 0);
+  const coveragePct = totalNeeded > 0 ? Math.round(totalContr / totalNeeded * 100) : 100;
+
+  wrap.innerHTML = `
+    <div style="background:linear-gradient(135deg,var(--rose-soft),var(--lav-soft));border-radius:var(--radius-sm);padding:14px 16px;border:2px solid var(--rose-mid);">
+      <div style="font-size:0.78em;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-soft);margin-bottom:10px;">📋 ${ctrName}'s Contract Summary</div>
+      <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:12px;">
+        <div class="stat-box"><div class="stat-val" style="font-size:1.2em;">${totalContr}</div><div class="stat-lbl">Contracted</div></div>
+        <div class="stat-box"><div class="stat-val" style="font-size:1.2em;">${totalNeeded}</div><div class="stat-lbl">Needed</div></div>
+        <div class="stat-box" style="background:${totalShort>0?'var(--coral-soft)':'var(--mint-soft)'};">
+          <div class="stat-val" style="font-size:1.2em;color:${totalShort>0?'#EF4444':'#10B981'};">${totalShort>0?'-'+totalShort:totalSurp>0?'+'+totalSurp:'✓'}</div>
+          <div class="stat-lbl">${totalShort>0?'Short':totalSurp>0?'Surplus':'On target'}</div>
+        </div>
+        <div class="stat-box" style="background:var(--lav-mid);">
+          <div class="stat-val" style="font-size:1.2em;color:#5B21B6;">${coveragePct}%</div>
+          <div class="stat-lbl">Coverage</div>
+        </div>
+      </div>
+      ${totalShort > 0 ? `<div style="font-size:0.82em;font-weight:800;color:#991B1B;padding:8px 12px;background:var(--coral-soft);border-radius:8px;border:1px solid var(--coral);">
+        ⚠️ If ${ctrName} finishes early, filling all shortfalls = <strong>${totalShort} more items</strong> · estimated <strong>+$${shortPay.toFixed(2)}</strong> additional pay
+      </div>` : `<div style="font-size:0.82em;font-weight:800;color:#065F46;padding:8px 12px;background:var(--mint-soft);border-radius:8px;border:1px solid var(--mint);">
+        ✅ Contract fully covers demand. Any extra time = pure bonus inventory for future events!
+      </div>`}
+    </div>
+  `;
+}
+
+function renderSavedContracts() {
+  const wrap = document.getElementById('savedContractsList');
+  if (!wrap) return;
+  const mine = contracts.filter(c => c.contractor === activeContractor);
+  if (!mine.length) { wrap.innerHTML = ''; return; }
+
+  wrap.innerHTML = `
+    <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:14px;">
+      <div style="font-size:0.78em;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-soft);margin-bottom:10px;">📁 Saved Contracts</div>
+      ${mine.sort((a,b) => b.id-a.id).map(c => {
+        const shorts = c.items.filter(i => i.contracted < i.target).length;
+        return `
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--white);border-radius:var(--radius-sm);margin-bottom:7px;border:1px solid var(--border);">
+          <div style="flex:1;">
+            <div style="font-weight:900;font-size:0.88em;">${c.label}</div>
+            <div style="font-size:0.72em;color:var(--text-soft);margin-top:2px;">${c.dateFrom||'?'} → ${c.dateTo||'?'} · ${c.items.length} items · saved ${c.savedAt||''}</div>
+          </div>
+          ${shorts > 0 ? `<span class="tag red">⚠️ ${shorts} short</span>` : `<span class="tag green">✓ Covered</span>`}
+          <button class="btn btn-secondary btn-sm" onclick="loadContract(${c.id})">Load</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteContract(${c.id})">🗑</button>
+        </div>
+      `}).join('')}
+    </div>
+  `;
+}
+
+function loadContract(id) {
+  const c   = contracts.find(x => x.id === id);
+  if (!c) return;
+  const ctr = CONTRACTORS[c.contractor];
+  if (!ctr) return;
+
+  document.getElementById('contract_label').value = c.label;
+  if (c.dateFrom) document.getElementById('contract_from').value = c.dateFrom;
+  if (c.dateTo)   document.getElementById('contract_to').value   = c.dateTo;
+
+  ctr.items.forEach((item, i) => {
+    const saved = c.items.find(x => x.name === item.name);
+    const cEl   = document.getElementById('cqty_'+i);
+    const tEl   = document.getElementById('ctgt_'+i);
+    if (cEl) cEl.value = saved?.contracted ?? 0;
+    if (tEl) tEl.value = saved?.target     ?? '';
+  });
+
+  renderGapResults(c);
+  document.getElementById('gapResults').style.display = 'block';
+  toast('📋 Contract loaded: ' + c.label);
+}
+
+function deleteContract(id) {
+  const c = contracts.find(x => x.id === id);
+  contracts = contracts.filter(x => x.id !== id);
+  save(KEY_CONTRACTS, contracts);
+  renderSavedContracts();
+  document.getElementById('gapResults').style.display = 'none';
+  toast('🗑 Contract deleted');
 }
 
 function initSettingsTab() {
