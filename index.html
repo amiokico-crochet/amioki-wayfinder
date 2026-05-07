@@ -57,7 +57,6 @@ body::before {
 
 .app-wrap { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 20px 16px 60px; }
 
-/* ── HEADER ── */
 .app-header {
   text-align: center;
   padding: 32px 20px 24px;
@@ -80,7 +79,6 @@ body::before {
 }
 .header-deco { font-size: 1.8em; margin-bottom: 8px; }
 
-/* ── TABS ── */
 .tab-bar {
   display: flex;
   gap: 6px;
@@ -118,7 +116,6 @@ body::before {
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
 
-/* ── CARDS ── */
 .card {
   background: var(--card-bg);
   border-radius: var(--radius);
@@ -139,7 +136,6 @@ body::before {
 }
 .card-title span { font-size: 1.2em; }
 
-/* ── FORM ELEMENTS ── */
 label { font-size: 0.82em; font-weight: 800; color: var(--text-mid); display: block; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
 input, select, textarea {
   width: 100%;
@@ -163,7 +159,6 @@ textarea { resize: vertical; min-height: 80px; }
 .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
 .form-group { margin-bottom: 14px; }
 
-/* ── BUTTONS ── */
 .btn {
   padding: 11px 22px;
   border: none;
@@ -195,7 +190,6 @@ textarea { resize: vertical; min-height: 80px; }
 .btn-full { width: 100%; justify-content: center; }
 .btn-danger { background: var(--coral-soft); color: #DC2626; border: 2px solid var(--coral); }
 
-/* ── WEATHER PILLS ── */
 .pill-row { display: flex; flex-wrap: wrap; gap: 7px; }
 .pill {
   padding: 7px 14px;
@@ -211,7 +205,6 @@ textarea { resize: vertical; min-height: 80px; }
 .pill.active { border-color: var(--rose); background: var(--rose-soft); color: var(--rose-deep); }
 .pill:hover:not(.active) { background: var(--lav-soft); }
 
-/* ── STATS ── */
 .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 16px; }
 .stat-box {
   background: linear-gradient(135deg, var(--rose-soft), var(--lav-soft));
@@ -223,7 +216,6 @@ textarea { resize: vertical; min-height: 80px; }
 .stat-val { font-size: 1.5em; font-weight: 900; color: var(--rose-deep); }
 .stat-lbl { font-size: 0.72em; font-weight: 800; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 3px; }
 
-/* ── LEADERBOARD ── */
 .lb-item {
   display: flex;
   align-items: center;
@@ -257,7 +249,6 @@ textarea { resize: vertical; min-height: 80px; }
 .lb-bar-wrap { width: 100%; height: 5px; background: var(--rose-soft); border-radius: 99px; margin-top: 4px; }
 .lb-bar { height: 5px; border-radius: 99px; background: linear-gradient(90deg, var(--rose), #C026D3); }
 
-/* ── PREDICTION CARDS ── */
 .pred-scenario {
   background: var(--white);
   border-radius: var(--radius-sm);
@@ -273,7 +264,6 @@ textarea { resize: vertical; min-height: 80px; }
 .pred-bar { height: 6px; border-radius: 99px; background: var(--rose-mid); margin-top: 8px; }
 .pred-fill { height: 6px; border-radius: 99px; transition: width 0.6s ease; }
 
-/* ── TAGS ── */
 .tag {
   display: inline-block;
   padding: 3px 10px;
@@ -290,7 +280,6 @@ textarea { resize: vertical; min-height: 80px; }
 .tag.blue { background: var(--sky-soft); color: #075985; border-color: var(--sky); }
 .tag.red { background: var(--coral-soft); color: #991B1B; border-color: var(--coral); }
 
-/* ── PLANNER ── */
 .plan-event {
   background: var(--white);
   border-radius: var(--radius-sm);
@@ -313,7 +302,6 @@ textarea { resize: vertical; min-height: 80px; }
   margin-top: 12px;
 }
 
-/* ── NOTES SECTION ── */
 .note-item {
   padding: 12px 14px;
   background: var(--yellow-soft);
@@ -326,7 +314,6 @@ textarea { resize: vertical; min-height: 80px; }
 }
 .note-meta { font-size: 0.72em; font-weight: 800; color: var(--text-soft); margin-bottom: 4px; text-transform: uppercase; }
 
-/* ── AI LOADING ── */
 .ai-loading { display: flex; align-items: center; gap: 10px; padding: 18px; color: var(--text-soft); font-weight: 700; font-size: 0.85em; }
 .dots { display: flex; gap: 4px; }
 .dots span {
@@ -339,7 +326,6 @@ textarea { resize: vertical; min-height: 80px; }
 .dots span:nth-child(3) { animation-delay: 0.4s; }
 @keyframes bounce { 0%,80%,100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
 
-/* ── INSIGHT BOX ── */
 .insight-box {
   background: linear-gradient(135deg, #FFF0F8, #F5F0FF);
   border-radius: var(--radius-sm);
@@ -359,7 +345,6 @@ textarea { resize: vertical; min-height: 80px; }
   margin-bottom: 6px;
 }
 
-/* ── PRICE SUGGESTION ── */
 .price-sug {
   display: inline-flex;
   align-items: center;
@@ -375,10 +360,8 @@ textarea { resize: vertical; min-height: 80px; }
 .price-sug.down { background: var(--coral-soft); color: #991B1B; border: 1px solid var(--coral); }
 .price-sug:hover { transform: scale(1.05); }
 
-/* ── SECTION DIVIDER ── */
 .divider { height: 1px; background: var(--border); margin: 18px 0; }
 
-/* ── EMPTY STATE ── */
 .empty-state {
   text-align: center;
   padding: 40px 20px;
@@ -387,7 +370,6 @@ textarea { resize: vertical; min-height: 80px; }
 .empty-state .empty-icon { font-size: 2.5em; margin-bottom: 10px; }
 .empty-state p { font-size: 0.88em; font-weight: 700; }
 
-/* ── CSV UPLOAD ── */
 .upload-zone {
   border: 2px dashed var(--rose);
   border-radius: var(--radius-sm);
@@ -401,10 +383,8 @@ textarea { resize: vertical; min-height: 80px; }
 .upload-zone input { display: none; }
 .upload-zone p { font-size: 0.85em; font-weight: 700; color: var(--text-mid); margin-top: 6px; }
 
-/* ── SCROLLABLE ── */
 .scroll-x { overflow-x: auto; }
 
-/* ── CHIPS ── */
 .chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .chip {
   padding: 5px 12px;
@@ -420,7 +400,6 @@ textarea { resize: vertical; min-height: 80px; }
 .chip:hover { background: var(--lavender); color: white; }
 .chip.active { background: linear-gradient(135deg, var(--rose), #C026D3); color: white; border-color: transparent; }
 
-/* ── MONTH HEADER ── */
 .month-header {
   font-size: 1em;
   font-weight: 900;
@@ -433,7 +412,6 @@ textarea { resize: vertical; min-height: 80px; }
   gap: 8px;
 }
 
-/* ── TOAST ── */
 #toast {
   position: fixed;
   bottom: 24px;
@@ -453,7 +431,6 @@ textarea { resize: vertical; min-height: 80px; }
 }
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* ── RESPONSIVE ── */
 @media (max-width: 600px) {
   .grid-2, .grid-3 { grid-template-columns: 1fr; }
   .tab-btn { font-size: 0.72em; padding: 8px 6px; }
@@ -472,7 +449,6 @@ textarea { resize: vertical; min-height: 80px; }
     <p>Your market planner & predictor for your kawaii empire 🧶</p>
   </div>
 
-  <!-- TAB BAR -->
   <div class="tab-bar">
     <button class="tab-btn active" onclick="switchTab('log')">📋 Log Event</button>
     <button class="tab-btn" onclick="switchTab('insights')">🏆 Insights</button>
@@ -483,11 +459,8 @@ textarea { resize: vertical; min-height: 80px; }
     <button class="tab-btn" onclick="switchTab('settings')">⚙️ Settings</button>
   </div>
 
-  <!-- ═══════════════════════════════════════════ -->
   <!-- TAB 1: LOG EVENT -->
-  <!-- ═══════════════════════════════════════════ -->
   <div id="tab-log" class="tab-panel active">
-
     <div class="card">
       <div class="card-title"><span>📤</span> Import from Square CSV</div>
       <div class="upload-zone" onclick="document.getElementById('csvInput').click()">
@@ -501,27 +474,22 @@ textarea { resize: vertical; min-height: 80px; }
 
     <div class="card">
       <div class="card-title"><span>🎪</span> Event Details</div>
-
       <div class="grid-2">
         <div class="form-group">
           <label>Event Name</label>
-          <div style="display:flex;gap:8px;">
-            <input type="text" id="ev_name" placeholder="e.g., Cherry Blossom Fest 2026" list="eventNameList" style="flex:1;">
-            <datalist id="eventNameList"></datalist>
-          </div>
+          <input type="text" id="ev_name" placeholder="e.g., Cherry Blossom Fest 2026" list="eventNameList">
+          <datalist id="eventNameList"></datalist>
         </div>
         <div class="form-group">
           <label>Date</label>
           <input type="date" id="ev_date">
         </div>
       </div>
-
       <div class="form-group">
         <label>Location / Venue</label>
-        <input type="text" id="ev_location" placeholder="e.g., Virginia Beach Farmers Market, Town Center, Chesapeake City Park..." list="locationList">
+        <input type="text" id="ev_location" placeholder="e.g., Virginia Beach Farmers Market, Town Center..." list="locationList">
         <datalist id="locationList"></datalist>
       </div>
-
       <div class="grid-2">
         <div class="form-group">
           <label>Market Type</label>
@@ -537,35 +505,19 @@ textarea { resize: vertical; min-height: 80px; }
           </select>
         </div>
       </div>
-
       <div class="grid-2">
         <div class="form-group">
           <label>Start Time</label>
-          <input type="time" id="ev_start_time" placeholder="09:00">
+          <input type="time" id="ev_start_time" oninput="calcHoursLive()">
         </div>
         <div class="form-group">
           <label>End Time</label>
-          <input type="time" id="ev_end_time" placeholder="15:00">
-        </div>
-      </div>
-      <div id="ev_hours_display" style="font-size:0.8em;font-weight:800;color:var(--text-soft);margin-top:-8px;margin-bottom:10px;display:none;">
-        ⏱️ <span id="ev_hours_text"></span>
-      </div>
-
-      <div class="grid-2">
-        <div class="form-group">
-          <label>Start Time</label>
-          <input type="time" id="ev_start_time" oninput="calcHours()">
-        </div>
-        <div class="form-group">
-          <label>End Time</label>
-          <input type="time" id="ev_end_time" oninput="calcHours()">
+          <input type="time" id="ev_end_time" oninput="calcHoursLive()">
         </div>
       </div>
       <div id="ev_hours_display" style="font-size:0.8em;font-weight:800;color:var(--text-soft);margin-top:-8px;margin-bottom:10px;display:none;">
         ⏱️ <span id="ev_hours_val"></span> hours at this event
       </div>
-
       <div class="grid-3">
         <div class="form-group">
           <label>Actual Revenue ($)</label>
@@ -576,11 +528,10 @@ textarea { resize: vertical; min-height: 80px; }
           <input type="number" id="ev_attendance" placeholder="500">
         </div>
         <div class="form-group">
-          <label>Items Sold <span style="font-weight:600;text-transform:none;font-size:0.9em;color:var(--text-soft);">(auto-totals from items below)</span></label>
+          <label>Items Sold <span style="font-weight:600;text-transform:none;font-size:0.9em;color:var(--text-soft);">(auto-totals)</span></label>
           <input type="number" id="ev_items" placeholder="Auto-calculated" style="background:var(--rose-soft);">
         </div>
       </div>
-
       <div class="form-group">
         <label>Weather Conditions</label>
         <div class="pill-row" id="weatherPills">
@@ -594,7 +545,6 @@ textarea { resize: vertical; min-height: 80px; }
           <div class="pill" data-w="💨 Windy" onclick="togglePill(this,'weather')">💨 Windy</div>
         </div>
       </div>
-
       <div class="form-group">
         <label>Crowd Energy</label>
         <div class="pill-row" id="crowdPills">
@@ -604,7 +554,6 @@ textarea { resize: vertical; min-height: 80px; }
           <div class="pill" data-c="😴 Slow" onclick="togglePill(this,'crowd')">😴 Slow</div>
         </div>
       </div>
-
       <div class="form-group">
         <label>Booth Operator</label>
         <div class="pill-row" id="vendorPills">
@@ -612,7 +561,6 @@ textarea { resize: vertical; min-height: 80px; }
           <div class="pill" data-v="Kara" onclick="togglePill(this,'vendor')">🌸 Kara</div>
         </div>
       </div>
-
       <div class="form-group">
         <label>Was this event juried?</label>
         <div class="pill-row" id="juriedPills">
@@ -622,7 +570,6 @@ textarea { resize: vertical; min-height: 80px; }
           <div class="pill" data-j="Juried — rejected" onclick="togglePill(this,'juried')">❌ Rejected</div>
         </div>
       </div>
-
       <div class="form-group">
         <label>Did you have the monopoly? <span style="font-weight:600;font-size:0.85em;color:var(--text-soft);">(only amigurumi vendor)</span></label>
         <div class="pill-row" id="monopolyPills">
@@ -632,7 +579,6 @@ textarea { resize: vertical; min-height: 80px; }
           <div class="pill" data-m="No — many similar" onclick="togglePill(this,'monopoly')">🔴 No — Many Similar</div>
         </div>
       </div>
-
       <div class="form-group">
         <label>How was the competition?</label>
         <div class="pill-row" id="competitionPills">
@@ -645,7 +591,6 @@ textarea { resize: vertical; min-height: 80px; }
       </div>
     </div>
 
-    <!-- Item Sales Entry -->
     <div class="card">
       <div class="card-title"><span>📦</span> Item Sales (optional — or auto-filled from CSV)</div>
       <div id="itemSalesWrap">
@@ -657,26 +602,19 @@ textarea { resize: vertical; min-height: 80px; }
         <label>Market Notes (AI will learn from these! 🧠)</label>
         <textarea id="ev_notes" placeholder="e.g., Pikachus sold out in 2 hours — raise price! Terrible weather but still did $200. Families with kids loved the Axolotl..."></textarea>
       </div>
-      <button class="btn btn-primary btn-full" onclick="saveEvent()" style="margin-top:4px;">
-        ✨ Save Event
-      </button>
+      <button class="btn btn-primary btn-full" onclick="saveEvent()" style="margin-top:4px;">✨ Save Event</button>
     </div>
 
-    <!-- Recent Events -->
     <div class="card">
       <div class="card-title"><span>📖</span> Recent Events</div>
       <div id="recentEvents">
         <div class="empty-state"><div class="empty-icon">🌸</div><p>No events logged yet. Add your first one above!</p></div>
       </div>
     </div>
-
   </div>
 
-  <!-- ═══════════════════════════════════════════ -->
   <!-- TAB 2: INSIGHTS -->
-  <!-- ═══════════════════════════════════════════ -->
   <div id="tab-insights" class="tab-panel">
-
     <div class="card">
       <div class="card-title"><span>📊</span> Overall Stats</div>
       <div class="stat-grid" id="overallStats">
@@ -686,49 +624,32 @@ textarea { resize: vertical; min-height: 80px; }
         <div class="stat-box"><div class="stat-val" id="stat-items">0</div><div class="stat-lbl">Items Sold</div></div>
       </div>
     </div>
-
     <div class="card">
       <div class="card-title"><span>🔍</span> Filter by Market Type</div>
       <div class="chip-row" id="typeChips">
         <div class="chip active" data-filter="all" onclick="setFilter(this)">All Markets</div>
       </div>
     </div>
-
     <div class="card">
       <div class="card-title"><span>🏆</span> Item Leaderboard — Units Sold</div>
-      <div id="lbUnits">
-        <div class="empty-state"><div class="empty-icon">📦</div><p>Log events with item data to see rankings!</p></div>
-      </div>
+      <div id="lbUnits"><div class="empty-state"><div class="empty-icon">📦</div><p>Log events with item data to see rankings!</p></div></div>
     </div>
-
     <div class="card">
       <div class="card-title"><span>💰</span> Item Leaderboard — Revenue</div>
-      <div id="lbRevenue">
-        <div class="empty-state"><div class="empty-icon">💸</div><p>Log events with item data to see revenue rankings!</p></div>
-      </div>
+      <div id="lbRevenue"><div class="empty-state"><div class="empty-icon">💸</div><p>Log events with item data to see revenue rankings!</p></div></div>
     </div>
-
     <div class="card">
       <div class="card-title"><span>💡</span> AI Price Suggestions</div>
-      <div id="priceSuggestions">
-        <div class="empty-state"><div class="empty-icon">🏷️</div><p>Add notes like "Pikachu sold out — raise price!" and AI will surface suggestions here!</p></div>
-      </div>
+      <div id="priceSuggestions"><div class="empty-state"><div class="empty-icon">🏷️</div><p>Add notes like "Pikachu sold out — raise price!" and AI will surface suggestions here!</p></div></div>
     </div>
-
     <div class="card">
       <div class="card-title"><span>📅</span> Performance by Event Name (YoY)</div>
-      <div id="yoyTable">
-        <div class="empty-state"><div class="empty-icon">📈</div><p>Log the same festival in multiple years to see year-over-year comparisons!</p></div>
-      </div>
+      <div id="yoyTable"><div class="empty-state"><div class="empty-icon">📈</div><p>Log the same festival in multiple years to see year-over-year comparisons!</p></div></div>
     </div>
-
   </div>
 
-  <!-- ═══════════════════════════════════════════ -->
   <!-- TAB 3: PREDICT -->
-  <!-- ═══════════════════════════════════════════ -->
   <div id="tab-predict" class="tab-panel">
-
     <div class="card">
       <div class="card-title"><span>🎪</span> Upcoming Event Details</div>
       <div class="grid-2">
@@ -821,9 +742,7 @@ textarea { resize: vertical; min-height: 80px; }
         <label>Additional Notes</label>
         <textarea id="pred_notes" placeholder="e.g., First time at this venue, expect families, holiday theme..."></textarea>
       </div>
-      <button class="btn btn-primary btn-full" onclick="runPrediction()">
-        🧭 Generate Forecast
-      </button>
+      <button class="btn btn-primary btn-full" onclick="runPrediction()">🧭 Generate Forecast</button>
     </div>
 
     <div id="predResultsWrap" style="display:none;">
@@ -844,14 +763,10 @@ textarea { resize: vertical; min-height: 80px; }
         <div id="yoyContent"></div>
       </div>
     </div>
-
   </div>
 
-  <!-- ═══════════════════════════════════════════ -->
   <!-- TAB 4: PLAN -->
-  <!-- ═══════════════════════════════════════════ -->
   <div id="tab-plan" class="tab-panel">
-
     <div class="card">
       <div class="card-title"><span>➕</span> Add Market to Plan</div>
       <div class="grid-2">
@@ -882,8 +797,6 @@ textarea { resize: vertical; min-height: 80px; }
       </div>
       <button class="btn btn-primary" onclick="addToPlan()">+ Add to Plan</button>
     </div>
-
-    <!-- View range selector -->
     <div class="card" style="padding:14px 22px;">
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
         <span style="font-weight:800;font-size:0.85em;color:var(--text-mid);">View Range:</span>
@@ -892,28 +805,20 @@ textarea { resize: vertical; min-height: 80px; }
         <button class="btn btn-ghost btn-sm" onclick="setPlanRange(3)" id="range3btn">3 Months</button>
       </div>
     </div>
-
-    <div id="planCalendar">
-      <div class="empty-state card"><div class="empty-icon">📅</div><p>Add upcoming markets above to start planning!</p></div>
-    </div>
-
+    <div id="planCalendar"><div class="empty-state card"><div class="empty-icon">📅</div><p>Add upcoming markets above to start planning!</p></div></div>
     <div id="planSummary" style="display:none;" class="card">
       <div class="card-title"><span>🎯</span> Planning Summary</div>
       <div id="planSummaryContent"></div>
     </div>
-
   </div>
 
-  <!-- ═══════════════════════════════════════════ -->
   <!-- TAB 5: NOTES -->
-  <!-- ═══════════════════════════════════════════ -->
   <div id="tab-notes" class="tab-panel">
-
     <div class="card">
       <div class="card-title"><span>📝</span> Add Quick Market Note</div>
       <div class="form-group">
         <label>Note (AI will reference this for future predictions!)</label>
-        <textarea id="quick_note" placeholder="e.g., Pikachus are always the first to go — we should raise the price by $2. Terrible rainy weather at Neptune still brought in $180. Axolotls do 3x better at family-friendly events..."></textarea>
+        <textarea id="quick_note" placeholder="e.g., Pikachus are always the first to go — raise the price by $2. Rainy Neptune still brought in $180. Axolotls do 3x better at family-friendly events..."></textarea>
       </div>
       <div class="grid-2">
         <div class="form-group">
@@ -935,7 +840,6 @@ textarea { resize: vertical; min-height: 80px; }
       </div>
       <button class="btn btn-primary" onclick="saveNote()">💾 Save Note</button>
     </div>
-
     <div class="card">
       <div class="card-title"><span>🗂️</span> All Market Notes</div>
       <div class="chip-row" style="margin-bottom:14px;" id="noteCatChips">
@@ -946,11 +850,8 @@ textarea { resize: vertical; min-height: 80px; }
         <div class="chip" data-nf="crowd" onclick="setNoteFilter(this)">👥 Crowd</div>
         <div class="chip" data-nf="strategy" onclick="setNoteFilter(this)">🧠 Strategy</div>
       </div>
-      <div id="allNotes">
-        <div class="empty-state"><div class="empty-icon">📝</div><p>No notes yet! Add observations above to teach the AI about your markets.</p></div>
-      </div>
+      <div id="allNotes"><div class="empty-state"><div class="empty-icon">📝</div><p>No notes yet! Add observations above to teach the AI about your markets.</p></div></div>
     </div>
-
     <div class="card">
       <div class="card-title"><span>🗂️</span> Manage Market Types & Locations</div>
       <p style="font-size:0.82em;font-weight:700;color:var(--text-mid);margin-bottom:14px;">Add your own market types — they'll appear in all dropdowns across the app.</p>
@@ -961,7 +862,6 @@ textarea { resize: vertical; min-height: 80px; }
       </div>
       <div id="marketTypesList"></div>
     </div>
-
     <div class="card">
       <div class="card-title"><span>🤖</span> Ask the AI About Your Markets</div>
       <div class="form-group">
@@ -973,15 +873,10 @@ textarea { resize: vertical; min-height: 80px; }
         <div id="aiAnswerText"></div>
       </div>
     </div>
-
   </div>
 
-  <!-- ═══════════════════════════════════════════ -->
   <!-- TAB 6: CONTRACTOR PAY PLANNER -->
-  <!-- ═══════════════════════════════════════════ -->
   <div id="tab-contractors" class="tab-panel">
-
-    <!-- Contractor selector -->
     <div class="card" style="padding:14px 22px;">
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
         <span style="font-weight:800;font-size:0.85em;color:var(--text-mid);">Viewing:</span>
@@ -992,15 +887,10 @@ textarea { resize: vertical; min-height: 80px; }
         Rate: <strong style="color:var(--rose-deep);">$12.77/hr</strong> · Updated January 2026 · <span id="ctr-note" style="color:var(--text-soft);">High-volume producer · SKU prefix CA-</span>
       </div>
     </div>
-
-    <!-- Production order builder -->
     <div class="card">
       <div class="card-title"><span>📋</span> Build Production Order</div>
       <p style="font-size:0.82em;font-weight:700;color:var(--text-mid);margin-bottom:14px;">Enter how many of each item you need made. Totals update live.</p>
-
       <div id="ctrItemsWrap"></div>
-
-      <!-- Custom item row -->
       <div style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);">
         <div style="font-size:0.78em;font-weight:800;color:var(--text-soft);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Add Custom Item</div>
         <div class="grid-3" style="gap:8px;align-items:end;">
@@ -1010,11 +900,8 @@ textarea { resize: vertical; min-height: 80px; }
         </div>
       </div>
     </div>
-
-    <!-- Running total -->
     <div class="card" style="background:linear-gradient(135deg,#FFF0F8,#F5F0FF);border:2px solid var(--rose-mid);">
       <div class="card-title"><span>💰</span> Payment Summary</div>
-
       <div class="stat-grid" style="margin-bottom:16px;">
         <div class="stat-box"><div class="stat-val" id="ctr-total-items">0</div><div class="stat-lbl">Items Ordered</div></div>
         <div class="stat-box"><div class="stat-val" id="ctr-total-labor">$0.00</div><div class="stat-lbl">Labor Cost</div></div>
@@ -1024,9 +911,7 @@ textarea { resize: vertical; min-height: 80px; }
           <div class="stat-lbl">Total Owed</div>
         </div>
       </div>
-
       <div id="ctr-breakdown" style="margin-bottom:14px;"></div>
-
       <div class="grid-2" style="gap:10px;">
         <div>
           <label>Label this order (optional)</label>
@@ -1037,33 +922,19 @@ textarea { resize: vertical; min-height: 80px; }
         </div>
       </div>
     </div>
-
-    <!-- Month planner -->
     <div class="card">
       <div class="card-title"><span>📅</span> Monthly Pay Estimate</div>
-      <p style="font-size:0.82em;font-weight:700;color:var(--text-mid);margin-bottom:14px;">
-        Based on your saved orders, here's what you'd owe <span id="ctr-name-inline">Ashley</span> this month and next.
-      </p>
-      <div id="ctr-monthly-breakdown">
-        <div class="empty-state"><div class="empty-icon">📦</div><p>Save production orders to see monthly pay estimates!</p></div>
-      </div>
+      <p style="font-size:0.82em;font-weight:700;color:var(--text-mid);margin-bottom:14px;">Based on your saved orders, here's what you'd owe <span id="ctr-name-inline">Ashley</span> this month and next.</p>
+      <div id="ctr-monthly-breakdown"><div class="empty-state"><div class="empty-icon">📦</div><p>Save production orders to see monthly pay estimates!</p></div></div>
     </div>
-
-    <!-- Saved orders -->
     <div class="card">
       <div class="card-title"><span>📂</span> Saved Orders</div>
-      <div id="ctr-saved-orders">
-        <div class="empty-state"><div class="empty-icon">🗂️</div><p>No saved orders yet.</p></div>
-      </div>
+      <div id="ctr-saved-orders"><div class="empty-state"><div class="empty-icon">🗂️</div><p>No saved orders yet.</p></div></div>
     </div>
-
   </div>
 
-  <!-- ═══════════════════════════════════════════ -->
   <!-- TAB 7: SETTINGS -->
-  <!-- ═══════════════════════════════════════════ -->
   <div id="tab-settings" class="tab-panel">
-
     <div class="card" style="background:linear-gradient(135deg,var(--rose-soft),var(--lav-soft));border:2px solid var(--rose-mid);">
       <div class="card-title"><span>🤖</span> AI Connection</div>
       <div class="insight-box" style="background:var(--mint-soft);border-color:var(--mint);margin-bottom:14px;">
@@ -1076,14 +947,12 @@ textarea { resize: vertical; min-height: 80px; }
         <div>🔒 No API key stored anywhere — fully private</div>
       </div>
     </div>
-
     <div class="card">
       <div class="card-title"><span>🧪</span> Test Connection</div>
       <p style="font-size:0.82em;font-weight:700;color:var(--text-mid);margin-bottom:14px;">Make sure the AI is working before using predictions.</p>
       <button class="btn btn-secondary" onclick="testApiKey()">🧪 Test AI Connection</button>
       <div id="apiTestResult" style="margin-top:12px;display:none;" class="insight-box"></div>
     </div>
-
     <div class="card">
       <div class="card-title"><span>🗄️</span> Data Management</div>
       <p style="font-size:0.82em;font-weight:700;color:var(--text-mid);margin-bottom:14px;">All your Wayfinder data lives in your browser's local storage.</p>
@@ -1091,7 +960,6 @@ textarea { resize: vertical; min-height: 80px; }
       <button class="btn btn-danger btn-sm" onclick="clearAllData()">⚠️ Clear All Data</button>
       <p style="font-size:0.75em;color:var(--text-soft);margin-top:8px;font-weight:700;">This will delete all events, notes, orders and plans. Cannot be undone.</p>
     </div>
-
   </div>
 
 </div><!-- end app-wrap -->
@@ -1106,7 +974,6 @@ let planRange = 1;
 let noteFilter = 'all';
 let itemRows = 0;
 
-// ── Storage helpers ──
 const KEY_EVENTS = 'amioki_mkt_events';
 const KEY_NOTES  = 'amioki_mkt_notes';
 const KEY_PLAN   = 'amioki_mkt_plan';
@@ -1122,7 +989,6 @@ let planEvents = load(KEY_PLAN,   []);
 let savedNames = load(KEY_NAMES,  ['Cherry Blossom Fest','Neptune Festival','Water Lantern Festival','Chesapeake Jubilee','VB Farmers Market','Strawberry Festival']);
 let savedOrders = load(KEY_ORDERS, []);
 
-// ── PIECE RATE DATA ──
 const CONTRACTORS = {
   ashley: {
     name: 'Ashley',
@@ -1162,7 +1028,7 @@ const CONTRACTORS = {
 };
 
 let activeContractor = 'ashley';
-let ctrCustomItems = []; // extra items added by user
+let ctrCustomItems = [];
 
 // ═══════════════════════════════════════════════
 // TABS
@@ -1196,15 +1062,9 @@ function togglePill(el, group) {
 // ═══════════════════════════════════════════════
 function addItemRow(name='', qty='', grossEach='', shelfPrice='') {
   itemRows++;
-  // Shelf = gross × 1.06 (exact, no rounding — matches Square CSV)
-  // Gross = shelf ÷ 1.06
-  const calcShelf = grossEach && !shelfPrice
-    ? (parseFloat(grossEach) * 1.06).toFixed(2)
-    : shelfPrice || '';
-  const calcGross = calcShelf && !grossEach
-    ? (parseFloat(calcShelf) / 1.06).toFixed(2)
-    : grossEach || '';
-  const taxAmt = calcShelf ? ((parseFloat(calcShelf) - parseFloat(calcShelf)/1.06)).toFixed(2) : '0.00';
+  const calcShelf = grossEach && !shelfPrice ? (parseFloat(grossEach) * 1.06).toFixed(2) : shelfPrice || '';
+  const calcGross = calcShelf && !grossEach  ? (parseFloat(calcShelf) / 1.06).toFixed(2) : grossEach || '';
+  const taxAmt = calcShelf ? (parseFloat(calcShelf) - parseFloat(calcShelf)/1.06).toFixed(2) : '0.00';
 
   const row = document.createElement('div');
   row.id = 'irow_'+itemRows;
@@ -1236,10 +1096,8 @@ function calcFromShelf(id) {
   if (!shelf) return;
   const gross = (shelf / 1.06).toFixed(2);
   const tax   = (shelf - shelf/1.06).toFixed(2);
-  const grossEl = document.getElementById('igross_'+id);
-  const taxEl   = document.getElementById('itax_'+id);
-  if (grossEl) grossEl.value = gross;
-  if (taxEl)   taxEl.innerHTML = `🏷️ Tax portion: <strong>$${tax}</strong> per item &nbsp;·&nbsp; Square records: <strong>$${gross}</strong>`;
+  if (document.getElementById('igross_'+id)) document.getElementById('igross_'+id).value = gross;
+  if (document.getElementById('itax_'+id)) document.getElementById('itax_'+id).innerHTML = `🏷️ Tax portion: <strong>$${tax}</strong> per item &nbsp;·&nbsp; Square records: <strong>$${gross}</strong>`;
 }
 
 function calcFromGross(id) {
@@ -1247,44 +1105,32 @@ function calcFromGross(id) {
   if (!gross) return;
   const shelf = (gross * 1.06).toFixed(2);
   const tax   = (parseFloat(shelf) - gross).toFixed(2);
-  const shelfEl = document.getElementById('iprice_'+id);
-  const taxEl   = document.getElementById('itax_'+id);
-  if (shelfEl) shelfEl.value = shelf;
-  if (taxEl)   taxEl.innerHTML = `🏷️ Tax portion: <strong>$${tax}</strong> per item &nbsp;·&nbsp; Shelf price: <strong>$${shelf}</strong>`;
+  if (document.getElementById('iprice_'+id)) document.getElementById('iprice_'+id).value = shelf;
+  if (document.getElementById('itax_'+id)) document.getElementById('itax_'+id).innerHTML = `🏷️ Tax portion: <strong>$${tax}</strong> per item &nbsp;·&nbsp; Shelf price: <strong>$${shelf}</strong>`;
 }
 
-function calcHours() {
+function calcHoursLive() {
   const start = document.getElementById('ev_start_time')?.value;
   const end   = document.getElementById('ev_end_time')?.value;
+  const hrs   = calcHours(start, end);
   const disp  = document.getElementById('ev_hours_display');
   const val   = document.getElementById('ev_hours_val');
-  if (!start || !end || !disp || !val) return;
-  const [sh, sm] = start.split(':').map(Number);
-  const [eh, em] = end.split(':').map(Number);
-  const hours = ((eh * 60 + em) - (sh * 60 + sm)) / 60;
-  if (hours > 0) {
-    val.textContent = hours.toFixed(1);
-    disp.style.display = 'block';
-  } else {
-    disp.style.display = 'none';
+  if (disp && val) {
+    if (hrs) { disp.style.display = 'block'; val.textContent = hrs; }
+    else { disp.style.display = 'none'; }
   }
 }
 
 function getEventHours() {
-  const start = document.getElementById('ev_start_time')?.value;
-  const end   = document.getElementById('ev_end_time')?.value;
-  if (!start || !end) return null;
-  const [sh, sm] = start.split(':').map(Number);
-  const [eh, em] = end.split(':').map(Number);
-  const hours = ((eh * 60 + em) - (sh * 60 + sm)) / 60;
-  return hours > 0 ? hours : null;
+  return calcHours(
+    document.getElementById('ev_start_time')?.value,
+    document.getElementById('ev_end_time')?.value
+  );
 }
 
 function syncItemsTotal() {
   let total = 0;
-  document.querySelectorAll('[id^="iqty_"]').forEach(input => {
-    total += parseInt(input.value) || 0;
-  });
+  document.querySelectorAll('[id^="iqty_"]').forEach(input => { total += parseInt(input.value) || 0; });
   const el = document.getElementById('ev_items');
   if (el) el.value = total || '';
 }
@@ -1293,9 +1139,7 @@ function syncItemsTotal() {
 // CSV IMPORT
 // ═══════════════════════════════════════════════
 function parseCSVLine(line) {
-  // Handles quoted fields with commas inside them
-  const result = [];
-  let cur = '', inQuote = false;
+  const result = []; let cur = '', inQuote = false;
   for (let i = 0; i < line.length; i++) {
     const ch = line[i];
     if (ch === '"') { inQuote = !inQuote; }
@@ -1316,7 +1160,6 @@ function handleCSV(e) {
       const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
       const rawHeaders = parseCSVLine(lines[0]);
       const headers = rawHeaders.map(h => h.replace(/"/g,'').trim().toLowerCase());
-
       const rows = lines.slice(1).map(l => {
         const cols = parseCSVLine(l);
         const obj = {};
@@ -1324,175 +1167,82 @@ function handleCSV(e) {
         return obj;
       }).filter(r => Object.values(r).some(v => v));
 
-      // ── Detect Square export type ──
-      // Square "Items" report headers include: "Item", "Qty", "Gross Sales", "Net Sales", "Category"
-      // Square "Transactions" report headers include: "Date", "Time", "Transaction ID", "Description", "Amount", "Fee", "Net Total"
-      // Square "Sales Summary" headers include: "Gross Sales", "Discounts", "Net Sales", "Gift Card Sales", "Tax", "Tips", "Partial Refunds", "Total Collected", "Fees", "Net Total"
-
-      const h = headers.join('|');
-      const isItemsReport      = headers.includes('item name') && headers.includes('items sold') && headers.includes('gross sales');
-      const isTransactions     = headers.includes('transaction id') || (headers.includes('description') && headers.includes('amount'));
-      const isSalesSummary     = headers.includes('gross sales') && !headers.includes('item name');
-      const isCategoryReport   = headers.includes('category') && headers.includes('gross sales') && !headers.includes('item name');
+      const isItemsReport  = headers.includes('item name') && headers.includes('items sold') && headers.includes('gross sales');
+      const isTransactions = headers.includes('transaction id') || (headers.includes('description') && headers.includes('amount'));
+      const isSalesSummary = headers.includes('gross sales') && !headers.includes('item name');
 
       let totalRev = 0, itemsMap = {}, date = '', customSales = [];
 
       if (isItemsReport) {
-        // ── Square Item Sales Summary ──
-        // Columns: Item Name, Item Variation, SKU, Category, Items Sold, Gross Sales,
-        //          Items Refunded, Refunds, Discounts & Comps, Net Sales, Tax, Unit, Units Sold...
         rows.forEach(r => {
-          const name      = r['item name'] || '';
-          const variation = r['item variation'] || '';
-          const qty       = parseFloat(r['items sold'] || r['units sold'] || '0') || 0;
-          const gross     = parseFloat((r['gross sales'] || '0').replace(/[$,]/g,'')) || 0;
-          // Track custom amounts separately instead of skipping them
-          if (!name || name.toLowerCase() === 'custom amount' || name.toLowerCase() === 'other' || name.toLowerCase() === 'custom sale') {
-            if (gross > 0) customSales.push({ qty, gross });
-            return;
+          const name = r['item name'] || '';
+          const qty  = parseFloat(r['items sold'] || r['units sold'] || '0') || 0;
+          const gross= parseFloat((r['gross sales'] || '0').replace(/[$,]/g,'')) || 0;
+          if (!name || ['custom amount','other','custom sale'].includes(name.toLowerCase())) {
+            if (gross > 0) customSales.push({ qty, gross }); return;
           }
           if (!date) date = r['date'] || '';
-          // Group all variations under the parent item name
-          if (!itemsMap[name]) itemsMap[name] = { qty: 0, rev: 0, variations: [] };
+          if (!itemsMap[name]) itemsMap[name] = { qty: 0, rev: 0 };
           itemsMap[name].qty += qty;
           itemsMap[name].rev += gross;
-          if (variation && variation !== name) itemsMap[name].variations.push(`${variation}: ${qty}`);
           totalRev += gross;
         });
-
       } else if (isTransactions) {
-        // ── Square Transactions Export ──
-        // Columns: Date, Time, Time Zone, Description, Amount, Fees, Net Total, Transaction ID...
         rows.forEach(r => {
           const desc   = r['description'] || r['item'] || '';
-          const amount = parseFloat((r['amount'] || r['gross sales'] || r['total'] || '0').replace(/[$,()-]/g,'')) || 0;
+          const amount = parseFloat((r['amount'] || '0').replace(/[$,()-]/g,'')) || 0;
           if (!date) date = r['date'] || '';
-          // Skip refunds (negative) and fees rows
-          if (amount <= 0) return;
-          if (desc.toLowerCase().includes('fee') || desc.toLowerCase().includes('transfer')) return;
+          if (amount <= 0 || desc.toLowerCase().includes('fee')) return;
           totalRev += amount;
           if (desc && desc !== 'Square') {
             if (!itemsMap[desc]) itemsMap[desc] = { qty: 0, rev: 0 };
-            itemsMap[desc].qty += 1;
-            itemsMap[desc].rev += amount;
+            itemsMap[desc].qty += 1; itemsMap[desc].rev += amount;
           }
         });
-
-      } else if (isSalesSummary || isCategoryReport) {
-        // ── Square Sales Summary or Category Report ──
-        rows.forEach(r => {
-          const gross = parseFloat((r['gross sales'] || r['total collected'] || r['net sales'] || '0').replace(/[$,]/g,'')) || 0;
-          if (!date) date = r['date'] || '';
-          totalRev += gross;
-        });
-
       } else {
-        // ── Fallback: try to find any revenue-like column ──
-        const revenueCol = headers.find(h =>
-          h.includes('gross') || h.includes('total') || h.includes('amount') || h.includes('revenue') || h.includes('sales')
-        );
-        const nameCol = headers.find(h =>
-          h.includes('item') || h.includes('name') || h.includes('description') || h.includes('product')
-        );
-        const qtyCol = headers.find(h => h.includes('qty') || h.includes('quantity') || h.includes('units'));
-
         rows.forEach(r => {
-          const gross = parseFloat((r[revenueCol] || '0').replace(/[$,]/g,'')) || 0;
-          if (gross <= 0) return;
-          totalRev += gross;
+          const gross = parseFloat((r['gross sales'] || r['total collected'] || '0').replace(/[$,]/g,'')) || 0;
           if (!date) date = r['date'] || '';
-          if (nameCol) {
-            const name = r[nameCol] || '';
-            if (name) {
-              if (!itemsMap[name]) itemsMap[name] = { qty: 0, rev: 0 };
-              itemsMap[name].qty += parseFloat(r[qtyCol] || '1') || 1;
-              itemsMap[name].rev += gross;
-            }
-          }
+          totalRev += gross;
         });
       }
 
-      // ── Populate form fields ──
       if (totalRev > 0) document.getElementById('ev_revenue').value = totalRev.toFixed(2);
-      if (date) {
-        const d = new Date(date);
-        if (!isNaN(d)) document.getElementById('ev_date').value = d.toISOString().split('T')[0];
-      }
+      if (date) { const d = new Date(date); if (!isNaN(d)) document.getElementById('ev_date').value = d.toISOString().split('T')[0]; }
 
-      // ── Populate item rows ──
-      document.getElementById('itemSalesRows').innerHTML = '';
-      itemRows = 0;
-      Object.entries(itemsMap)
-        .sort((a,b) => b[1].rev - a[1].rev)
-        .forEach(([name, {qty, rev}]) => {
-          const grossEach = qty > 0 ? (rev / qty).toFixed(2) : '';
-          addItemRow(name, qty, grossEach); // shelf price auto-calculates from gross
-        });
+      document.getElementById('itemSalesRows').innerHTML = ''; itemRows = 0;
+      Object.entries(itemsMap).sort((a,b) => b[1].rev - a[1].rev).forEach(([name, {qty, rev}]) => {
+        addItemRow(name, qty, qty > 0 ? (rev/qty).toFixed(2) : '');
+      });
 
-      // ── Add custom sales to total revenue & create editable rows ──
-      const customTotal = customSales.reduce((s, c) => s + c.gross, 0);
-      const customQty   = customSales.reduce((s, c) => s + c.qty, 0);
+      const customTotal = customSales.reduce((s,c) => s+c.gross, 0);
       totalRev += customTotal;
-      if (customSales.length > 0) {
-        // Split each custom sale into individual rows based on qty
-        customSales.forEach((c) => {
-          const perItem = c.qty > 1 ? (c.gross / c.qty).toFixed(2) : c.gross.toFixed(2);
-          const count = c.qty > 1 ? c.qty : 1;
-          for (let i = 0; i < count; i++) {
-            addItemRow('', 1, perItem); // gross each, shelf auto-calculates
-          }
-        });
-      }
-
-      // ── Sync items total ──
+      customSales.forEach(c => {
+        const perItem = c.qty > 1 ? (c.gross/c.qty).toFixed(2) : c.gross.toFixed(2);
+        for (let i = 0; i < (c.qty > 1 ? c.qty : 1); i++) addItemRow('', 1, perItem);
+      });
       syncItemsTotal();
 
       const count = Object.keys(itemsMap).length;
-      const exportType = isItemsReport ? 'Items report' : isTransactions ? 'Transactions export' : isSalesSummary ? 'Sales summary' : 'CSV';
-
-      // ── Price suggestions based on imported data ──
-      let priceSugHtml = '';
-      if (Object.entries(itemsMap).length) {
-        const sugLines = Object.entries(itemsMap).sort((a,b) => b[1].qty-a[1].qty).slice(0,3).map(([name,d]) => {
-          const avgPrice = d.qty > 0 ? d.rev/d.qty : 0;
-          const baseKey = Object.keys(BASE_PRICES).find(k => name.toLowerCase().includes(k.toLowerCase()));
-          const storedBase = BASE_PRICES[name] || BASE_PRICES[baseKey] || 0;
-          const diff = storedBase > 0 ? avgPrice - storedBase : 0;
-          if (Math.abs(diff) < 0.5 || storedBase === 0) return '';
-          const arrow = diff > 0 ? '📈' : '📉';
-          const action = diff > 0 ? 'raising' : 'reviewing';
-          const baseNote = storedBase > 0 ? ' vs your base $' + storedBase.toFixed(2) + ' — consider ' + action : '';
-          return '<div style="font-size:0.8em;font-weight:700;color:var(--text-mid);padding:4px 0;">' + arrow + ' <strong>' + name + '</strong> sold at $' + avgPrice.toFixed(2) + ' avg' + baseNote + '</div>';
-        }).filter(Boolean);
-        const sugContent = sugLines.length ? sugLines.join('') : '<div style="font-size:0.8em;color:var(--text-soft);">Prices look consistent with your base prices!</div>';
-        priceSugHtml = '<div style="margin-top:10px;"><div style="font-size:0.75em;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-soft);margin-bottom:6px;">💡 Pricing Suggestions</div>' + sugContent + '</div>';
-      }
-
+      const exportType = isItemsReport ? 'Items report' : isTransactions ? 'Transactions export' : 'Sales summary';
       document.getElementById('csvPreview').style.display = 'block';
       document.getElementById('csvPreview').innerHTML = `<div class="insight-box" style="background:var(--mint-soft);border-color:var(--mint);">
         <div class="insight-label">✅ ${exportType} imported!</div>
         <strong>$${totalRev.toFixed(2)}</strong> gross revenue detected${count ? ` across <strong>${count} item types</strong>` : ''}.
-        ${priceSugHtml}
       </div>
       ${customSales.length > 0 ? `<div class="insight-box" style="background:var(--yellow-soft);border-color:var(--yellow);margin-top:10px;">
-        <div class="insight-label">✏️ Hey! ${customSales.length} custom sale${customSales.length > 1 ? 's' : ''} found ($${customTotal.toFixed(2)} total)</div>
-        Square logged ${customSales.length > 1 ? 'these' : 'this'} as <strong>"Custom Amount"</strong> — I've added ${customSales.length > 1 ? 'them' : 'it'} as blank item row${customSales.length > 1 ? 's' : ''} below. Please fill in the item name${customSales.length > 1 ? 's' : ''} so the predictor can learn from ${customSales.length > 1 ? 'them' : 'it'}!
+        <div class="insight-label">✏️ ${customSales.length} custom sale${customSales.length > 1?'s':''} found</div>
+        Added as blank item rows — please fill in item names so the predictor can learn from them!
       </div>` : ''}`;
       toast('✅ CSV imported!');
-
     } catch(err) {
       document.getElementById('csvPreview').style.display = 'block';
-      document.getElementById('csvPreview').innerHTML = `<div class="insight-box" style="background:var(--coral-soft);border-color:var(--coral);">
-        <div class="insight-label">⚠️ Import Issue</div>
-        Couldn't parse this CSV. Make sure you're using a Square <strong>Items</strong>, <strong>Transactions</strong>, or <strong>Sales Summary</strong> export.
-        <br><small style="color:var(--text-soft);">Error: ${err.message}</small>
-      </div>`;
+      document.getElementById('csvPreview').innerHTML = `<div class="insight-box" style="background:var(--coral-soft);border-color:var(--coral);"><div class="insight-label">⚠️ Import Issue</div>Couldn't parse this CSV. Use a Square Items, Transactions, or Sales Summary export.<br><small>${err.message}</small></div>`;
     }
   };
   reader.readAsText(file);
 }
 
-// ── BASE PRICES (pre-loaded, editable) ──
 const BASE_PRICES = {
   'Pikachu': 20, 'Axolotl': 20, 'Kirby': 18, 'Capybara': 20,
   'Snorlax': 22, 'Mew': 18, 'Miffy': 18, 'Penguin': 18,
@@ -1510,7 +1260,6 @@ function saveEvent() {
   const type = document.getElementById('ev_type').value;
   if (!name || !date || !type) { toast('⚠️ Please fill in event name, date, and type!'); return; }
 
-  // Collect items
   const items = [];
   document.querySelectorAll('[id^="irow_"]').forEach(row => {
     const id    = row.id.replace('irow_','');
@@ -1523,65 +1272,49 @@ function saveEvent() {
 
   const evData = {
     name, date, type,
-    location: document.getElementById('ev_location').value.trim(),
-    startTime: document.getElementById('ev_start_time').value,
-    endTime:   document.getElementById('ev_end_time').value,
-    hours:     calcHours(document.getElementById('ev_start_time').value, document.getElementById('ev_end_time').value),
-    duration: parseInt(document.getElementById('ev_duration').value)||1,
-    startTime: document.getElementById('ev_start_time').value || '',
-    endTime:   document.getElementById('ev_end_time').value || '',
-    hours:     getEventHours(),
-    revenue: parseFloat(document.getElementById('ev_revenue').value)||0,
+    location:   document.getElementById('ev_location').value.trim(),
+    startTime:  document.getElementById('ev_start_time').value || '',
+    endTime:    document.getElementById('ev_end_time').value || '',
+    hours:      getEventHours(),
+    duration:   parseInt(document.getElementById('ev_duration').value)||1,
+    revenue:    parseFloat(document.getElementById('ev_revenue').value)||0,
     attendance: parseInt(document.getElementById('ev_attendance').value)||0,
-    itemsSold: parseInt(document.getElementById('ev_items').value)||0,
-    weather: pillState.weather,
-    crowd: pillState.crowd,
-    vendor: pillState.vendor,
-    juried: pillState.juried,
-    monopoly: pillState.monopoly,
-    competition: pillState.competition,
-    notes: document.getElementById('ev_notes').value.trim(),
+    itemsSold:  parseInt(document.getElementById('ev_items').value)||0,
+    weather:    pillState.weather,
+    crowd:      pillState.crowd,
+    vendor:     pillState.vendor,
+    juried:     pillState.juried,
+    monopoly:   pillState.monopoly,
+    competition:pillState.competition,
+    notes:      document.getElementById('ev_notes').value.trim(),
     items
   };
 
   const editingId = window._editingEventId;
   if (editingId) {
-    // UPDATE existing event
     const idx = events.findIndex(e => e.id === editingId);
-    if (idx !== -1) {
-      events[idx] = { ...events[idx], ...evData };
-    }
+    if (idx !== -1) events[idx] = { ...events[idx], ...evData };
     window._editingEventId = null;
     document.getElementById('editBanner')?.remove();
     const saveBtn = document.querySelector('#tab-log .btn-primary.btn-full');
     if (saveBtn) { saveBtn.textContent = '✨ Save Event'; saveBtn.style.background = ''; }
     toast('✅ Event updated!');
   } else {
-    // NEW event
     events.unshift({ id: Date.now(), ...evData });
     toast('🌸 Event saved!');
   }
 
   save(KEY_EVENTS, events);
-
-  // Save event name and location for datalists
   if (!savedNames.includes(name)) { savedNames.push(name); save(KEY_NAMES, savedNames); }
   if (evData.location) saveLocation(evData.location);
+  if (evData.notes) { notes.unshift({ id: Date.now()+1, text: evData.notes, event: name, cat: 'general', date }); save(KEY_NOTES, notes); }
 
-  // Auto-save notes if any
-  if (evData.notes) {
-    notes.unshift({ id: Date.now()+1, text: evData.notes, event: name, cat: 'general', date });
-    save(KEY_NOTES, notes);
-  }
-
-  // Clear form
   ['ev_name','ev_date','ev_location','ev_start_time','ev_end_time','ev_revenue','ev_attendance','ev_items','ev_notes'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('ev_hours_display').style.display = 'none';
   document.getElementById('ev_type').value = '';
   document.getElementById('itemSalesRows').innerHTML = '';
   document.getElementById('csvPreview').style.display = 'none';
   itemRows = 0;
-
   renderRecentEvents();
   refreshDataLists();
 }
@@ -1597,7 +1330,7 @@ function renderRecentEvents() {
     <div class="lb-item">
       <div style="flex:1;">
         <div style="font-weight:900;font-size:0.9em;">${ev.name}</div>
-        <div style="font-size:0.75em;color:var(--text-soft);margin-top:2px;">${ev.date}${ev.startTime ? ` · ⏱️ ${ev.startTime}–${ev.endTime} (${ev.hours}hrs)` : ''} · <span class="tag">${typeLabel[ev.type]||ev.type}</span> · ${ev.weather}${ev.location ? ` · 📍 ${ev.location}` : ''}${ev.hours && ev.revenue ? ` · 💰 $${(ev.revenue/parseFloat(ev.hours)).toFixed(0)}/hr` : ''}</div>
+        <div style="font-size:0.75em;color:var(--text-soft);margin-top:2px;">${ev.date} · <span class="tag">${typeLabel[ev.type]||ev.type}</span> · ${ev.weather}${ev.location ? ` · 📍 ${ev.location}` : ''}</div>
       </div>
       <div style="text-align:right;">
         <div style="font-weight:900;color:var(--rose-deep);">$${ev.revenue.toFixed(0)}</div>
@@ -1612,70 +1345,46 @@ function renderRecentEvents() {
 function editEvent(id) {
   const ev = events.find(e => e.id === id);
   if (!ev) return;
-
-  // Scroll to top of log form
   document.querySelector('#tab-log .card').scrollIntoView({ behavior: 'smooth' });
-
-  // Mark as editing
   window._editingEventId = id;
-
-  // Pre-fill all fields
   document.getElementById('ev_name').value     = ev.name || '';
   document.getElementById('ev_date').value     = ev.date || '';
   document.getElementById('ev_location').value = ev.location || '';
   document.getElementById('ev_start_time').value = ev.startTime || '';
   document.getElementById('ev_end_time').value   = ev.endTime   || '';
-  updateHoursDisplay();
   document.getElementById('ev_type').value     = ev.type || '';
   document.getElementById('ev_duration').value = ev.duration || 1;
-  document.getElementById('ev_start_time').value = ev.startTime || '';
-  document.getElementById('ev_end_time').value   = ev.endTime   || '';
-  calcHours();
   document.getElementById('ev_revenue').value  = ev.revenue || '';
   document.getElementById('ev_attendance').value = ev.attendance || '';
   document.getElementById('ev_items').value    = ev.itemsSold || '';
   document.getElementById('ev_notes').value    = ev.notes || '';
+  calcHoursLive();
 
-  // Pre-fill weather/crowd/vendor pills
-  const weatherPill = document.querySelector(`#weatherPills [data-w="${ev.weather}"]`);
-  if (weatherPill) { document.querySelectorAll('#weatherPills .pill').forEach(p=>p.classList.remove('active')); weatherPill.classList.add('active'); pillState.weather = ev.weather; }
-  const crowdPill = document.querySelector(`#crowdPills [data-c="${ev.crowd}"]`);
-  if (crowdPill) { document.querySelectorAll('#crowdPills .pill').forEach(p=>p.classList.remove('active')); crowdPill.classList.add('active'); pillState.crowd = ev.crowd; }
-  const vendorPill = document.querySelector(`#vendorPills [data-v="${ev.vendor}"]`);
-  if (vendorPill) { document.querySelectorAll('#vendorPills .pill').forEach(p=>p.classList.remove('active')); vendorPill.classList.add('active'); pillState.vendor = ev.vendor; }
-  const juriedPill = document.querySelector(`#juriedPills [data-j="${ev.juried}"]`);
-  if (juriedPill) { document.querySelectorAll('#juriedPills .pill').forEach(p=>p.classList.remove('active')); juriedPill.classList.add('active'); pillState.juried = ev.juried; }
-  const monopolyPill = document.querySelector(`#monopolyPills [data-m="${ev.monopoly}"]`);
-  if (monopolyPill) { document.querySelectorAll('#monopolyPills .pill').forEach(p=>p.classList.remove('active')); monopolyPill.classList.add('active'); pillState.monopoly = ev.monopoly; }
-  const competitionPill = document.querySelector(`#competitionPills [data-k="${ev.competition}"]`);
-  if (competitionPill) { document.querySelectorAll('#competitionPills .pill').forEach(p=>p.classList.remove('active')); competitionPill.classList.add('active'); pillState.competition = ev.competition; }
+  const setActivePill = (selector, val) => {
+    const pill = document.querySelector(`${selector} [data-${selector.includes('weather')?'w':selector.includes('crowd')?'c':selector.includes('vendor')?'v':selector.includes('juried')?'j':selector.includes('monopoly')?'m':'k'}="${val}"]`);
+    if (pill) { document.querySelectorAll(`${selector} .pill`).forEach(p=>p.classList.remove('active')); pill.classList.add('active'); }
+  };
+  setActivePill('#weatherPills', ev.weather);
+  setActivePill('#crowdPills', ev.crowd);
+  setActivePill('#vendorPills', ev.vendor);
+  setActivePill('#juriedPills', ev.juried);
+  setActivePill('#monopolyPills', ev.monopoly);
+  setActivePill('#competitionPills', ev.competition);
+  pillState.weather = ev.weather; pillState.crowd = ev.crowd; pillState.vendor = ev.vendor;
+  pillState.juried = ev.juried; pillState.monopoly = ev.monopoly; pillState.competition = ev.competition;
 
-  // Pre-fill item rows
-  document.getElementById('itemSalesRows').innerHTML = '';
-  itemRows = 0;
-  if (ev.items?.length) {
-    ev.items.forEach(item => addItemRow(item.name, item.qty, item.grossEach || '', item.price || ''));
-  }
+  document.getElementById('itemSalesRows').innerHTML = ''; itemRows = 0;
+  if (ev.items?.length) ev.items.forEach(item => addItemRow(item.name, item.qty, item.grossEach || '', item.price || ''));
   syncItemsTotal();
 
-  // Change save button to show "Update Event"
   const saveBtn = document.querySelector('#tab-log .btn-primary.btn-full');
-  if (saveBtn) {
-    saveBtn.textContent = '✅ Update Event';
-    saveBtn.style.background = 'linear-gradient(135deg,#10B981,#059669)';
-  }
+  if (saveBtn) { saveBtn.textContent = '✅ Update Event'; saveBtn.style.background = 'linear-gradient(135deg,#10B981,#059669)'; }
 
-  // Show editing banner
-  const existingBanner = document.getElementById('editBanner');
-  if (existingBanner) existingBanner.remove();
+  document.getElementById('editBanner')?.remove();
   const banner = document.createElement('div');
-  banner.id = 'editBanner';
-  banner.className = 'insight-box';
+  banner.id = 'editBanner'; banner.className = 'insight-box';
   banner.style.cssText = 'background:var(--yellow-soft);border-color:var(--yellow);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;';
-  banner.innerHTML = `
-    <div><div class="insight-label">✏️ Editing Event</div><strong>${ev.name}</strong> — make your changes and hit Update Event</div>
-    <button class="btn btn-ghost btn-sm" onclick="cancelEdit()">✕ Cancel</button>
-  `;
+  banner.innerHTML = `<div><div class="insight-label">✏️ Editing Event</div><strong>${ev.name}</strong> — make your changes and hit Update Event</div><button class="btn btn-ghost btn-sm" onclick="cancelEdit()">✕ Cancel</button>`;
   document.querySelector('#tab-log').insertBefore(banner, document.querySelector('#tab-log .card'));
   toast('✏️ Editing ' + ev.name);
 }
@@ -1685,32 +1394,23 @@ function cancelEdit() {
   document.getElementById('editBanner')?.remove();
   ['ev_name','ev_date','ev_location','ev_start_time','ev_end_time','ev_revenue','ev_attendance','ev_items','ev_notes'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('ev_type').value = '';
-  document.getElementById('itemSalesRows').innerHTML = '';
-  itemRows = 0;
+  document.getElementById('itemSalesRows').innerHTML = ''; itemRows = 0;
   const saveBtn = document.querySelector('#tab-log .btn-primary.btn-full');
   if (saveBtn) { saveBtn.textContent = '✨ Save Event'; saveBtn.style.background = ''; }
   toast('✕ Edit cancelled');
 }
 
 function deleteEvent(id) {
-  const existing = document.getElementById('deleteConfirm_'+id);
-  if (existing) { existing.remove(); return; }
-
-  // Remove any other open confirmations first
   document.querySelectorAll('[id^="deleteConfirm_"]').forEach(el => el.remove());
-
   const ev = events.find(e => e.id === id);
   const row = document.querySelector(`button[onclick="deleteEvent(${id})"]`)?.closest('.lb-item');
   if (!row) return;
-
   const confirm = document.createElement('div');
   confirm.id = 'deleteConfirm_'+id;
   confirm.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--coral-soft);border-radius:8px;margin-top:6px;border:1px solid var(--coral);flex-wrap:wrap;';
-  confirm.innerHTML = `
-    <span style="font-size:0.82em;font-weight:800;color:#991B1B;flex:1;">Delete "${ev?.name}"? This can't be undone.</span>
+  confirm.innerHTML = `<span style="font-size:0.82em;font-weight:800;color:#991B1B;flex:1;">Delete "${ev?.name}"? This can't be undone.</span>
     <button class="btn btn-danger btn-sm" onclick="confirmDeleteEvent(${id})">🗑 Yes, delete</button>
-    <button class="btn btn-ghost btn-sm" onclick="document.getElementById('deleteConfirm_${id}').remove()">Cancel</button>
-  `;
+    <button class="btn btn-ghost btn-sm" onclick="document.getElementById('deleteConfirm_${id}').remove()">Cancel</button>`;
   row.parentNode.insertBefore(confirm, row.nextSibling);
 }
 
@@ -1733,117 +1433,38 @@ function setFilter(el) {
 
 function renderInsights() {
   const filtered = currentFilter === 'all' ? events : events.filter(e => e.type === currentFilter);
-
-  // Stats
   const totalRev = filtered.reduce((s,e) => s+e.revenue, 0);
   const totalItems = filtered.reduce((s,e) => s+(e.itemsSold||e.items?.reduce((x,i)=>x+i.qty,0)||0), 0);
-  document.getElementById('stat-events').textContent = filtered.length;
+  document.getElementById('stat-events').textContent  = filtered.length;
   document.getElementById('stat-revenue').textContent = '$'+totalRev.toFixed(0);
-  document.getElementById('stat-avg').textContent = filtered.length ? '$'+(totalRev/filtered.length).toFixed(0) : '$0';
-  document.getElementById('stat-items').textContent = totalItems;
+  document.getElementById('stat-avg').textContent     = filtered.length ? '$'+(totalRev/filtered.length).toFixed(0) : '$0';
+  document.getElementById('stat-items').textContent   = totalItems;
 
-  // Type chips
   const types = [...new Set(events.map(e=>e.type))];
   const typeLabel = Object.fromEntries(marketTypes.map(t => [t.id, t.label]));
   const chipsWrap = document.getElementById('typeChips');
   chipsWrap.innerHTML = `<div class="chip ${currentFilter==='all'?'active':''}" data-filter="all" onclick="setFilter(this)">All Markets</div>`;
-  types.forEach(t => {
-    chipsWrap.innerHTML += `<div class="chip ${currentFilter===t?'active':''}" data-filter="${t}" onclick="setFilter(this)">${typeLabel[t]||t}</div>`;
-  });
+  types.forEach(t => { chipsWrap.innerHTML += `<div class="chip ${currentFilter===t?'active':''}" data-filter="${t}" onclick="setFilter(this)">${typeLabel[t]||t}</div>`; });
 
-  // Item leaderboard — build individual + category aggregates
   const itemAgg = {};
-  const categoryAgg = {}; // groups items by keyword categories
-  // Order matters — Stickers must be checked BEFORE plushie names
-  const CATEGORIES = [
-    { key: 'Stickers', match: (name) => name.toLowerCase().includes('sticker') },
-    { key: 'Chicken',  match: (name) => name.toLowerCase().includes('chicken') && !name.toLowerCase().includes('sticker') },
-    { key: 'Axolotl',  match: (name) => name.toLowerCase().includes('axolotl') && !name.toLowerCase().includes('sticker') },
-    { key: 'Capybara', match: (name) => name.toLowerCase().includes('capybara') && !name.toLowerCase().includes('sticker') },
-    { key: 'Kirby',    match: (name) => name.toLowerCase().includes('kirby') && !name.toLowerCase().includes('sticker') },
-    { key: 'Pikachu',  match: (name) => name.toLowerCase().includes('pikachu') && !name.toLowerCase().includes('sticker') },
-    { key: 'Birb',     match: (name) => name.toLowerCase().includes('birb') && !name.toLowerCase().includes('sticker') },
-    { key: 'Octopus',  match: (name) => (name.toLowerCase().includes('octop') || name.toLowerCase().includes('octopi')) && !name.toLowerCase().includes('sticker') },
-  ];
-
   filtered.forEach(ev => {
     ev.items?.forEach(item => {
-      if (!itemAgg[item.name]) itemAgg[item.name] = {qty:0, rev:0, prices:[], events:0};
-      itemAgg[item.name].qty  += item.qty;
-      itemAgg[item.name].rev  += item.rev;
-      if (item.price) itemAgg[item.name].prices.push(item.price);
+      if (!itemAgg[item.name]) itemAgg[item.name] = {qty:0, rev:0, events:0};
+      itemAgg[item.name].qty += item.qty;
+      itemAgg[item.name].rev += item.rev;
       itemAgg[item.name].events++;
-
-      // Check if item belongs to a category — stickers checked first
-      CATEGORIES.forEach(cat => {
-        if (cat.match(item.name)) {
-          if (!categoryAgg[cat.key]) categoryAgg[cat.key] = {qty:0, rev:0, variants:{}};
-          categoryAgg[cat.key].qty += item.qty;
-          categoryAgg[cat.key].rev += item.rev;
-          if (!categoryAgg[cat.key].variants[item.name]) categoryAgg[cat.key].variants[item.name] = {qty:0, rev:0};
-          categoryAgg[cat.key].variants[item.name].qty += item.qty;
-          categoryAgg[cat.key].variants[item.name].rev += item.rev;
-        }
-      });
     });
   });
 
-  // Build display list: inject category rows for multi-variant categories
   const buildLeaderboard = (sortKey) => {
     const byVal = Object.entries(itemAgg).sort((a,b) => b[1][sortKey]-a[1][sortKey]);
     const maxVal = byVal[0]?.[1]?.[sortKey] || 1;
-
-    const catEmoji = { Stickers:'🏷️', Chicken:'🐔', Axolotl:'🦎', Capybara:'🐾', Kirby:'⭐', Pikachu:'⚡', Birb:'🐦', Octopus:'🐙' };
-
-    // Which categories have 2+ variants?
-    const multiVariantCats = Object.entries(categoryAgg).filter(([,d]) => Object.keys(d.variants).length > 1);
-    const injectedCats = new Set();
-
     let rank = 0;
     return byVal.slice(0,15).map(([name, d]) => {
-      // Check if this item belongs to a multi-variant category we haven't shown yet
-      const catEntry = CATEGORIES.find(cat =>
-        cat.match(name) && !injectedCats.has(cat.key) && multiVariantCats.some(([k]) => k === cat.key)
-      );
-
-      let catRow = '';
-      if (catEntry) {
-        const catName = catEntry.key;
-        const catData = categoryAgg[catName];
-        injectedCats.add(catName);
-        const emoji = catEmoji[catName] || '🗂️';
-        const variantList = Object.entries(catData.variants)
-          .sort((a,b) => b[1][sortKey]-a[1][sortKey])
-          .map(([vn, vd]) => `<div style="display:flex;justify-content:space-between;padding:4px 8px;font-size:0.78em;color:var(--text-mid);font-weight:700;">
-            <span>↳ ${vn}</span>
-            <span>${sortKey==='qty' ? vd.qty+' sold' : '$'+vd.rev.toFixed(0)}</span>
-          </div>`).join('');
-
-        const catDetailsId = 'catDetail_'+catName.replace(/\s/g,'')+'_'+sortKey;
-        catRow = `<div style="background:linear-gradient(135deg,var(--rose-soft),var(--lav-soft));border-radius:10px;margin-bottom:8px;border:2px solid var(--rose-mid);overflow:hidden;">
-          <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;" onclick="
-            const d=document.getElementById('${catDetailsId}');
-            d.style.display=d.style.display==='none'?'block':'none';
-            this.querySelector('.cat-arrow').textContent=d.style.display==='none'?'▸':'▾';
-          ">
-            <div class="lb-rank gold">${emoji}</div>
-            <div style="flex:1;">
-              <div style="font-weight:900;font-size:0.9em;">🗂️ All ${catName}${catName==='Stickers'?'':catName.endsWith('s')?'':'s'} <span style="font-size:0.75em;font-weight:700;color:var(--text-soft);">(${Object.keys(catData.variants).length} types)</span></div>
-              <div class="lb-bar-wrap"><div class="lb-bar" style="width:${Math.round(catData[sortKey]/maxVal*100)}%"></div></div>
-            </div>
-            <div style="font-weight:900;color:var(--rose-deep);">${sortKey==='qty' ? catData.qty+' sold' : '$'+catData.rev.toFixed(0)}</div>
-            <span class="cat-arrow" style="color:var(--text-soft);font-size:0.9em;margin-left:4px;">▸</span>
-          </div>
-          <div id="${catDetailsId}" style="display:none;border-top:1px solid var(--border);padding:4px 0 8px;">
-            ${variantList}
-          </div>
-        </div>`;
-      }
-
       rank++;
-      const i = rank - 1;
+      const i = rank-1;
       const rc = i===0?'gold':i===1?'silver':i===2?'bronze':'other';
-      const itemRow = `<div class="lb-item">
+      return `<div class="lb-item">
         <div class="lb-rank ${rc}">${i<3?['🥇','🥈','🥉'][i]:rank}</div>
         <div style="flex:1;">
           <div class="lb-name">${name}</div>
@@ -1852,46 +1473,24 @@ function renderInsights() {
         </div>
         <div class="lb-val">${sortKey==='qty' ? d.qty+' sold' : '$'+d.rev.toFixed(0)}</div>
       </div>`;
-
-      return catRow + itemRow;
     }).join('');
   };
 
-  document.getElementById('lbUnits').innerHTML = Object.keys(itemAgg).length
-    ? buildLeaderboard('qty')
-    : '<div class="empty-state"><div class="empty-icon">📦</div><p>Log events with item data to see rankings!</p></div>';
+  document.getElementById('lbUnits').innerHTML   = Object.keys(itemAgg).length ? buildLeaderboard('qty') : '<div class="empty-state"><div class="empty-icon">📦</div><p>Log events with item data to see rankings!</p></div>';
+  document.getElementById('lbRevenue').innerHTML = Object.keys(itemAgg).length ? buildLeaderboard('rev') : '<div class="empty-state"><div class="empty-icon">💸</div><p>Log events with item data to see revenue rankings!</p></div>';
 
-  document.getElementById('lbRevenue').innerHTML = Object.keys(itemAgg).length
-    ? buildLeaderboard('rev')
-    : '<div class="empty-state"><div class="empty-icon">💸</div><p>Log events with item data to see revenue rankings!</p></div>';
-
-  // Price suggestions from notes
-  const allNotes = notes.map(n=>n.text).join(' ') + ' ' + events.map(e=>e.notes||'').join(' ');
+  const allNotesText = notes.map(n=>n.text).join(' ') + ' ' + events.map(e=>e.notes||'').join(' ');
   const priceSugs = [];
-  const raiseMatches = allNotes.matchAll(/(\w+(?:\s+\w+)?)\s*(?:sold out|always sells|going fast|raise price)/gi);
+  const raiseMatches = allNotesText.matchAll(/(\w+(?:\s+\w+)?)\s*(?:sold out|always sells|going fast|raise price)/gi);
   for (const m of raiseMatches) {
     const item = m[1].trim();
-    if (item.length > 2 && !['we','they','it','the','sold','always'].includes(item.toLowerCase())) {
-      priceSugs.push({item, dir:'up', note:'Frequently mentioned as a top seller or sell-out'});
-    }
+    if (item.length > 2 && !['we','they','it','the','sold','always'].includes(item.toLowerCase()))
+      priceSugs.push({item, note:'Frequently mentioned as top seller or sell-out'});
   }
-  // Also flag items with 100% sell-through (all qty = max we track)
-  if (priceSugs.length) {
-    document.getElementById('priceSuggestions').innerHTML = priceSugs.slice(0,6).map(s => `
-      <div class="lb-item">
-        <div style="font-size:1.3em;">📈</div>
-        <div style="flex:1;">
-          <div class="lb-name">${s.item}</div>
-          <div class="lb-meta">${s.note}</div>
-        </div>
-        <div class="price-sug up">Consider raising price ↑</div>
-      </div>
-    `).join('');
-  } else {
-    document.getElementById('priceSuggestions').innerHTML = '<div class="empty-state"><div class="empty-icon">🏷️</div><p>Add notes like "Pikachu sold out fast — raise price!" to get suggestions here!</p></div>';
-  }
+  document.getElementById('priceSuggestions').innerHTML = priceSugs.length
+    ? priceSugs.slice(0,6).map(s => `<div class="lb-item"><div style="font-size:1.3em;">📈</div><div style="flex:1;"><div class="lb-name">${s.item}</div><div class="lb-meta">${s.note}</div></div><div class="price-sug up">Consider raising price ↑</div></div>`).join('')
+    : '<div class="empty-state"><div class="empty-icon">🏷️</div><p>Add notes like "Pikachu sold out fast — raise price!" to get suggestions!</p></div>';
 
-  // YoY comparison
   const byName = {};
   events.forEach(ev => {
     const key = ev.name.replace(/\d{4}/, '').trim().toLowerCase();
@@ -1899,34 +1498,31 @@ function renderInsights() {
     byName[key].push(ev);
   });
   const multiYear = Object.entries(byName).filter(([,evs]) => evs.length > 1);
-  if (multiYear.length) {
-    document.getElementById('yoyTable').innerHTML = multiYear.map(([key, evs]) => {
-      const sorted = [...evs].sort((a,b) => new Date(b.date)-new Date(a.date));
-      return `<div style="margin-bottom:14px;">
-        <div style="font-weight:900;font-size:0.9em;margin-bottom:8px;text-transform:capitalize;">${key}</div>
-        ${sorted.map((ev,i) => {
-          const prev = sorted[i+1];
-          const diff = prev ? ev.revenue - prev.revenue : null;
-          const diffStr = diff !== null ? (diff >= 0 ? `<span class="tag green">+$${diff.toFixed(0)} ↑</span>` : `<span class="tag red">-$${Math.abs(diff).toFixed(0)} ↓</span>`) : '';
-          return `<div class="lb-item" style="margin-bottom:6px;">
-            <div style="flex:1;"><div class="lb-name">${ev.name}</div><div class="lb-meta">${ev.date} · ${ev.weather} · ${ev.crowd}</div></div>
-            <div style="text-align:right;"><div class="lb-val">$${ev.revenue.toFixed(0)}</div>${diffStr}</div>
-          </div>`;
-        }).join('')}
-      </div>`;
-    }).join('');
-  } else {
-    document.getElementById('yoyTable').innerHTML = '<div class="empty-state"><div class="empty-icon">📈</div><p>Log the same festival 2+ years in a row to see year-over-year comparisons!</p></div>';
-  }
+  document.getElementById('yoyTable').innerHTML = multiYear.length
+    ? multiYear.map(([key, evs]) => {
+        const sorted = [...evs].sort((a,b) => new Date(b.date)-new Date(a.date));
+        return `<div style="margin-bottom:14px;"><div style="font-weight:900;font-size:0.9em;margin-bottom:8px;text-transform:capitalize;">${key}</div>
+          ${sorted.map((ev,i) => {
+            const prev = sorted[i+1];
+            const diff = prev ? ev.revenue - prev.revenue : null;
+            const diffStr = diff !== null ? (diff >= 0 ? `<span class="tag green">+$${diff.toFixed(0)} ↑</span>` : `<span class="tag red">-$${Math.abs(diff).toFixed(0)} ↓</span>`) : '';
+            return `<div class="lb-item" style="margin-bottom:6px;"><div style="flex:1;"><div class="lb-name">${ev.name}</div><div class="lb-meta">${ev.date} · ${ev.weather} · ${ev.crowd}</div></div><div style="text-align:right;"><div class="lb-val">$${ev.revenue.toFixed(0)}</div>${diffStr}</div></div>`;
+          }).join('')}
+        </div>`;
+      }).join('')
+    : '<div class="empty-state"><div class="empty-icon">📈</div><p>Log the same festival 2+ years in a row to see YoY comparisons!</p></div>';
 }
 
 // ═══════════════════════════════════════════════
-// PREDICTION
+// ✨ PREDICTION — FULLY AI-DRIVEN (v2)
+// Replaces formula-based averaging with contextual
+// per-item, per-weather, per-event-type reasoning
 // ═══════════════════════════════════════════════
+
 async function runPrediction() {
-  const name = document.getElementById('pred_name').value.trim();
-  const type = document.getElementById('pred_type').value;
-  const date = document.getElementById('pred_date').value;
+  const name       = document.getElementById('pred_name').value.trim();
+  const type       = document.getElementById('pred_type').value;
+  const date       = document.getElementById('pred_date').value;
   if (!name || !type) { toast('⚠️ Fill in event name and type!'); return; }
 
   const attendance = parseInt(document.getElementById('pred_attendance').value)||0;
@@ -1934,157 +1530,220 @@ async function runPrediction() {
   const predStart  = document.getElementById('pred_start_time')?.value || '';
   const predEnd    = document.getElementById('pred_end_time')?.value || '';
   const predHours  = calcHours(predStart, predEnd);
-  const weather = pillState.predWeather;
-  const crowd = pillState.predCrowd;
-  const extraNotes = document.getElementById('pred_notes').value;
+  const weather    = pillState.predWeather;
+  const crowd      = pillState.predCrowd;
+  const juried     = pillState.predJuried;
+  const monopoly   = pillState.predMonopoly;
+  const competition= pillState.predCompetition;
+  const extraNotes = document.getElementById('pred_notes').value.trim();
 
-  // Find past events at same location for extra context
-  const pastSameLocation = location ? events.filter(e => e.location && e.location.toLowerCase().includes(location.toLowerCase().split(' ')[0])) : [];
+  // ── BUILD RICH HISTORICAL CONTEXT ─────────────────────────────────────────
+  const itemHistory = {};
+  events.forEach(ev => {
+    ev.items?.forEach(item => {
+      if (!item.name || !item.qty) return;
+      if (!itemHistory[item.name]) itemHistory[item.name] = { totalQty:0, totalRev:0, eventCount:0, byEventType:{}, byWeather:{}, byMonopoly:{} };
+      const h = itemHistory[item.name];
+      h.totalQty  += item.qty;
+      h.totalRev  += (item.rev || item.qty * (item.grossEach || item.price || 0));
+      h.eventCount++;
+      if (!h.byEventType[ev.type]) h.byEventType[ev.type] = {qty:0, events:0};
+      h.byEventType[ev.type].qty += item.qty; h.byEventType[ev.type].events++;
+      const wKey = ev.weather || 'Unknown';
+      if (!h.byWeather[wKey]) h.byWeather[wKey] = {qty:0, events:0};
+      h.byWeather[wKey].qty += item.qty; h.byWeather[wKey].events++;
+      if (ev.monopoly) {
+        if (!h.byMonopoly[ev.monopoly]) h.byMonopoly[ev.monopoly] = {qty:0, events:0};
+        h.byMonopoly[ev.monopoly].qty += item.qty; h.byMonopoly[ev.monopoly].events++;
+      }
+    });
+  });
 
-  // YoY context
-  const nameKey = name.replace(/\d{4}/,'').trim().toLowerCase();
-  const pastSame = events.filter(e => e.name.replace(/\d{4}/,'').trim().toLowerCase() === nameKey);
+  // Revenue benchmarks by market type / weather / crowd
+  const typeRevStats = {};
+  const weatherRevStats = {};
+  const crowdRevStats   = {};
+  events.forEach(ev => {
+    [typeRevStats, {[ev.weather||'Unknown']: true}, {[ev.crowd||'Unknown']: true}].forEach(() => {});
+    if (!typeRevStats[ev.type])         typeRevStats[ev.type]         = {total:0, count:0};
+    if (!weatherRevStats[ev.weather])   weatherRevStats[ev.weather]   = {total:0, count:0};
+    if (!crowdRevStats[ev.crowd])       crowdRevStats[ev.crowd]       = {total:0, count:0};
+    typeRevStats[ev.type].total         += ev.revenue; typeRevStats[ev.type].count++;
+    weatherRevStats[ev.weather].total   += ev.revenue; weatherRevStats[ev.weather].count++;
+    crowdRevStats[ev.crowd].total       += ev.revenue; crowdRevStats[ev.crowd].count++;
+  });
 
-  // Build summary
-  const recentEvents = events.slice(0,15);
-  const allNotesText = notes.map(n => `[${n.cat}] ${n.text}`).join('\n');
-  const itemAgg = {};
-  events.forEach(ev => ev.items?.forEach(item => {
-    if (!itemAgg[item.name]) itemAgg[item.name] = {qty:0, rev:0};
-    itemAgg[item.name].qty += item.qty;
-    itemAgg[item.name].rev += item.rev;
-  }));
-  const topItems = Object.entries(itemAgg).sort((a,b) => b[1].qty-a[1].qty).slice(0,8).map(([n,d]) => `${n}: ${d.qty} sold, avg $${d.qty>0?(d.rev/d.qty).toFixed(2):'?'}`).join(', ');
+  const nameKey    = name.replace(/\d{4}/,'').trim().toLowerCase();
+  const pastSame   = events.filter(e => e.name.replace(/\d{4}/,'').trim().toLowerCase() === nameKey);
+  const locKeyword = location ? location.toLowerCase().split(' ')[0] : '';
+  const pastSameLoc= locKeyword ? events.filter(e => e.location && e.location.toLowerCase().includes(locKeyword)) : [];
 
-  // Warn if no item data
-  if (!topItems) {
-    document.getElementById('predInventory').innerHTML = `<div class="insight-box" style="background:var(--yellow-soft);border-color:var(--yellow);">
-      <div class="insight-label">💡 No item data yet</div>
-      Import a Square CSV on the <strong>Log Event</strong> tab and hit <strong>Save Event</strong> — then the predictor can recommend specific items and quantities based on your real sales history!
-    </div>`;
-  }
+  const allNotesText = notes.map(n => `[${n.cat.toUpperCase()}] ${n.text}`).join('\n');
 
-  const historySummary = recentEvents.map(e => {
-    const rph = e.hours ? ` ($${(e.revenue/e.hours).toFixed(0)}/hr)` : '';
-    const timeStr = e.startTime ? ` ${e.startTime}–${e.endTime} (${e.hours?.toFixed(1)}hrs)` : '';
-    const competStr = [e.juried, e.monopoly, e.competition].filter(x => x && x !== 'Not juried' && x !== 'Unknown' && x !== 'Not assessed').join(', ');
-    return `${e.name} (${e.type}): $${e.revenue} revenue${rph},${timeStr} ${e.weather}, ${e.crowd}${competStr ? ', '+competStr : ''}, ${e.items?.length||0} item types`;
-  }).join('\n');
-  const pastSameSummary = pastSame.length ? 'PAST SAME EVENT: ' + pastSame.map(e => `${e.name}: $${e.revenue}, ${e.weather}, ${e.crowd}`).join(' | ') : 'No past data for this specific event name.';
+  // Per-item detail lines (for inventory prompt)
+  const itemDetailLines = Object.entries(itemHistory)
+    .sort((a,b) => b[1].totalQty - a[1].totalQty).slice(0,15)
+    .map(([itemName, h]) => {
+      const avgPerEvent = (h.totalQty / h.eventCount).toFixed(1);
+      const avgPrice    = h.totalRev > 0 && h.totalQty > 0 ? '$'+(h.totalRev/h.totalQty).toFixed(2) : '?';
+      const atThisType  = h.byEventType[type];
+      const typeNote    = atThisType ? `avg ${(atThisType.qty/atThisType.events).toFixed(1)}/event at this market type` : 'no data at this market type';
+      const weatherMatch= h.byWeather[weather];
+      const weatherNote = weatherMatch ? `avg ${(weatherMatch.qty/weatherMatch.events).toFixed(1)} in ${weather}` : 'no weather match data';
+      const monNote     = h.byMonopoly[monopoly] ? `avg ${(h.byMonopoly[monopoly].qty/h.byMonopoly[monopoly].events).toFixed(1)} when monopoly=${monopoly}` : '';
+      return `  • ${itemName}: ${h.totalQty} total / ${h.eventCount} events (avg ${avgPerEvent}/event @ ${avgPrice}); ${typeNote}; ${weatherNote}${monNote?'; '+monNote:''}`;
+    }).join('\n');
 
+  // Revenue signal strings
+  const typeAvgRev    = typeRevStats[type]    ? `$${(typeRevStats[type].total/typeRevStats[type].count).toFixed(0)} avg (${typeRevStats[type].count} events at this type)` : 'No past data for this market type';
+  const weatherAvgRev = weatherRevStats[weather] ? `$${(weatherRevStats[weather].total/weatherRevStats[weather].count).toFixed(0)} avg in ${weather} (${weatherRevStats[weather].count} events)` : 'No weather data';
+  const crowdAvgRev   = crowdRevStats[crowd]  ? `$${(crowdRevStats[crowd].total/crowdRevStats[crowd].count).toFixed(0)} avg at ${crowd} (${crowdRevStats[crowd].count} events)` : 'No crowd data';
+  const overallStats  = events.length > 0 ? `Overall: ${events.length} events, $${(events.reduce((s,e)=>s+e.revenue,0)/events.length).toFixed(0)} avg, best $${Math.max(...events.map(e=>e.revenue)).toFixed(0)}, worst $${Math.min(...events.map(e=>e.revenue)).toFixed(0)}` : '';
+  const pastSameSummary = pastSame.length
+    ? 'SAME EVENT PAST DATA:\n' + pastSame.map(e => `  ${e.date}: $${e.revenue} (${e.weather}, ${e.crowd}, monopoly=${e.monopoly||'?'})`).join('\n')
+    : 'No prior history for this exact event name.';
+  const pastLocSummary = pastSameLoc.length
+    ? 'SAME LOCATION PAST DATA:\n' + pastSameLoc.slice(0,4).map(e => `  ${e.name} ${e.date}: $${e.revenue} (${e.weather}, ${e.crowd})`).join('\n')
+    : '';
+
+  // ── SHOW LOADING STATE ────────────────────────────────────────────────────
   document.getElementById('predResultsWrap').style.display = 'block';
-  document.getElementById('predResults').innerHTML = '<div class="ai-loading"><div class="dots"><span></span><span></span><span></span></div> Forecasting revenue...</div>';
-  document.getElementById('predInventory').innerHTML = '<div class="ai-loading"><div class="dots"><span></span><span></span><span></span></div> Building inventory plan...</div>';
+  document.getElementById('predResults').innerHTML   = '<div class="ai-loading"><div class="dots"><span></span><span></span><span></span></div> Analyzing your event history & forecasting revenue...</div>';
+  document.getElementById('predInventory').innerHTML = '<div class="ai-loading"><div class="dots"><span></span><span></span><span></span></div> Building contextual inventory plan...</div>';
   document.getElementById('predInsightBox').style.display = 'none';
+  document.getElementById('yoyCard').style.display = 'none';
 
-  // Revenue prediction
+  // ── REVENUE FORECAST — CONTEXTUAL AI ─────────────────────────────────────
   try {
-    const res = await apiCall({
-        system: `You are a revenue forecasting assistant for Amioki, a kawaii amigurumi/crochet brand in Virginia Beach VA run by Ami. She sells handmade plushies (Kirby, Axolotl, Capybara, Mew, Pikachu, Snorlax, Miffy, Penguin) at markets and festivals. She has a pink branded tent and an experiential booth. Key data: even in bad weather/dreary days she still earns well at her home base VB Farmers Market. Pikachu is supply-constrained, not demand-weak. You MUST respond with ONLY raw JSON. No words before or after. No markdown. No backticks. No explanation. Start your response with { and end with }.
-{"low":number,"mid":number,"high":number,"low_label":"string","mid_label":"string","high_label":"string","key_factors":["factor1","factor2","factor3"],"tip":"one actionable insight string"}`,
-        messages: [{ role: 'user', content: `Predict revenue for upcoming Amioki event:
-Event: ${name}
-Type: ${type}
-Date: ${date||'upcoming'}
-Location: ${location||'not specified'}
-Hours: ${predHours ? predHours+' hours ('+predStart+'–'+predEnd+')' : 'not specified'}
-Attendance: ${attendance||'unknown'}
-Weather forecast: ${weather}
-Expected crowd: ${crowd}
-Juried event: ${pillState.predJuried}
-Monopoly on amigurumi: ${pillState.predMonopoly}
-Competition level: ${pillState.predCompetition}
-Extra notes: ${extraNotes||'none'}
+    const revRes = await apiCall({
+      system: `You are a revenue forecasting expert for Amioki, a kawaii amigurumi brand in Virginia Beach VA run by Ami. She sells handmade plushies (Pikachu, Axolotl, Kirby, Capybara, Snorlax, Mew, Miffy, Penguin, Whale, Octopus, Jellyfish, Frog, Birb, Chicken, Heart Keychain) at markets and festivals. Key facts: Pikachu demand always exceeds supply so it under-reports vs real demand. Axolotl and Kirby are consistent top sellers. Juried events filter competition and tend to lift sales. Rain at her home market (VB Farmers Market) still yields solid revenue because regulars seek her out. Respond with ONLY raw JSON. No text before or after. No markdown. No backticks. Start with { end with }.
+{"low":number,"mid":number,"high":number,"low_label":"under 6 words","mid_label":"under 6 words","high_label":"under 6 words","key_factors":["factor1","factor2","factor3"],"reasoning":"2-3 sentences explaining how you weighted these specific signals to reach the mid estimate","tip":"one specific actionable insight for this exact event"}`,
+      messages: [{ role: 'user', content: `Forecast revenue for this Amioki event. Reason from the historical benchmarks below — do NOT just average all events. Weight each signal (market type, weather, crowd, juried status, monopoly, attendance, same-event history) to adjust the baseline up or down.
+
+UPCOMING EVENT:
+- Name: ${name}
+- Type: ${type}
+- Date: ${date||'upcoming'}
+- Location: ${location||'not specified'}
+- Duration: ${predHours ? predHours+' hours ('+predStart+'–'+predEnd+')' : 'not specified'}
+- Expected attendance: ${attendance||'unknown'}
+- Weather forecast: ${weather}
+- Expected crowd: ${crowd}
+- Juried: ${juried}
+- Monopoly status: ${monopoly}
+- Competition: ${competition}
+- Notes: ${extraNotes||'none'}
+
+HISTORICAL BENCHMARKS:
+- This market type: ${typeAvgRev}
+- Revenue in ${weather} weather: ${weatherAvgRev}
+- Revenue with ${crowd} crowd: ${crowdAvgRev}
+${overallStats}
 
 ${pastSameSummary}
-${pastSameLocation.length ? `PAST EVENTS AT SAME LOCATION: ${pastSameLocation.map(e=>`${e.name}: $${e.revenue}, ${e.weather}, ${e.crowd}`).join(' | ')}` : ''}
+${pastLocSummary}
 
-Recent events history:
-${historySummary||'No prior events logged yet.'}
-
-Market notes/learnings:
+MARKET LEARNINGS:
 ${allNotesText||'None yet.'}
 
-Return JSON prediction only.` }]
+Return JSON only.` }]
     });
-    const data = await res.json();
-    let raw = (data.content?.find(c=>c.type==='text')?.text || '');
-    const pred = extractJSON(raw, {});
-    const maxVal = pred.high || 500;
+
+    const revData = await revRes.json();
+    const pred    = extractJSON(revData.content?.find(c=>c.type==='text')?.text||'', {});
+    const maxVal  = pred.high || 500;
 
     document.getElementById('predResults').innerHTML = `
       <div class="pred-scenario high">
-        <div class="pred-label">🌟 Best Case · ${pred.high_label||''}</div>
+        <div class="pred-label">🌟 Best Case · ${pred.high_label||'Strong conditions'}</div>
         <div class="pred-amt">$${(pred.high||0).toFixed(0)}</div>
         <div class="pred-bar"><div class="pred-fill" style="width:100%;background:linear-gradient(90deg,#6EE7B7,#059669);"></div></div>
       </div>
       <div class="pred-scenario mid">
-        <div class="pred-label">📊 Expected · ${pred.mid_label||''}</div>
+        <div class="pred-label">📊 Expected · ${pred.mid_label||'Most likely'}</div>
         <div class="pred-amt">$${(pred.mid||0).toFixed(0)}</div>
         <div class="pred-bar"><div class="pred-fill" style="width:${Math.round((pred.mid||0)/maxVal*100)}%;background:linear-gradient(90deg,var(--lavender),#9333EA);"></div></div>
       </div>
       <div class="pred-scenario low">
-        <div class="pred-label">📉 Conservative · ${pred.low_label||''}</div>
+        <div class="pred-label">📉 Conservative · ${pred.low_label||'Cautious'}</div>
         <div class="pred-amt" style="color:var(--text-mid);">$${(pred.low||0).toFixed(0)}</div>
         <div class="pred-bar"><div class="pred-fill" style="width:${Math.round((pred.low||0)/maxVal*100)}%;background:linear-gradient(90deg,var(--sky),#0284C7);"></div></div>
       </div>
-      ${pred.key_factors ? `<div style="margin-top:14px;display:flex;flex-wrap:wrap;gap:6px;">${pred.key_factors.map(f=>`<span class="tag purple">${f}</span>`).join('')}</div>` : ''}
+      ${pred.key_factors?.length ? `<div style="margin-top:14px;display:flex;flex-wrap:wrap;gap:6px;">${pred.key_factors.map(f=>`<span class="tag purple">${f}</span>`).join('')}</div>` : ''}
+      ${pred.reasoning ? `<div style="margin-top:14px;padding:12px 14px;background:var(--lav-soft);border-radius:var(--radius-sm);border:2px solid var(--lavender);font-size:0.82em;font-weight:700;color:var(--text);line-height:1.6;"><div style="font-size:0.72em;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-soft);margin-bottom:6px;">🧠 AI Reasoning</div>${pred.reasoning}</div>` : ''}
     `;
-    if (pred.tip) {
-      document.getElementById('predInsightBox').style.display = 'block';
-      document.getElementById('predInsightText').textContent = pred.tip;
-    }
+    if (pred.tip) { document.getElementById('predInsightBox').style.display = 'block'; document.getElementById('predInsightText').textContent = pred.tip; }
+
   } catch(e) {
-    document.getElementById('predResults').innerHTML = '<div class="insight-box" style="background:var(--coral-soft);border-color:var(--coral);">Could not get AI prediction — log more events for better results!</div>';
+    document.getElementById('predResults').innerHTML = '<div class="insight-box" style="background:var(--coral-soft);border-color:var(--coral);">Could not get AI prediction — check your connection!</div>';
   }
 
-  // Inventory prediction
+  // ── INVENTORY PLAN — CONTEXTUAL AI ───────────────────────────────────────
   try {
-    const res2 = await apiCall({
-        system: `You are an inventory planner for Amioki, a kawaii amigurumi brand. Known items: Kirby, Axolotl, Capybara, Mew, Pikachu, Snorlax, Miffy, Penguin, Whale. Pikachu demand always exceeds supply. Axolotl is a bestseller. Family events favor cute recognizable characters. You MUST respond with ONLY a raw JSON array. No words before or after. No markdown. No backticks. No explanation. Start your response with [ and end with ].
-[{"item":"name","qty":number,"reason":"short reason string","priority":"high|medium|low"}]`,
-        messages: [{ role: 'user', content: `Plan inventory for: ${name} (${type}), attendance ~${attendance||'medium'}, weather: ${weather}, crowd: ${crowd}.
-Top historical items: ${topItems||'No item data yet.'}
-Past same event: ${pastSameSummary}
-Notes: ${extraNotes||'none'}
-Market learnings: ${allNotesText||'none'}
-Return a JSON array of 6-10 item recommendations.` }]
+    const invRes = await apiCall({
+      system: `You are an inventory planner for Amioki, a kawaii amigurumi brand in Virginia Beach VA. You have per-item historical data broken down by event type, weather, and conditions. Recommend specific quantities for THIS event by reasoning about each item's past performance in similar conditions — not just overall averages. Contractors: Ashley makes Chickens, Baby Chicks, Octopi, Heart Keychains, Mini Loaf Cat, Bear/Apple Coasters, Cherry Blossom Pouch, Pet Rock, Mama/Baby Possum. Liz makes Leggy Frog, Bees, Birb, Jellyfish. Ami makes the rest (Pikachu, Axolotl, Kirby, Capybara, Snorlax, Mew, Miffy, Penguin, Whale). Pikachu demand always exceeds supply — always recommend as many as possible. Respond with ONLY a raw JSON array. Start with [ end with ]. No other text.
+[{"item":"name","qty":number,"reason":"1-2 sentences specific to THIS event conditions","priority":"high|medium|low","signal":"the data point that most drove this qty"}]`,
+      messages: [{ role: 'user', content: `Inventory plan for: ${name} (${type})
+Date: ${date||'upcoming'}, Location: ${location||'TBD'}
+Attendance: ${attendance||'medium'}, Weather: ${weather}, Crowd: ${crowd}
+Juried: ${juried}, Monopoly: ${monopoly}, Competition: ${competition}
+${predHours ? 'Duration: '+predHours+' hours' : ''}
+${extraNotes ? 'Notes: '+extraNotes : ''}
+
+ITEM-LEVEL HISTORICAL DATA (reason per-item based on conditions match):
+${itemDetailLines||'No item history yet — suggest baseline quantities based on event type and known bestsellers.'}
+
+${pastSameSummary}
+
+MARKET LEARNINGS:
+${allNotesText||'None yet.'}
+
+Return 8-12 items. For each, explain WHY you chose that quantity for THESE specific conditions.` }]
     });
-    const data2 = await res2.json();
-    let raw2 = (data2.content?.find(c=>c.type==='text')?.text || '');
-    const inv = extractJSON(raw2, []);
+
+    const invData = await invRes.json();
+    const inv     = extractJSON(invData.content?.find(c=>c.type==='text')?.text||'', []);
     const priColors = {high:'var(--rose)',medium:'var(--lavender)',low:'var(--sky)'};
-    document.getElementById('predInventory').innerHTML = inv.length ? inv.map(i => `
-      <div class="lb-item">
-        <div style="flex:1;">
-          <div class="lb-name">${i.item}</div>
-          <div class="lb-meta">${i.reason}</div>
+
+    document.getElementById('predInventory').innerHTML = inv.length
+      ? inv.map(i => `
+        <div class="lb-item" style="flex-direction:column;align-items:flex-start;gap:8px;padding:14px 16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+            <div style="font-weight:900;font-size:0.95em;">${i.item}</div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div style="font-weight:900;font-size:1.4em;color:var(--rose-deep);">${i.qty}</div>
+              <span class="tag" style="background:${priColors[i.priority]||'var(--lavender)'}1a;color:${priColors[i.priority]||'var(--lavender)'};border-color:${priColors[i.priority]||'var(--lavender)'}66;">${i.priority||'medium'}</span>
+            </div>
+          </div>
+          ${i.reason ? `<div style="font-size:0.8em;font-weight:700;color:var(--text-mid);line-height:1.5;">${i.reason}</div>` : ''}
+          ${i.signal ? `<div style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;font-size:0.72em;font-weight:800;background:var(--lav-mid);color:var(--text-mid);border:1px solid var(--lavender);">📊 ${i.signal}</div>` : ''}
         </div>
-        <div style="text-align:right;">
-          <div style="font-weight:900;font-size:1.2em;color:var(--rose-deep);">${i.qty}</div>
-          <span class="tag" style="background:${priColors[i.priority]}1a;color:${priColors[i.priority]};border-color:${priColors[i.priority]}66;">${i.priority}</span>
-        </div>
-      </div>
-    `).join('') : '<div class="empty-state"><p>No inventory data — add more events first!</p></div>';
+      `).join('')
+      : '<div class="empty-state"><p>Log events with item details to get contextual inventory plans!</p></div>';
+
   } catch(e) {
-    document.getElementById('predInventory').innerHTML = '<div class="insight-box" style="background:var(--coral-soft);">Could not generate inventory plan.</div>';
+    document.getElementById('predInventory').innerHTML = '<div class="insight-box" style="background:var(--coral-soft);">Could not generate inventory plan — check your connection!</div>';
   }
 
-  // YoY card
-  const pastSameFiltered = events.filter(e => e.name.replace(/\d{4}/,'').trim().toLowerCase() === name.replace(/\d{4}/,'').trim().toLowerCase());
+  // ── YOY CARD ─────────────────────────────────────────────────────────────
+  const pastSameFiltered = events.filter(e =>
+    e.name.replace(/\d{4}/,'').trim().toLowerCase() === name.replace(/\d{4}/,'').trim().toLowerCase()
+  );
   if (pastSameFiltered.length) {
     document.getElementById('yoyCard').style.display = 'block';
     document.getElementById('yoyContent').innerHTML = `
       <p style="font-size:0.85em;font-weight:700;color:var(--text-mid);margin-bottom:12px;">Past data for "${name.replace(/\d{4}/,'').trim()}":</p>
       ${pastSameFiltered.sort((a,b) => new Date(b.date)-new Date(a.date)).map(ev => `
         <div class="lb-item">
-          <div style="flex:1;"><div class="lb-name">${ev.name}</div><div class="lb-meta">${ev.date} · ${ev.weather} · ${ev.crowd}</div></div>
+          <div style="flex:1;">
+            <div class="lb-name">${ev.name}</div>
+            <div class="lb-meta">${ev.date} · ${ev.weather} · ${ev.crowd} · monopoly: ${ev.monopoly||'unknown'}</div>
+            ${ev.items?.length ? `<div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:3px;">${ev.items.sort((a,b)=>b.qty-a.qty).slice(0,5).map(i=>`<span class="tag">${i.name} ×${i.qty}</span>`).join('')}</div>` : ''}
+          </div>
           <div style="font-weight:900;color:var(--rose-deep);">$${ev.revenue.toFixed(0)}</div>
         </div>
       `).join('')}
     `;
-  } else {
-    document.getElementById('yoyCard').style.display = 'none';
   }
 }
 
@@ -2104,16 +1763,10 @@ function addToPlan() {
   const date = document.getElementById('plan_date').value;
   const type = document.getElementById('plan_type').value;
   if (!name || !date || !type) { toast('⚠️ Fill in name, date, and type!'); return; }
-
   const attendance = parseInt(document.getElementById('plan_attendance').value)||0;
   const location   = document.getElementById('plan_location').value.trim();
-  // Revenue estimate: prefer past same event at same location, then same event, then same type
-  const sameLocSameType = location
-    ? events.filter(e => e.type === type && e.location && e.location.toLowerCase().includes(location.toLowerCase().split(' ')[0]))
-    : [];
-  const similar = sameLocSameType.length ? sameLocSameType : events.filter(e => e.type === type);
-  const avgRev = similar.length ? similar.reduce((s,e)=>s+e.revenue,0)/similar.length : null;
-
+  const similar    = events.filter(e => e.type === type);
+  const avgRev     = similar.length ? similar.reduce((s,e)=>s+e.revenue,0)/similar.length : null;
   planEvents.push({ id: Date.now(), name, date, type, attendance, location, estRev: avgRev });
   save(KEY_PLAN, planEvents);
   if (location) saveLocation(location);
@@ -2123,86 +1776,22 @@ function addToPlan() {
   renderPlan();
 }
 
-function editPlanEvent(id) {
-  const ev = planEvents.find(e => e.id === id);
-  if (!ev) return;
-  const card = document.getElementById('plev_'+id);
-  if (!card) return;
-
-  const typeOpts = marketTypes.map(t =>
-    `<option value="${t.id}" ${ev.type===t.id?'selected':''}>${t.emoji} ${t.label}</option>`
-  ).join('');
-  const locOpts = savedLocations.map(l =>
-    `<option value="${l}">`
-  ).join('');
-
-  card.innerHTML = `
-    <div style="background:var(--lav-soft);border-radius:10px;padding:14px;border:2px solid var(--lavender);">
-      <div style="font-size:0.78em;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-soft);margin-bottom:10px;">✏️ Edit Plan Event</div>
-      <div class="grid-2" style="gap:8px;margin-bottom:8px;">
-        <div><label>Event Name</label><input type="text" id="pedit_name_${id}" value="${ev.name}" list="eventNameList"></div>
-        <div><label>Date</label><input type="date" id="pedit_date_${id}" value="${ev.date}"></div>
-      </div>
-      <div class="grid-2" style="gap:8px;margin-bottom:8px;">
-        <div><label>Market Type</label><select id="pedit_type_${id}">${typeOpts}</select></div>
-        <div><label>Expected Attendance</label><input type="number" id="pedit_att_${id}" value="${ev.attendance||''}" placeholder="500"></div>
-      </div>
-      <div style="margin-bottom:10px;">
-        <label>Location</label>
-        <input type="text" id="pedit_loc_${id}" value="${ev.location||''}" placeholder="Virginia Beach Farmers Market..." list="pedit_loclist_${id}">
-        <datalist id="pedit_loclist_${id}">${locOpts}</datalist>
-      </div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn btn-primary btn-sm" onclick="savePlanEventEdit(${id})">✅ Save</button>
-        <button class="btn btn-ghost btn-sm" onclick="renderPlan()">✕ Cancel</button>
-      </div>
-    </div>
-  `;
-}
-
-function savePlanEventEdit(id) {
-  const idx = planEvents.findIndex(e => e.id === id);
-  if (idx === -1) return;
-  const name     = document.getElementById('pedit_name_'+id)?.value.trim();
-  const date     = document.getElementById('pedit_date_'+id)?.value;
-  const type     = document.getElementById('pedit_type_'+id)?.value;
-  const att      = parseInt(document.getElementById('pedit_att_'+id)?.value)||0;
-  const location = document.getElementById('pedit_loc_'+id)?.value.trim();
-  if (!name || !date || !type) { toast('⚠️ Fill in name, date and type!'); return; }
-  planEvents[idx] = { ...planEvents[idx], name, date, type, attendance: att, location };
-  save(KEY_PLAN, planEvents);
-  if (location) saveLocation(location);
-  if (!savedNames.includes(name)) { savedNames.push(name); save(KEY_NAMES, savedNames); }
-  renderPlan();
-  toast('✅ Plan event updated!');
-}
-
-function removePlanEvent(id) {
-  planEvents = planEvents.filter(e => e.id !== id);
-  save(KEY_PLAN, planEvents);
-  renderPlan();
-}
+function removePlanEvent(id) { planEvents = planEvents.filter(e => e.id !== id); save(KEY_PLAN, planEvents); renderPlan(); }
 
 function renderPlan() {
-  const now = new Date();
+  const now    = new Date();
   const cutoff = new Date(now);
   cutoff.setMonth(cutoff.getMonth() + planRange);
-
-  const inRange = planEvents.filter(e => {
-    const d = new Date(e.date);
-    return d >= now && d <= cutoff;
-  }).sort((a,b) => new Date(a.date)-new Date(b.date));
-
+  const inRange = planEvents.filter(e => { const d = new Date(e.date); return d >= now && d <= cutoff; }).sort((a,b) => new Date(a.date)-new Date(b.date));
   const typeLabel = Object.fromEntries(marketTypes.map(t => [t.id, t.label]));
   const typeEmoji = Object.fromEntries(marketTypes.map(t => [t.id, t.emoji]));
 
   if (!inRange.length) {
-    document.getElementById('planCalendar').innerHTML = '<div class="empty-state card"><div class="empty-icon">📅</div><p>No events in the next '+(planRange===1?'month':planRange+' months')+'. Add some above!</p></div>';
+    document.getElementById('planCalendar').innerHTML = '<div class="empty-state card"><div class="empty-icon">📅</div><p>No events in range. Add some above!</p></div>';
     document.getElementById('planSummary').style.display = 'none';
     return;
   }
 
-  // Group by month
   const byMonth = {};
   inRange.forEach(ev => {
     const key = new Date(ev.date).toLocaleDateString('en-US', {month:'long', year:'numeric'});
@@ -2214,47 +1803,31 @@ function renderPlan() {
     <div class="card">
       <div class="month-header">📅 ${month}</div>
       ${evs.map(ev => {
-        // Location-aware revenue estimate: same event+location > same event > same type
-        const pastSameLocSame = ev.location
-          ? events.filter(e => e.name.replace(/\d{4}/,'').trim().toLowerCase() === ev.name.replace(/\d{4}/,'').trim().toLowerCase() && e.location && e.location.toLowerCase().includes(ev.location.toLowerCase().split(' ')[0]))
-          : [];
-        const pastSame = events.filter(e => e.name.replace(/\d{4}/,'').trim().toLowerCase() === ev.name.replace(/\d{4}/,'').trim().toLowerCase());
-        const similar  = events.filter(e => e.type === ev.type);
-        const pastLocAvg  = pastSameLocSame.length ? pastSameLocSame.reduce((s,e)=>s+e.revenue,0)/pastSameLocSame.length : null;
-        const pastAvg     = pastSame.length ? pastSame.reduce((s,e)=>s+e.revenue,0)/pastSame.length : null;
-        const avg         = similar.length ? similar.reduce((s,e)=>s+e.revenue,0)/similar.length : null;
-        const estRev      = pastLocAvg || pastAvg || avg;
-        const estTag      = pastLocAvg ? '<span class="tag green">Same event + location</span>' : pastAvg ? '<span class="tag green">Same past event</span>' : avg ? '<span class="tag purple">Similar market type</span>' : '';
-        return `<div class="plan-event" id="plev_${ev.id}">
+        const pastSame  = events.filter(e => e.name.replace(/\d{4}/,'').trim().toLowerCase() === ev.name.replace(/\d{4}/,'').trim().toLowerCase());
+        const similar   = events.filter(e => e.type === ev.type);
+        const pastAvg   = pastSame.length  ? pastSame.reduce((s,e)=>s+e.revenue,0)/pastSame.length   : null;
+        const avg       = similar.length   ? similar.reduce((s,e)=>s+e.revenue,0)/similar.length     : null;
+        const estRev    = pastAvg || avg;
+        const estTag    = pastAvg ? '<span class="tag green">Same past event</span>' : avg ? '<span class="tag purple">Similar market type</span>' : '';
+        return `<div class="plan-event">
           <div class="plan-event-header">
             <div>
               <div class="plan-event-name">${typeEmoji[ev.type]||''} ${ev.name}</div>
-              <div class="plan-event-date">${new Date(ev.date+'T12:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})} · <span class="tag">${typeLabel[ev.type]||ev.type}</span>${ev.attendance ? ` · ~${ev.attendance.toLocaleString()} attendance` : ''}${ev.location ? ` · 📍 ${ev.location}` : ''}</div>
+              <div class="plan-event-date">${new Date(ev.date+'T12:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})} · <span class="tag">${typeLabel[ev.type]||ev.type}</span>${ev.attendance ? ` · ~${ev.attendance.toLocaleString()}` : ''}${ev.location ? ` · 📍 ${ev.location}` : ''}</div>
             </div>
-            <div style="display:flex;gap:6px;align-items:center;">
-              <button class="btn btn-secondary btn-sm" onclick="editPlanEvent(${ev.id})">✏️</button>
-              <button class="plan-remove" onclick="removePlanEvent(${ev.id})">✕</button>
-            </div>
+            <button class="plan-remove" onclick="removePlanEvent(${ev.id})">✕</button>
           </div>
-          <div class="plan-forecast">
-            ${estRev ? `💰 Est. revenue: <strong>$${(estRev*0.85).toFixed(0)}–$${(estRev*1.2).toFixed(0)}</strong> ${estTag}` : `💰 Est. revenue: <span class="tag">Log similar events for forecast!</span>`}
-          </div>
-          <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="btn btn-primary btn-sm" onclick="getPrepList(${ev.id})">🧭 Get AI Prep List</button>
-          </div>
-          <div id="preplist_${ev.id}" style="display:none;margin-top:12px;"></div>
+          <div class="plan-forecast">${estRev ? `💰 Est: <strong>$${(estRev*0.85).toFixed(0)}–$${(estRev*1.2).toFixed(0)}</strong> ${estTag}` : '💰 Log similar events for a forecast estimate!'}</div>
         </div>`;
       }).join('')}
     </div>
   `).join('');
 
-  // Summary
   const totalEst = inRange.reduce((s,ev) => {
     const similar = events.filter(e => e.type === ev.type);
     const avg = similar.length ? similar.reduce((x,e)=>x+e.revenue,0)/similar.length : 0;
     const pastSame = events.filter(e => e.name.replace(/\d{4}/,'').trim().toLowerCase() === ev.name.replace(/\d{4}/,'').trim().toLowerCase());
-    const pastAvg = pastSame.length ? pastSame.reduce((x,e)=>x+e.revenue,0)/pastSame.length : 0;
-    return s + (pastAvg || avg || 0);
+    return s + (pastSame.length ? pastSame.reduce((x,e)=>x+e.revenue,0)/pastSame.length : avg);
   }, 0);
 
   document.getElementById('planSummary').style.display = 'block';
@@ -2265,358 +1838,14 @@ function renderPlan() {
     </div>
     <div class="insight-box" style="margin-top:12px;">
       <div class="insight-label">💡 Planning Tip</div>
-      You have ${inRange.length} event${inRange.length!==1?'s':''} in the next ${planRange===1?'month':planRange+' months'}. ${totalEst > 0 ? `Based on your history, expect roughly $${totalEst.toFixed(0)} in total revenue for this period.` : 'Log past events to get revenue estimates!'}
+      ${inRange.length} event${inRange.length!==1?'s':''} in the next ${planRange===1?'month':planRange+' months'}. ${totalEst > 0 ? `Based on your history, expect roughly $${totalEst.toFixed(0)} across this period.` : 'Log past events to get revenue estimates!'}
     </div>
-    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
-      <div style="font-weight:900;font-size:0.9em;margin-bottom:8px;">🗓️ Master Prep List</div>
-      <p style="font-size:0.82em;font-weight:700;color:var(--text-mid);margin-bottom:10px;">Get a combined prep list across all ${inRange.length} event${inRange.length!==1?'s':''} — totals per item with a priority breakdown by event.</p>
-      <button class="btn btn-primary btn-sm" onclick="renderProductionSchedule()">📋 Generate Production Schedule</button>
-    </div>
-    <div id="masterPrepResult" style="margin-top:14px;display:none;"></div>
   `;
 }
 
 // ═══════════════════════════════════════════════
-// PRODUCTION SCHEDULE (formula-based, no AI)
+// NOTES TAB
 // ═══════════════════════════════════════════════
-
-// All items each contractor makes with avg time per piece
-const CONTRACTOR_ITEMS = {
-  ashley: [
-    'Chickens', 'Baby Chicks', 'Octopi', 'Heart Keychain',
-    'Mini Loaf Cat', 'Bear Coasters', 'Cherry Blossom Pouch',
-    'Apple Coasters', 'Pet Rock', 'Christmas Baby Chick', 'Baby Christmas Tree',
-    'Mama Possum', 'Baby Possum'
-  ],
-  liz: [
-    'Leggy Frog', 'Bees', 'Pastel Rainbow Birb', 'Jellyfish',
-    'All Birb Designs', 'Birb'
-  ]
-};
-
-function getContractorForItem(itemName) {
-  const n = itemName.toLowerCase();
-  if (CONTRACTOR_ITEMS.ashley.some(i => n.includes(i.toLowerCase()) || i.toLowerCase().includes(n.split(' ')[0]))) return 'ashley';
-  if (CONTRACTOR_ITEMS.liz.some(i => n.includes(i.toLowerCase()) || i.toLowerCase().includes(n.split(' ')[0]))) return 'liz';
-  return 'ami';
-}
-
-function needByDate(eventDate) {
-  const d = new Date(eventDate + 'T12:00');
-  d.setDate(d.getDate() - 2);
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-}
-
-function renderProductionSchedule() {
-  const resultEl = document.getElementById('masterPrepResult');
-  if (!resultEl) return;
-  resultEl.style.display = 'block';
-
-  const now = new Date();
-  const cutoff = new Date(now);
-  cutoff.setMonth(cutoff.getMonth() + planRange);
-  const inRange = planEvents.filter(e => {
-    const d = new Date(e.date);
-    return d >= now && d <= cutoff;
-  }).sort((a,b) => new Date(a.date) - new Date(b.date));
-
-  if (!inRange.length) {
-    resultEl.innerHTML = `<div class="insight-box" style="background:var(--yellow-soft);border-color:var(--yellow);">No events in range — add some to your plan first!</div>`;
-    return;
-  }
-
-  // Build item list from historical sales
-  const itemAgg = {};
-  const relevantEvents = events.filter(e => inRange.some(p => p.type === e.type));
-  const allEvents = relevantEvents.length ? relevantEvents : events;
-
-  allEvents.forEach(ev => {
-    ev.items?.forEach(item => {
-      if (!item.name) return;
-      if (!itemAgg[item.name]) itemAgg[item.name] = { qty: 0, count: 0 };
-      itemAgg[item.name].qty += item.qty;
-      itemAgg[item.name].count++;
-    });
-  });
-
-  // Per-event quantities: avg sold per event for that item
-  // Assign items to each planned event based on avg
-  const schedule = {}; // itemName -> { who, events: [{evName, date, qty, needBy}], total }
-
-  inRange.forEach(ev => {
-    Object.entries(itemAgg).forEach(([name, d]) => {
-      const avgQty = Math.ceil(d.qty / d.count);
-      if (avgQty < 1) return;
-      const who = getContractorForItem(name);
-      if (!schedule[name]) schedule[name] = { who, events: [], total: 0 };
-      schedule[name].events.push({
-        evName: ev.name,
-        date: ev.date,
-        qty: avgQty,
-        needBy: needByDate(ev.date)
-      });
-      schedule[name].total += avgQty;
-    });
-  });
-
-  // Also add contractor's known items even if no history
-  ['ashley','liz'].forEach(who => {
-    CONTRACTOR_ITEMS[who].forEach(itemName => {
-      if (!schedule[itemName]) {
-        // No history — suggest 5 per event as starter
-        const evs = inRange.map(ev => ({
-          evName: ev.name, date: ev.date, qty: 5, needBy: needByDate(ev.date)
-        }));
-        schedule[itemName] = { who, events: evs, total: evs.length * 5, noHistory: true };
-      }
-    });
-  });
-
-  // Group by contractor
-  const byWho = { ashley: {}, liz: {}, ami: {} };
-  Object.entries(schedule).forEach(([name, d]) => {
-    if (byWho[d.who]) byWho[d.who][name] = d;
-  });
-
-  // Store for pay tab
-  window._productionSchedule = schedule;
-
-  resultEl.innerHTML = `
-    <div style="font-size:0.82em;font-weight:700;color:var(--text-mid);margin-bottom:14px;">
-      📋 Production schedule across <strong>${inRange.length} events</strong> — quantities based on your sales history.
-      Quantities with ⭐ are estimates (no past sales data).
-    </div>
-    ${renderContractorSection('ashley', byWho.ashley, 'Ashley')}
-    ${renderContractorSection('liz', byWho.liz, 'Liz')}
-    ${renderContractorSection('ami', byWho.ami, 'Ami')}
-    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
-      <button class="btn btn-primary btn-sm" onclick="sendScheduleToPayTab('ashley')">💸 Send Ashley's to Pay</button>
-      <button class="btn btn-secondary btn-sm" onclick="sendScheduleToPayTab('liz')">💸 Send Liz's to Pay</button>
-      <button class="btn btn-ghost btn-sm" onclick="renderProductionSchedule()">🔄 Recalculate</button>
-    </div>
-
-    <div style="margin-top:14px;padding:14px;background:var(--lav-soft);border-radius:var(--radius-sm);border:2px solid var(--lavender);">
-      <div style="font-size:0.78em;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-soft);margin-bottom:8px;">🤖 Ask AI to Adjust</div>
-      <textarea id="scheduleAdjustInput" placeholder="e.g. I think Axolotls will sell way more at the strawberry festival — bump those up and reduce Kirby. Also add 10 extra Heart Keychains across all events." style="width:100%;min-height:70px;padding:10px;border:2px solid var(--lavender);border-radius:8px;font-family:'Nunito',sans-serif;font-size:0.85em;font-weight:600;resize:vertical;"></textarea>
-      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
-        <button class="btn btn-primary btn-sm" onclick="aiAdjustSchedule()">✨ Apply AI Adjustments</button>
-        <span style="font-size:0.75em;font-weight:700;color:var(--text-soft);align-self:center;">AI will suggest changes — you approve before anything updates</span>
-      </div>
-      <div id="scheduleAdjustResult" style="display:none;margin-top:12px;"></div>
-    </div>
-  `;
-}
-
-function renderContractorSection(who, items, label) {
-  if (!Object.keys(items).length) return '';
-  const whoColors = { ashley: '#FCE7F3', liz: '#EDE9FE', ami: '#ECFDF5' };
-  const whoBorder = { ashley: '#F472B6', liz: '#C4B5FD', ami: '#6EE7B7' };
-  const totalItems = Object.values(items).reduce((s, d) => s + d.total, 0);
-  const sectionId = 'prodsec_' + who;
-  const meetupId = 'meetup_' + who;
-
-  const meetupDate = localStorage.getItem('meetup_' + who) || '';
-
-  const itemRows = Object.entries(items).sort((a,b) => b[1].total - a[1].total).map(([name, d]) => {
-    const detailId = 'proditem_' + who + '_' + name.replace(/\s/g,'');
-
-    // Split events into before/after next meetup
-    let beforeMeetup = [], afterMeetup = [];
-    if (meetupDate) {
-      const mu = new Date(meetupDate + 'T12:00');
-      d.events.forEach(ev => {
-        if (new Date(ev.date) <= mu) beforeMeetup.push(ev);
-        else afterMeetup.push(ev);
-      });
-    }
-
-    const evRows = d.events.map(ev => `
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 10px;border-bottom:1px dashed var(--border);font-size:0.78em;font-weight:700;color:var(--text-mid);">
-        <span>📅 ${ev.evName} <span style="color:var(--text-soft);font-weight:600;">(${new Date(ev.date+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})})</span></span>
-        <span style="color:var(--text);">${ev.qty} · <span style="color:var(--coral);font-size:0.9em;">need by ${ev.needBy}</span></span>
-      </div>
-    `).join('');
-
-    const meetupAlert = meetupDate && beforeMeetup.length ? `
-      <div style="background:#FEF9C3;border-left:3px solid #EAB308;padding:5px 10px;font-size:0.75em;font-weight:800;color:#854D0E;">
-        🔔 ${beforeMeetup.reduce((s,e)=>s+e.qty,0)} needed for next meetup (${new Date(meetupDate+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})})
-      </div>` : '';
-
-    return `
-      <div style="background:var(--white);border-radius:8px;margin-bottom:6px;border:1px solid var(--border);overflow:hidden;">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;cursor:pointer;background:${d.noHistory?'var(--yellow-soft)':'var(--white)'};"
-          onclick="const el=document.getElementById('${detailId}');el.style.display=el.style.display==='none'?'block':'none';this.querySelector('.arr').textContent=el.style.display==='none'?'▸':'▾';">
-          <div>
-            <span style="font-weight:900;font-size:0.88em;">${name}</span>
-            ${d.noHistory ? '<span style="font-size:0.7em;color:#92400E;margin-left:6px;">⭐ estimated</span>' : ''}
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;">
-            <span style="font-weight:900;font-size:1.1em;color:var(--rose-deep);">${d.total}</span>
-            <span class="arr" style="color:var(--text-soft);">▸</span>
-          </div>
-        </div>
-        <div id="${detailId}" style="display:none;border-top:1px solid var(--border);">
-          ${meetupAlert}
-          ${evRows}
-        </div>
-      </div>
-    `;
-  }).join('');
-
-  return `
-    <div style="margin-bottom:16px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;background:${whoColors[who]};border-radius:10px;border:2px solid ${whoBorder[who]};cursor:pointer;margin-bottom:8px;"
-        onclick="const s=document.getElementById('${sectionId}');s.style.display=s.style.display==='none'?'block':'none';this.querySelector('.sarr').textContent=s.style.display==='none'?'▸':'▾';">
-        <div>
-          <span style="font-weight:900;font-size:0.92em;">${who==='ami'?'🌸':'👩'} ${label} — ${Object.keys(items).length} items · ${totalItems} total</span>
-        </div>
-        <span class="sarr" style="color:var(--text-mid);">▾</span>
-      </div>
-      <div id="${sectionId}">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding:8px 12px;background:var(--white);border-radius:8px;border:1px solid var(--border);">
-          <span style="font-size:0.8em;font-weight:800;color:var(--text-mid);white-space:nowrap;">📅 Next meetup:</span>
-          <input type="date" value="${meetupDate}" onchange="saveMeetupDate('${who}',this.value);renderProductionSchedule();"
-            style="padding:5px 8px;border:2px solid var(--rose-mid);border-radius:6px;font-size:0.82em;font-weight:700;flex:1;">
-          ${meetupDate ? `<span style="font-size:0.75em;font-weight:700;color:var(--text-soft);">${new Date(meetupDate+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>` : '<span style="font-size:0.75em;color:var(--text-soft);">set date to see meetup highlights</span>'}
-        </div>
-        ${itemRows}
-      </div>
-    </div>
-  `;
-}
-
-function saveMeetupDate(who, date) {
-  localStorage.setItem('meetup_' + who, date);
-  toast('📅 Meetup date saved for ' + (who === 'ashley' ? 'Ashley' : who === 'liz' ? 'Liz' : 'Ami'));
-}
-
-async function aiAdjustSchedule() {
-  const note = document.getElementById('scheduleAdjustInput')?.value.trim();
-  if (!note) { toast('⚠️ Tell the AI what to adjust first!'); return; }
-
-  const schedule = window._productionSchedule;
-  if (!schedule) { toast('⚠️ Generate a schedule first!'); return; }
-
-  const resultEl = document.getElementById('scheduleAdjustResult');
-  resultEl.style.display = 'block';
-  resultEl.innerHTML = '<div class="ai-loading"><div class="dots"><span></span><span></span><span></span></div> Calculating adjustments...</div>';
-
-  // Build current schedule summary for AI
-  const scheduleSummary = Object.entries(schedule).map(([name, d]) =>
-    `${name} (${d.who}): ${d.total} total across ${d.events.length} events`
-  ).join(', ');
-
-  const eventList = (window._productionSchedule ? Object.values(schedule)[0]?.events.map(e => e.evName).join(', ') : '') || 'various events';
-
-  try {
-    const res = await apiCall({
-      system: `You are a production quantity adjuster for Amioki amigurumi brand. You receive a current production schedule and a user's adjustment request. Return ONLY a JSON array of changes. Start with [ end with ]. No other text.
-Schema: [{"item":"item name","change":"increase|decrease|set","amount":number,"reason":"brief reason"}]`,
-      messages: [{ role: 'user', content: `Current schedule: ${scheduleSummary}
-
-User's adjustment request: "${note}"
-
-Return a JSON array of specific quantity changes to make. Be precise with item names and amounts.` }]
-    });
-
-    const data = await res.json();
-    const raw = data.content?.find(c => c.type === 'text')?.text || '';
-    const changes = extractJSON(raw, []);
-
-    if (!changes.length) {
-      resultEl.innerHTML = `<div class="insight-box" style="background:var(--yellow-soft);border-color:var(--yellow);">AI couldn't parse that request — try being more specific about item names and quantities.</div>`;
-      return;
-    }
-
-    // Show suggestion card for approval
-    resultEl.innerHTML = `
-      <div style="background:var(--white);border-radius:10px;border:2px solid var(--lavender);overflow:hidden;">
-        <div style="padding:10px 14px;background:var(--lav-soft);font-weight:900;font-size:0.85em;">✨ Suggested Adjustments — Review & Approve</div>
-        ${changes.map((c, i) => `
-          <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);">
-            <input type="checkbox" id="chg_${i}" checked style="width:16px;height:16px;accent-color:var(--rose);">
-            <div style="flex:1;">
-              <div style="font-weight:800;font-size:0.88em;">${c.item}</div>
-              <div style="font-size:0.75em;color:var(--text-soft);">${c.reason||''}</div>
-            </div>
-            <div style="font-weight:900;color:${c.change==='increase'?'#065F46':c.change==='decrease'?'#991B1B':'var(--text)'};">
-              ${c.change==='increase'?'↑ +':c.change==='decrease'?'↓ -':'→ '}${c.amount}
-            </div>
-          </div>
-        `).join('')}
-        <div style="padding:12px 14px;display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="btn btn-primary btn-sm" onclick="applyScheduleChanges(${JSON.stringify(changes).replace(/"/g,'&quot;')})">✅ Apply Selected</button>
-          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('scheduleAdjustResult').style.display='none'">✕ Cancel</button>
-        </div>
-      </div>
-    `;
-
-    // Store changes for apply function
-    window._pendingScheduleChanges = changes;
-
-  } catch(e) {
-    resultEl.innerHTML = `<div class="insight-box" style="background:var(--coral-soft);border-color:var(--coral);">❌ Could not get AI adjustments. Check your connection and try again.</div>`;
-  }
-}
-
-function applyScheduleChanges(changes) {
-  const schedule = window._productionSchedule;
-  if (!schedule) return;
-
-  // Only apply checked ones
-  const checked = changes.filter((c, i) => document.getElementById('chg_'+i)?.checked);
-
-  checked.forEach(change => {
-    // Find matching item (fuzzy match)
-    const matchKey = Object.keys(schedule).find(k =>
-      k.toLowerCase().includes(change.item.toLowerCase()) ||
-      change.item.toLowerCase().includes(k.toLowerCase())
-    );
-    if (!matchKey) return;
-
-    const item = schedule[matchKey];
-    const perEvent = Math.ceil(item.total / (item.events.length || 1));
-
-    if (change.change === 'increase') {
-      const addPerEvent = Math.ceil(change.amount / (item.events.length || 1));
-      item.events.forEach(ev => ev.qty += addPerEvent);
-      item.total += change.amount;
-    } else if (change.change === 'decrease') {
-      const subPerEvent = Math.ceil(change.amount / (item.events.length || 1));
-      item.events.forEach(ev => ev.qty = Math.max(0, ev.qty - subPerEvent));
-      item.total = Math.max(0, item.total - change.amount);
-    } else if (change.change === 'set') {
-      const newPerEvent = Math.ceil(change.amount / (item.events.length || 1));
-      item.events.forEach(ev => ev.qty = newPerEvent);
-      item.total = change.amount;
-    }
-  });
-
-  toast(`✅ ${checked.length} adjustment${checked.length!==1?'s':''} applied!`);
-  document.getElementById('scheduleAdjustInput').value = '';
-  renderProductionSchedule();
-}
-
-
-function sendScheduleToPayTab(who) {
-  const schedule = window._productionSchedule;
-  if (!schedule) { toast('⚠️ Generate production schedule first!'); return; }
-  const entries = Object.entries(schedule)
-    .filter(([, d]) => d.who === who)
-    .map(([name, d]) => ({ itemName: name, qty: d.total, rate: 0, labor: 0, materials: 0 }));
-  if (!entries.length) { toast('No items for ' + who + ' in this schedule!'); return; }
-  window._pendingPayOrder = {
-    evName: `${planRange}-Month Production`,
-    ashley: who === 'ashley' ? entries : [],
-    liz:    who === 'liz'    ? entries : []
-  };
-  document.querySelectorAll('.tab-btn').forEach(b => { if (b.textContent.includes('Pay')) b.click(); });
-  setTimeout(() => { setContractor(who); loadPendingPayOrder(); }, 300);
-  toast('💸 Sent ' + (who === 'ashley' ? 'Ashley' : 'Liz') + "'s items to Pay tab!");
-}
-
-
-
 function setNoteFilter(el) {
   document.querySelectorAll('#noteCatChips .chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
@@ -2627,14 +1856,7 @@ function setNoteFilter(el) {
 function saveNote() {
   const text = document.getElementById('quick_note').value.trim();
   if (!text) { toast('⚠️ Write a note first!'); return; }
-  const note = {
-    id: Date.now(),
-    text,
-    event: document.getElementById('note_event').value.trim(),
-    cat: document.getElementById('note_cat').value,
-    date: new Date().toISOString().split('T')[0]
-  };
-  notes.unshift(note);
+  notes.unshift({ id: Date.now(), text, event: document.getElementById('note_event').value.trim(), cat: document.getElementById('note_cat').value, date: new Date().toISOString().split('T')[0] });
   save(KEY_NOTES, notes);
   document.getElementById('quick_note').value = '';
   document.getElementById('note_event').value = '';
@@ -2642,26 +1864,19 @@ function saveNote() {
   renderNotes();
 }
 
-function deleteNote(id) {
-  notes = notes.filter(n => n.id !== id);
-  save(KEY_NOTES, notes);
-  renderNotes();
-}
+function deleteNote(id) { notes = notes.filter(n => n.id !== id); save(KEY_NOTES, notes); renderNotes(); }
 
 function renderNotes() {
   const filtered = noteFilter === 'all' ? notes : notes.filter(n => n.cat === noteFilter);
   const catLabel = {pricing:'💰 Pricing',item:'📦 Item',weather:'🌤️ Weather',crowd:'👥 Crowd',strategy:'🧠 Strategy',general:'📌 General'};
   const wrap = document.getElementById('allNotes');
-  if (!filtered.length) {
-    wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div><p>No notes in this category yet!</p></div>';
-    return;
-  }
+  if (!filtered.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div><p>No notes in this category yet!</p></div>'; return; }
   wrap.innerHTML = filtered.map(n => `
     <div class="note-item">
-      <div class="note-meta">${catLabel[n.cat]||n.cat}${n.event ? ' · '+n.event : ''} · ${n.date}</div>
+      <div class="note-meta">${catLabel[n.cat]||n.cat}${n.event?' · '+n.event:''} · ${n.date}</div>
       <div style="display:flex;gap:8px;align-items:flex-start;">
         <div style="flex:1;">${n.text}</div>
-        <button onclick="deleteNote(${n.id})" style="background:none;border:none;cursor:pointer;color:var(--coral);font-size:1em;flex-shrink:0;">🗑</button>
+        <button onclick="deleteNote(${n.id})" style="background:none;border:none;cursor:pointer;color:var(--coral);">🗑</button>
       </div>
     </div>
   `).join('');
@@ -2670,64 +1885,47 @@ function renderNotes() {
 async function askAI() {
   const question = document.getElementById('aiQuestion').value.trim();
   if (!question) { toast('⚠️ Type a question first!'); return; }
-
-  const answerBox = document.getElementById('aiAnswer');
+  const answerBox  = document.getElementById('aiAnswer');
   const answerText = document.getElementById('aiAnswerText');
   answerBox.style.display = 'block';
   answerText.innerHTML = '<div class="ai-loading"><div class="dots"><span></span><span></span><span></span></div> Thinking...</div>';
 
-  const evSummary = events.slice(0,20).map(e => `${e.name} (${e.type}): $${e.revenue} revenue, ${e.weather}, ${e.crowd}${e.notes?' — notes: '+e.notes:''}`).join('\n');
+  const evSummary   = events.slice(0,20).map(e => `${e.name} (${e.type}): $${e.revenue}${e.notes?' — '+e.notes:''}`).join('\n');
   const noteSummary = notes.map(n => `[${n.cat}] ${n.text}`).join('\n');
   const itemAgg = {};
   events.forEach(ev => ev.items?.forEach(item => {
     if (!itemAgg[item.name]) itemAgg[item.name] = {qty:0, rev:0};
-    itemAgg[item.name].qty += item.qty;
-    itemAgg[item.name].rev += item.rev;
+    itemAgg[item.name].qty += item.qty; itemAgg[item.name].rev += item.rev;
   }));
-  const itemSummary = Object.entries(itemAgg).sort((a,b) => b[1].qty-a[1].qty).map(([n,d]) => `${n}: ${d.qty} sold`).join(', ');
+  const itemSummary = Object.entries(itemAgg).sort((a,b)=>b[1].qty-a[1].qty).map(([n,d])=>`${n}: ${d.qty} sold`).join(', ');
 
   try {
     const res = await apiCall({
-        system: `You are a friendly business analyst for Amioki, a kawaii amigurumi crochet brand in Virginia Beach VA run by Ami. She sells handmade plushies at markets/festivals. Her best sellers are Pikachu (always demand-constrained), Axolotl, and Kirby. She has a pink branded tent. She works with contractors Ashley and Liz. Answer her question directly, warmly, and with specific actionable advice based on her data. Keep it concise.`,
-        messages: [{ role: 'user', content: `My question: ${question}
-
-My event history:
-${evSummary||'No events logged yet.'}
-
-My market notes:
-${noteSummary||'No notes yet.'}
-
-Item performance:
-${itemSummary||'No item data yet.'}` }]
+      system: `You are a friendly business analyst for Amioki, a kawaii amigurumi brand in Virginia Beach VA run by Ami. She sells handmade plushies at markets/festivals. Bestsellers: Pikachu (always demand-constrained), Axolotl, Kirby. She has contractors Ashley and Liz. Answer her question directly, warmly, with specific actionable advice based on her data.`,
+      messages: [{ role: 'user', content: `My question: ${question}\n\nMy event history:\n${evSummary||'No events yet.'}\n\nMy notes:\n${noteSummary||'None yet.'}\n\nItem performance:\n${itemSummary||'No item data yet.'}` }]
     });
     const data = await res.json();
-    answerText.textContent = data.content?.find(c=>c.type==='text')?.text || 'Unable to get an answer right now. Log more events for better insights!';
-  } catch(e) {
-    answerText.textContent = 'Connection issue — try again!';
-  }
+    answerText.textContent = data.content?.find(c=>c.type==='text')?.text || 'Unable to get an answer right now.';
+  } catch(e) { answerText.textContent = 'Connection issue — try again!'; }
 }
 
 // ═══════════════════════════════════════════════
 // CONTRACTOR PAY PLANNER
 // ═══════════════════════════════════════════════
 function setContractor(who) {
-  activeContractor = who;
-  ctrCustomItems = [];
-  document.getElementById('ctr-ashley-btn').className = 'btn btn-sm ' + (who==='ashley' ? 'btn-primary' : 'btn-ghost');
-  document.getElementById('ctr-liz-btn').className    = 'btn btn-sm ' + (who==='liz'    ? 'btn-primary' : 'btn-ghost');
+  activeContractor = who; ctrCustomItems = [];
+  document.getElementById('ctr-ashley-btn').className = 'btn btn-sm '+(who==='ashley'?'btn-primary':'btn-ghost');
+  document.getElementById('ctr-liz-btn').className    = 'btn btn-sm '+(who==='liz'?'btn-primary':'btn-ghost');
   const ctr = CONTRACTORS[who];
   document.getElementById('ctr-note').textContent = ctr.note + ' · Contract anniversary ' + ctr.anniversary;
   document.getElementById('ctr-name-inline').textContent = ctr.name;
-  renderContractorItems();
-  renderSavedOrders();
-  renderMonthlyBreakdown();
+  renderContractorItems(); renderSavedOrders(); renderMonthlyBreakdown();
 }
 
 function renderContractorItems() {
   const ctr = CONTRACTORS[activeContractor];
   const allItems = [...ctr.items, ...ctrCustomItems];
   const wrap = document.getElementById('ctrItemsWrap');
-
   wrap.innerHTML = `
     <div style="display:grid;grid-template-columns:1fr 90px 80px 80px 80px;gap:8px;padding:8px 10px;background:var(--lav-mid);border-radius:var(--radius-sm);margin-bottom:8px;">
       <div style="font-size:0.72em;font-weight:900;text-transform:uppercase;color:var(--text-mid);">Item</div>
@@ -2740,12 +1938,10 @@ function renderContractorItems() {
       <div style="display:grid;grid-template-columns:1fr 90px 80px 80px 80px;gap:8px;align-items:center;padding:8px 10px;background:var(--white);border-radius:var(--radius-sm);margin-bottom:6px;border:1px solid var(--border);">
         <div>
           <div style="font-weight:800;font-size:0.88em;">${item.name}</div>
-          <div style="font-size:0.72em;color:var(--text-soft);">${item.time ? item.time+' min · ':''}$${item.labor.toFixed(2)} labor + $${item.materials.toFixed(2)} mat.</div>
+          <div style="font-size:0.72em;color:var(--text-soft);">${item.time?item.time+' min · ':''}$${item.labor.toFixed(2)} labor + $${item.materials.toFixed(2)} mat.</div>
         </div>
         <div style="text-align:center;">
-          <input type="number" min="0" value="0" id="ctr_qty_${i}"
-            oninput="updateCtrTotals()"
-            style="width:70px;padding:6px;border:2px solid var(--rose-mid);border-radius:8px;text-align:center;font-weight:900;font-size:0.9em;">
+          <input type="number" min="0" value="0" id="ctr_qty_${i}" oninput="updateCtrTotals()" style="width:70px;padding:6px;border:2px solid var(--rose-mid);border-radius:8px;text-align:center;font-weight:900;font-size:0.9em;">
         </div>
         <div style="text-align:right;font-weight:800;font-size:0.88em;">$${item.total.toFixed(2)}</div>
         <div style="text-align:right;font-weight:800;font-size:0.88em;color:var(--text-mid);">$${item.labor.toFixed(2)}</div>
@@ -2759,55 +1955,35 @@ function renderContractorItems() {
 function updateCtrTotals() {
   const ctr = CONTRACTORS[activeContractor];
   const allItems = [...ctr.items, ...ctrCustomItems];
-  let totalItems = 0, totalLabor = 0, totalMaterials = 0, totalOwed = 0;
+  let totalItems=0, totalLabor=0, totalMaterials=0, totalOwed=0;
   const breakdownLines = [];
-
   allItems.forEach((item, i) => {
     const qty = parseInt(document.getElementById('ctr_qty_'+i)?.value)||0;
     const subtotal = qty * item.total;
-    const laborSub = qty * item.labor;
-    const matSub   = qty * item.materials;
-    totalItems    += qty;
-    totalLabor    += laborSub;
-    totalMaterials+= matSub;
-    totalOwed     += subtotal;
+    totalItems+=qty; totalLabor+=qty*item.labor; totalMaterials+=qty*item.materials; totalOwed+=subtotal;
     const el = document.getElementById('ctr_sub_'+i);
     if (el) el.textContent = '$'+subtotal.toFixed(2);
-    if (qty > 0) breakdownLines.push({ name: item.name, qty, subtotal, laborSub, matSub });
+    if (qty > 0) breakdownLines.push({name:item.name, qty, subtotal, laborSub:qty*item.labor, matSub:qty*item.materials});
   });
-
-  document.getElementById('ctr-total-items').textContent = totalItems;
-  document.getElementById('ctr-total-labor').textContent = '$'+totalLabor.toFixed(2);
+  document.getElementById('ctr-total-items').textContent     = totalItems;
+  document.getElementById('ctr-total-labor').textContent     = '$'+totalLabor.toFixed(2);
   document.getElementById('ctr-total-materials').textContent = '$'+totalMaterials.toFixed(2);
-  document.getElementById('ctr-total-owed').textContent = '$'+totalOwed.toFixed(2);
-
+  document.getElementById('ctr-total-owed').textContent      = '$'+totalOwed.toFixed(2);
   const bdWrap = document.getElementById('ctr-breakdown');
-  if (!breakdownLines.length) {
-    bdWrap.innerHTML = '';
-    return;
-  }
-  bdWrap.innerHTML = `
+  bdWrap.innerHTML = breakdownLines.length ? `
     <div style="font-size:0.78em;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-soft);margin-bottom:8px;">Order Breakdown</div>
-    ${breakdownLines.map(l => `
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--white);border-radius:8px;margin-bottom:5px;border:1px solid var(--border);">
-        <div>
-          <span style="font-weight:800;font-size:0.88em;">${l.name}</span>
-          <span style="color:var(--text-soft);font-size:0.78em;"> × ${l.qty}</span>
-        </div>
-        <div style="text-align:right;">
-          <span style="font-weight:900;color:var(--rose-deep);">$${l.subtotal.toFixed(2)}</span>
-          <span style="color:var(--text-soft);font-size:0.72em;"> ($${l.laborSub.toFixed(2)} labor + $${l.matSub.toFixed(2)} mat.)</span>
-        </div>
-      </div>
-    `).join('')}
-  `;
+    ${breakdownLines.map(l => `<div style="display:flex;justify-content:space-between;padding:7px 10px;background:var(--white);border-radius:8px;margin-bottom:5px;border:1px solid var(--border);">
+      <div><span style="font-weight:800;font-size:0.88em;">${l.name}</span> <span style="color:var(--text-soft);font-size:0.78em;">× ${l.qty}</span></div>
+      <div><span style="font-weight:900;color:var(--rose-deep);">$${l.subtotal.toFixed(2)}</span> <span style="color:var(--text-soft);font-size:0.72em;">($${l.laborSub.toFixed(2)} labor + $${l.matSub.toFixed(2)} mat.)</span></div>
+    </div>`).join('')}
+  ` : '';
 }
 
 function addCustomItem() {
   const name  = document.getElementById('ctr_custom_name').value.trim();
   const total = parseFloat(document.getElementById('ctr_custom_rate').value)||0;
   if (!name || !total) { toast('⚠️ Enter item name and piece rate!'); return; }
-  ctrCustomItems.push({ name, labor: total, materials: 0, total, time: null });
+  ctrCustomItems.push({name, labor:total, materials:0, total, time:null});
   document.getElementById('ctr_custom_name').value = '';
   document.getElementById('ctr_custom_rate').value = '';
   renderContractorItems();
@@ -2817,77 +1993,49 @@ function addCustomItem() {
 function saveOrder() {
   const ctr = CONTRACTORS[activeContractor];
   const allItems = [...ctr.items, ...ctrCustomItems];
-  const label  = document.getElementById('ctr_order_label').value.trim() || 'Production Order';
-  const lines  = [];
-  let totalOwed = 0, totalItems = 0;
-
+  const label = document.getElementById('ctr_order_label').value.trim() || 'Production Order';
+  const lines = []; let totalOwed=0, totalItems=0;
   allItems.forEach((item, i) => {
     const qty = parseInt(document.getElementById('ctr_qty_'+i)?.value)||0;
-    if (qty > 0) {
-      lines.push({ name: item.name, qty, rate: item.total, labor: item.labor, materials: item.materials, subtotal: qty*item.total });
-      totalOwed  += qty * item.total;
-      totalItems += qty;
-    }
+    if (qty > 0) { lines.push({name:item.name, qty, rate:item.total, labor:item.labor, materials:item.materials, subtotal:qty*item.total}); totalOwed+=qty*item.total; totalItems+=qty; }
   });
-
   if (!lines.length) { toast('⚠️ Add at least one item quantity first!'); return; }
-
-  const order = {
-    id: Date.now(),
-    label,
-    contractor: activeContractor,
-    date: new Date().toISOString().split('T')[0],
-    items: lines,
-    totalItems,
-    totalOwed,
-    paid: false
-  };
-  savedOrders.unshift(order);
+  savedOrders.unshift({id:Date.now(), label, contractor:activeContractor, date:new Date().toISOString().split('T')[0], items:lines, totalItems, totalOwed, paid:false});
   save(KEY_ORDERS, savedOrders);
   document.getElementById('ctr_order_label').value = '';
   toast('💾 Order saved!');
-  renderSavedOrders();
-  renderMonthlyBreakdown();
+  renderSavedOrders(); renderMonthlyBreakdown();
 }
 
 function toggleOrderPaid(id) {
   const order = savedOrders.find(o => o.id === id);
   if (order) { order.paid = !order.paid; save(KEY_ORDERS, savedOrders); }
-  renderSavedOrders();
-  renderMonthlyBreakdown();
+  renderSavedOrders(); renderMonthlyBreakdown();
 }
 
 function deleteOrder(id) {
   if (!confirm('Delete this order?')) return;
   savedOrders = savedOrders.filter(o => o.id !== id);
   save(KEY_ORDERS, savedOrders);
-  renderSavedOrders();
-  renderMonthlyBreakdown();
+  renderSavedOrders(); renderMonthlyBreakdown();
 }
 
 function renderSavedOrders() {
   const wrap = document.getElementById('ctr-saved-orders');
   const filtered = savedOrders.filter(o => o.contractor === activeContractor);
-  if (!filtered.length) {
-    wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">🗂️</div><p>No saved orders for this contractor yet.</p></div>';
-    return;
-  }
+  if (!filtered.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">🗂️</div><p>No saved orders for this contractor yet.</p></div>'; return; }
   wrap.innerHTML = filtered.map(o => `
-    <div style="background:var(--white);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px;border:2px solid ${o.paid ? 'var(--mint)' : 'var(--border)'};">
+    <div style="background:var(--white);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px;border:2px solid ${o.paid?'var(--mint)':'var(--border)'};">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap;">
         <div>
           <div style="font-weight:900;font-size:0.92em;">${o.label}</div>
-          <div style="font-size:0.75em;color:var(--text-soft);margin-top:2px;">${o.date} · ${o.totalItems} items</div>
-          <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;">
-            ${o.items.map(l => `<span class="tag">${l.name} ×${l.qty}</span>`).join('')}
-          </div>
+          <div style="font-size:0.75em;color:var(--text-soft);">${o.date} · ${o.totalItems} items</div>
+          <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;">${o.items.map(l=>`<span class="tag">${l.name} ×${l.qty}</span>`).join('')}</div>
         </div>
-        <div style="text-align:right;flex-shrink:0;">
+        <div style="text-align:right;">
           <div style="font-weight:900;font-size:1.3em;color:var(--rose-deep);">$${o.totalOwed.toFixed(2)}</div>
           <div style="display:flex;gap:6px;margin-top:6px;justify-content:flex-end;">
-            <button onclick="toggleOrderPaid(${o.id})" class="btn btn-sm ${o.paid ? 'btn-secondary' : 'btn-ghost'}" style="${o.paid ? 'background:var(--mint-soft);color:#065F46;border-color:var(--mint);' : ''}">
-              ${o.paid ? '✅ Paid' : '○ Mark Paid'}
-            </button>
+            <button onclick="toggleOrderPaid(${o.id})" class="btn btn-sm ${o.paid?'btn-secondary':'btn-ghost'}" style="${o.paid?'background:var(--mint-soft);color:#065F46;border-color:var(--mint);':''}">${o.paid?'✅ Paid':'○ Mark Paid'}</button>
             <button onclick="deleteOrder(${o.id})" class="btn btn-danger btn-sm">🗑</button>
           </div>
         </div>
@@ -2899,259 +2047,61 @@ function renderSavedOrders() {
 function renderMonthlyBreakdown() {
   const wrap = document.getElementById('ctr-monthly-breakdown');
   const ctrOrders = savedOrders.filter(o => o.contractor === activeContractor);
-  if (!ctrOrders.length) {
-    wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><p>Save production orders to see monthly estimates!</p></div>';
-    return;
-  }
-
+  if (!ctrOrders.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><p>Save production orders to see monthly estimates!</p></div>'; return; }
   const now = new Date();
-  const months = [0, 1].map(offset => {
+  const months = [0,1].map(offset => {
     const d = new Date(now.getFullYear(), now.getMonth() + offset, 1);
-    return { label: d.toLocaleDateString('en-US', {month:'long', year:'numeric'}), year: d.getFullYear(), month: d.getMonth() };
+    return {label: d.toLocaleDateString('en-US',{month:'long',year:'numeric'}), year:d.getFullYear(), month:d.getMonth()};
   });
-
   wrap.innerHTML = months.map(m => {
-    const monthOrders = ctrOrders.filter(o => {
-      const d = new Date(o.date);
-      return d.getFullYear() === m.year && d.getMonth() === m.month;
-    });
-    const owed   = monthOrders.filter(o => !o.paid).reduce((s,o) => s+o.totalOwed, 0);
-    const paid   = monthOrders.filter(o =>  o.paid).reduce((s,o) => s+o.totalOwed, 0);
-    const total  = owed + paid;
-
-    if (!monthOrders.length) return `
-      <div style="padding:12px 14px;background:var(--white);border-radius:var(--radius-sm);margin-bottom:10px;border:1px solid var(--border);">
-        <div style="font-weight:900;font-size:0.88em;color:var(--text-soft);">${m.label}</div>
-        <div style="font-size:0.8em;color:var(--text-soft);margin-top:4px;">No orders this month</div>
-      </div>`;
-
-    return `
-      <div style="background:var(--white);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px;border:2px solid var(--border);">
-        <div style="font-weight:900;font-size:0.9em;margin-bottom:10px;">${m.label}</div>
-        <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);">
-          <div class="stat-box"><div class="stat-val" style="font-size:1.2em;">$${total.toFixed(0)}</div><div class="stat-lbl">Total</div></div>
-          <div class="stat-box" style="background:var(--coral-soft);"><div class="stat-val" style="font-size:1.2em;color:#DC2626;">$${owed.toFixed(0)}</div><div class="stat-lbl">Unpaid</div></div>
-          <div class="stat-box" style="background:var(--mint-soft);"><div class="stat-val" style="font-size:1.2em;color:#065F46;">$${paid.toFixed(0)}</div><div class="stat-lbl">Paid</div></div>
-        </div>
-        <div style="margin-top:10px;font-size:0.78em;font-weight:700;color:var(--text-mid);">${monthOrders.length} order${monthOrders.length!==1?'s':''} · ${monthOrders.filter(o=>o.paid).length} paid · ${monthOrders.filter(o=>!o.paid).length} unpaid</div>
-      </div>`;
-  }).join('');
-}
-
-// ═══════════════════════════════════════════════
-// PLAN → PREP → PAY PIPELINE
-// ═══════════════════════════════════════════════
-
-// Known piece rates for matching (Ashley = CA-, Liz = CL-)
-const ALL_PIECE_RATES = {
-  ashley: CONTRACTORS.ashley.items,
-  liz:    CONTRACTORS.liz.items
-};
-
-function findContractorForItem(itemName) {
-  // Check Ashley first
-  const ashleyMatch = CONTRACTORS.ashley.items.find(i =>
-    itemName.toLowerCase().includes(i.name.toLowerCase()) ||
-    i.name.toLowerCase().includes(itemName.toLowerCase().split(' ')[0])
-  );
-  if (ashleyMatch) return { who: 'ashley', item: ashleyMatch };
-  const lizMatch = CONTRACTORS.liz.items.find(i =>
-    itemName.toLowerCase().includes(i.name.toLowerCase()) ||
-    i.name.toLowerCase().includes(itemName.toLowerCase().split(' ')[0])
-  );
-  if (lizMatch) return { who: 'liz', item: lizMatch };
-  return null; // Ami makes it
-}
-
-async function getPrepList(planId) {
-  const ev = planEvents.find(e => e.id === planId);
-  if (!ev) return;
-  const wrap = document.getElementById('preplist_'+planId);
-  wrap.style.display = 'block';
-  wrap.innerHTML = `<div class="ai-loading"><div class="dots"><span></span><span></span><span></span></div> Building prep list...</div>`;
-
-  // Build context from history
-  const itemAgg = {};
-  const pastSame = events.filter(e =>
-    e.name.replace(/\d{4}/,'').trim().toLowerCase() === ev.name.replace(/\d{4}/,'').trim().toLowerCase()
-  );
-  const similar = events.filter(e => e.type === ev.type);
-  const relevantEvents = pastSame.length ? pastSame : similar;
-  relevantEvents.forEach(e => {
-    e.items?.forEach(item => {
-      if (!itemAgg[item.name]) itemAgg[item.name] = { qty: 0, rev: 0, count: 0 };
-      itemAgg[item.name].qty += item.qty;
-      itemAgg[item.name].rev += item.rev;
-      itemAgg[item.name].count++;
-    });
-  });
-  const historyStr = Object.entries(itemAgg)
-    .sort((a,b) => b[1].qty - a[1].qty)
-    .map(([n,d]) => `${n}: avg ${(d.qty/d.count).toFixed(1)} sold per event`)
-    .join(', ') || 'No past item history yet';
-
-  try {
-    const res = await apiCall({
-      system: `You are an inventory prep planner for Amioki, a kawaii amigurumi brand in Virginia Beach VA. 
-Known items Ami sells: Pikachu, Axolotl, Kirby, Capybara, Snorlax, Mew, Miffy, Penguin, Whale, Baby Shark, Octopus, Jellyfish, Leggy Frog, Bee, Birb, Chicken, Baby Chick, Heart Keychain, Mini Loaf Cat.
-Contractors: Ashley makes Chickens, Baby Chicks, Octopi, Mama/Baby Possum, Heart Keychain, Bear Coasters, Cherry Blossom Pouch, Apple Coasters, Pet Rock, Mini Loaf Cat, Christmas Baby Chick, Baby Christmas Tree.
-Liz makes Leggy Frog, Bees, Pastel Rainbow Birb, Jellyfish, all Birb designs.
-Ami makes the rest herself (Pikachu, Axolotl, Kirby, Capybara, Snorlax, Mew, Miffy, Penguin, Whale, Baby Shark).
-You MUST respond with ONLY a raw JSON array. No words before or after. No markdown. No backticks. No explanation. Start your response with [ and end with ].
-[{"item":"name","qty":number,"who":"ashley|liz|ami","reason":"brief reason"}]`,
-      messages: [{ role: 'user', content: `Suggest prep quantities for: ${ev.name}
-Type: ${ev.type}, Date: ${ev.date}, Location: ${ev.location||'TBD'}, Attendance: ${ev.attendance||'unknown'}
-Past item sales at similar events: ${historyStr}
-Return 8-12 items with realistic quantities. Consider who makes each item.` }]
-    });
-    const data = await res.json();
-    let raw = (data.content?.find(c=>c.type==='text')?.text || '');
-    const items = extractJSON(raw, []);
-    renderPrepTable(planId, ev.name, items);
-  } catch(e) {
-    
-    // Fallback: build from history without AI
-    const fallback = Object.entries(itemAgg)
-      .sort((a,b) => b[1].qty - a[1].qty)
-      .slice(0, 10)
-      .map(([name, d]) => {
-        const match = findContractorForItem(name);
-        return { item: name, qty: Math.ceil(d.qty / d.count), who: match?.who || 'ami', reason: 'Based on past event averages' };
-      });
-    if (fallback.length) {
-      renderPrepTable(planId, ev.name, fallback);
-    } else {
-      wrap.innerHTML = `<div class="insight-box" style="background:var(--coral-soft);border-color:var(--coral);">Could not generate prep list. Check your internet connection or log more events first!</div>`;
-    }
-  }
-}
-
-function renderPrepTable(planId, evName, items) {
-  const wrap = document.getElementById('preplist_'+planId);
-  const whoColors = { ashley: 'var(--rose)', liz: 'var(--lavender)', ami: 'var(--mint)' };
-  const whoLabels = { ashley: '👩 Ashley', liz: '👩 Liz', ami: '🌸 Ami' };
-
-  wrap.innerHTML = `
-    <div style="font-size:0.78em;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-soft);margin-bottom:8px;">
-      🧶 Prep List — edit quantities & assignments, then send to Pay
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 70px 110px;gap:6px;padding:6px 8px;background:var(--lav-mid);border-radius:8px;margin-bottom:6px;">
-      <div style="font-size:0.72em;font-weight:900;text-transform:uppercase;color:var(--text-mid);">Item</div>
-      <div style="font-size:0.72em;font-weight:900;text-transform:uppercase;color:var(--text-mid);text-align:center;">Qty</div>
-      <div style="font-size:0.72em;font-weight:900;text-transform:uppercase;color:var(--text-mid);">Made by</div>
-    </div>
-    ${items.map((item, i) => `
-      <div data-item="${item.item.replace(/"/g,'&quot;')}" style="display:grid;grid-template-columns:1fr 70px 110px;gap:6px;align-items:center;padding:6px 8px;background:var(--white);border-radius:8px;margin-bottom:5px;border:1px solid var(--border);">
-        <div>
-          <div style="font-weight:800;font-size:0.85em;">${item.item}</div>
-          <div style="font-size:0.7em;color:var(--text-soft);">${item.reason||''}</div>
-        </div>
-        <div style="text-align:center;">
-          <input type="number" min="0" value="${item.qty}" id="prep_qty_${planId}_${i}"
-            style="width:55px;padding:5px;border:2px solid var(--rose-mid);border-radius:6px;text-align:center;font-weight:900;font-size:0.9em;">
-        </div>
-        <div>
-          <select id="prep_who_${planId}_${i}"
-            style="width:100%;padding:5px;border:2px solid var(--rose-mid);border-radius:6px;font-size:0.8em;font-weight:700;">
-            <option value="ami" ${item.who==='ami'?'selected':''}>🌸 Ami</option>
-            <option value="ashley" ${item.who==='ashley'?'selected':''}>👩 Ashley</option>
-            <option value="liz" ${item.who==='liz'?'selected':''}>👩 Liz</option>
-          </select>
-        </div>
+    const monthOrders = ctrOrders.filter(o => { const d=new Date(o.date); return d.getFullYear()===m.year && d.getMonth()===m.month; });
+    const owed = monthOrders.filter(o=>!o.paid).reduce((s,o)=>s+o.totalOwed,0);
+    const paid = monthOrders.filter(o=> o.paid).reduce((s,o)=>s+o.totalOwed,0);
+    if (!monthOrders.length) return `<div style="padding:12px 14px;background:var(--white);border-radius:var(--radius-sm);margin-bottom:10px;border:1px solid var(--border);"><div style="font-weight:900;font-size:0.88em;color:var(--text-soft);">${m.label}</div><div style="font-size:0.8em;color:var(--text-soft);margin-top:4px;">No orders this month</div></div>`;
+    return `<div style="background:var(--white);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px;border:2px solid var(--border);">
+      <div style="font-weight:900;font-size:0.9em;margin-bottom:10px;">${m.label}</div>
+      <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);">
+        <div class="stat-box"><div class="stat-val" style="font-size:1.2em;">$${(owed+paid).toFixed(0)}</div><div class="stat-lbl">Total</div></div>
+        <div class="stat-box" style="background:var(--coral-soft);"><div class="stat-val" style="font-size:1.2em;color:#DC2626;">$${owed.toFixed(0)}</div><div class="stat-lbl">Unpaid</div></div>
+        <div class="stat-box" style="background:var(--mint-soft);"><div class="stat-val" style="font-size:1.2em;color:#065F46;">$${paid.toFixed(0)}</div><div class="stat-lbl">Paid</div></div>
       </div>
-    `).join('')}
-    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
-      <button class="btn btn-primary btn-sm" onclick="sendToPayTab(${planId}, ${items.length}, '${evName.replace(/'/g,"\\'")}')">
-        💸 Send to Pay Tab
-      </button>
-      <button class="btn btn-ghost btn-sm" onclick="getPrepList(${planId})">🔄 Regenerate</button>
-    </div>
-  `;
-}
-
-function sendToPayTab(planId, itemCount, evName) {
-  const ashleyItems = [];
-  const lizItems    = [];
-  const rows = document.querySelectorAll(`#preplist_${planId} [data-item]`);
-
-  rows.forEach((row, i) => {
-    const name = row.dataset.item || '';
-    const qty  = parseInt(document.getElementById(`prep_qty_${planId}_${i}`)?.value) || 0;
-    const who  = document.getElementById(`prep_who_${planId}_${i}`)?.value || 'ami';
-    if (qty === 0 || who === 'ami') return;
-    const ctr   = who === 'ashley' ? CONTRACTORS.ashley : CONTRACTORS.liz;
-    const match = ctr.items.find(it =>
-      name.toLowerCase().includes(it.name.toLowerCase()) ||
-      it.name.toLowerCase().includes(name.toLowerCase().split(' ')[0])
-    );
-    const entry = { itemName: name, qty, rate: match?.total || 0, labor: match?.labor || 0, materials: match?.materials || 0 };
-    if (who === 'ashley') ashleyItems.push(entry);
-    if (who === 'liz')    lizItems.push(entry);
-  });
-
-  window._pendingPayOrder = { evName, ashley: ashleyItems, liz: lizItems };
-
-  // Switch to Pay tab
-  document.querySelectorAll('.tab-btn').forEach(b => {
-    if (b.textContent.includes('Pay')) { b.click(); }
-  });
-  toast('💸 Sent to Pay tab!');
+    </div>`;
+  }).join('');
 }
 
 function loadPendingPayOrder() {
   const order = window._pendingPayOrder;
   if (!order) return;
-
   const items = activeContractor === 'ashley' ? order.ashley : order.liz;
-  if (!items?.length) {
-    toast(`No ${activeContractor === 'ashley' ? 'Ashley' : 'Liz'} items in this prep list — switch contractors if needed.`);
-    return;
-  }
-
-  // Pre-fill the order label
-  document.getElementById('ctr_order_label').value = order.evName + ' Prep';
-
-  // Set quantities for matching items
+  if (!items?.length) { toast(`No ${activeContractor} items — switch contractors if needed.`); return; }
+  document.getElementById('ctr_order_label').value = (order.evName||'') + ' Prep';
   const ctr = CONTRACTORS[activeContractor];
   items.forEach(prep => {
     ctr.items.forEach((ctrItem, idx) => {
-      const matches = prep.itemName.toLowerCase().includes(ctrItem.name.toLowerCase()) ||
-        ctrItem.name.toLowerCase().includes(prep.itemName.toLowerCase().split(' ')[0]);
-      if (matches) {
+      if (prep.itemName.toLowerCase().includes(ctrItem.name.toLowerCase()) || ctrItem.name.toLowerCase().includes(prep.itemName.toLowerCase().split(' ')[0])) {
         const qtyEl = document.getElementById('ctr_qty_'+idx);
         if (qtyEl) qtyEl.value = prep.qty;
       }
     });
   });
-
   updateCtrTotals();
-
-  // Show banner
-  const banner = document.createElement('div');
-  banner.className = 'insight-box';
-  banner.style.cssText = 'background:var(--mint-soft);border-color:var(--mint);margin-bottom:12px;';
-  banner.innerHTML = `<div class="insight-label">✅ Loaded from Plan: ${order.evName}</div>
-    Quantities pre-filled from your prep list. Review, adjust if needed, then hit 💾 Save Order.`;
-  const wrap = document.getElementById('ctrItemsWrap');
-  if (wrap) wrap.parentNode.insertBefore(banner, wrap);
-  setTimeout(() => banner.remove(), 6000);
+  toast('💸 Order loaded from plan!');
 }
 
-
+// ═══════════════════════════════════════════════
+// MARKET TYPES
+// ═══════════════════════════════════════════════
 const KEY_MARKET_TYPES = 'amioki_market_types';
-
 const DEFAULT_MARKET_TYPES = [
-  { id: 'vb_farmers_market',  emoji: '🌿', label: 'VB Farmers Market - First Sunday' },
-  { id: 'farmers_market',     emoji: '🌿', label: 'Farmers Market (Other)' },
-  { id: 'special_event',      emoji: '⭐', label: 'Special Event' },
-  { id: 'festival',           emoji: '🎡', label: 'Festival (Single Day)' },
-  { id: 'festival_multi',     emoji: '🎡', label: 'Premium Festival (Multi-Day)' },
-  { id: 'holiday_market',     emoji: '🎄', label: 'Holiday Market' },
-  { id: 'popup',              emoji: '🏪', label: 'Pop-Up / Indoor Venue' },
+  { id: 'vb_farmers_market', emoji: '🌿', label: 'VB Farmers Market - First Sunday' },
+  { id: 'farmers_market',    emoji: '🌿', label: 'Farmers Market (Other)' },
+  { id: 'special_event',     emoji: '⭐', label: 'Special Event' },
+  { id: 'festival',          emoji: '🎡', label: 'Festival (Single Day)' },
+  { id: 'festival_multi',    emoji: '🎡', label: 'Premium Festival (Multi-Day)' },
+  { id: 'holiday_market',    emoji: '🎄', label: 'Holiday Market' },
+  { id: 'popup',             emoji: '🏪', label: 'Pop-Up / Indoor Venue' },
 ];
-
 let marketTypes = load(KEY_MARKET_TYPES, DEFAULT_MARKET_TYPES);
-
 function saveMarketTypes() { save(KEY_MARKET_TYPES, marketTypes); }
 
 function rebuildTypeDropdowns() {
@@ -3164,33 +2114,22 @@ function rebuildTypeDropdowns() {
     const prev = el.value;
     el.innerHTML = opts;
     el.value = prev;
-    // Remove old listener before adding new one
     el.onchange = null;
-    el.addEventListener('change', function() {
-      if (this.value === '__add_new__') {
-        this.value = '';
-        showInlineAddType(id);
-      }
-    });
+    el.addEventListener('change', function() { if (this.value === '__add_new__') { this.value=''; showInlineAddType(id); } });
   });
 }
 
 function showInlineAddType(selectId) {
-  // Remove any existing inline add form
   document.querySelectorAll('.inline-add-type').forEach(el => el.remove());
-
   const select = document.getElementById(selectId);
   if (!select) return;
-
   const wrap = document.createElement('div');
   wrap.className = 'inline-add-type';
   wrap.style.cssText = 'display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center;padding:10px 12px;background:var(--lav-soft);border-radius:10px;border:2px solid var(--lavender);';
-  wrap.innerHTML = `
-    <input type="text" id="inline_emoji" placeholder="🎪" style="width:50px;text-align:center;padding:7px;border:2px solid var(--rose-mid);border-radius:8px;font-size:1em;">
-    <input type="text" id="inline_label" placeholder="Type name e.g. Pungo Strawberry Festival" style="flex:1;min-width:160px;padding:7px;border:2px solid var(--rose-mid);border-radius:8px;font-size:0.88em;font-weight:700;">
+  wrap.innerHTML = `<input type="text" id="inline_emoji" placeholder="🎪" style="width:50px;text-align:center;padding:7px;border:2px solid var(--rose-mid);border-radius:8px;">
+    <input type="text" id="inline_label" placeholder="Type name..." style="flex:1;min-width:160px;padding:7px;border:2px solid var(--rose-mid);border-radius:8px;font-size:0.88em;font-weight:700;">
     <button class="btn btn-primary btn-sm" onclick="saveInlineType('${selectId}')">✅ Add</button>
-    <button class="btn btn-ghost btn-sm" onclick="this.closest('.inline-add-type').remove()">✕</button>
-  `;
+    <button class="btn btn-ghost btn-sm" onclick="this.closest('.inline-add-type').remove()">✕</button>`;
   select.parentNode.insertBefore(wrap, select.nextSibling);
   document.getElementById('inline_label').focus();
 }
@@ -3198,16 +2137,12 @@ function showInlineAddType(selectId) {
 function saveInlineType(selectId) {
   const emoji = document.getElementById('inline_emoji')?.value.trim() || '📍';
   const label = document.getElementById('inline_label')?.value.trim();
-  if (!label) { toast('⚠️ Enter a name for this market type!'); return; }
+  if (!label) { toast('⚠️ Enter a name!'); return; }
   const id = 'custom_' + Date.now();
-  marketTypes.push({ id, emoji, label });
-  saveMarketTypes();
-  rebuildTypeDropdowns();
-  renderMarketTypesList();
-  // Auto-select the new type in the triggering dropdown
+  marketTypes.push({id, emoji, label});
+  saveMarketTypes(); rebuildTypeDropdowns(); renderMarketTypesList();
   const el = document.getElementById(selectId);
   if (el) el.value = id;
-  // Remove inline form
   document.querySelectorAll('.inline-add-type').forEach(el => el.remove());
   toast('✅ ' + emoji + ' ' + label + ' added!');
 }
@@ -3216,358 +2151,151 @@ function addMarketType() {
   const emoji = document.getElementById('mt_emoji').value.trim() || '📍';
   const label = document.getElementById('mt_label').value.trim();
   if (!label) { toast('⚠️ Enter a market type name!'); return; }
-  const id = 'custom_' + Date.now();
-  marketTypes.push({ id, emoji, label });
+  marketTypes.push({id:'custom_'+Date.now(), emoji, label});
   saveMarketTypes();
-  document.getElementById('mt_emoji').value = '';
-  document.getElementById('mt_label').value = '';
-  rebuildTypeDropdowns();
-  renderMarketTypesList();
+  document.getElementById('mt_emoji').value = ''; document.getElementById('mt_label').value = '';
+  rebuildTypeDropdowns(); renderMarketTypesList();
   toast('✅ Market type added!');
 }
 
 function deleteMarketType(id) {
-  const inUse = events.some(e => e.type === id);
-  if (inUse) { toast('⚠️ This type has events logged — can\'t delete!'); return; }
+  if (events.some(e => e.type === id)) { toast('⚠️ This type has events — can\'t delete!'); return; }
   marketTypes = marketTypes.filter(t => t.id !== id);
-  saveMarketTypes();
-  rebuildTypeDropdowns();
-  renderMarketTypesList();
+  saveMarketTypes(); rebuildTypeDropdowns(); renderMarketTypesList();
   toast('🗑 Market type removed');
 }
 
 function renderMarketTypesList() {
   const wrap = document.getElementById('marketTypesList');
   if (!wrap) return;
-  if (!marketTypes.length) {
-    wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">🗂️</div><p>No market types yet!</p></div>';
-    return;
-  }
-  wrap.innerHTML = `
-    <div style="font-size:0.72em;font-weight:800;color:var(--text-soft);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">
-      ☰ Drag to reorder — order reflects in all dropdowns
-    </div>
-    ${marketTypes.map((t, idx) => {
-      const inUse = events.filter(e => e.type === t.id).length;
-      return `<div id="mtrow_${idx}" draggable="true"
-        ondragstart="mtDragStart(event,${idx})"
-        ondragover="mtDragOver(event)"
-        ondrop="mtDrop(event,${idx})"
-        ondragend="mtDragEnd(event)"
-        style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;margin-bottom:8px;background:var(--white);border:1px solid var(--border);cursor:grab;transition:opacity 0.2s,transform 0.1s;">
-        <div style="color:var(--text-soft);font-size:1.1em;cursor:grab;flex-shrink:0;">☰</div>
-        <div style="font-size:1.3em;width:28px;text-align:center;flex-shrink:0;">${t.emoji}</div>
-        <div style="flex:1;">
-          <div style="font-weight:800;font-size:0.88em;">${t.label}</div>
-          ${inUse
-            ? `<div style="font-size:0.72em;color:var(--text-soft);">${inUse} event${inUse!==1?'s':''} logged</div>`
-            : '<div style="font-size:0.72em;color:var(--text-soft);">No events yet</div>'}
-        </div>
-        <button class="btn btn-secondary btn-sm" onclick="editMarketType(${idx})" style="flex-shrink:0;">✏️ Edit</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteMarketType('${t.id}')" style="flex-shrink:0;"
-          ${inUse ? 'disabled' : ''}>🗑</button>
-      </div>`;
-    }).join('')}
-  `;
-}
-
-// ── Drag & Drop state ──
-let mtDragIdx = null;
-
-function mtDragStart(e, idx) {
-  mtDragIdx = idx;
-  e.dataTransfer.effectAllowed = 'move';
-  setTimeout(() => {
-    const el = document.getElementById('mtrow_'+idx);
-    if (el) el.style.opacity = '0.4';
-  }, 0);
-}
-
-function mtDragOver(e) {
-  e.preventDefault();
-  e.dataTransfer.dropEffect = 'move';
-  // Highlight drop target
-  document.querySelectorAll('[id^="mtrow_"]').forEach(el => el.style.transform = '');
-  const target = e.currentTarget;
-  if (target) target.style.transform = 'translateY(-2px)';
-}
-
-function mtDrop(e, toIdx) {
-  e.preventDefault();
-  if (mtDragIdx === null || mtDragIdx === toIdx) return;
-  // Reorder array
-  const moved = marketTypes.splice(mtDragIdx, 1)[0];
-  marketTypes.splice(toIdx, 0, moved);
-  saveMarketTypes();
-  rebuildTypeDropdowns();
-  renderMarketTypesList();
-  toast('✅ Order updated!');
-  mtDragIdx = null;
-}
-
-function mtDragEnd(e) {
-  document.querySelectorAll('[id^="mtrow_"]').forEach(el => {
-    el.style.opacity = '';
-    el.style.transform = '';
-  });
-  mtDragIdx = null;
-}
-
-function editMarketType(idx) {
-  const t = marketTypes[idx];
-  const row = document.getElementById('mtrow_'+idx);
-  if (!row) return;
-  row.innerHTML = `
-    <input type="text" id="edit_emoji_${idx}" value="${t.emoji}" style="width:50px;text-align:center;padding:6px;">
-    <input type="text" id="edit_label_${idx}" value="${t.label}" style="flex:1;padding:6px;">
-    <div style="display:flex;gap:6px;">
-      <button class="btn btn-primary btn-sm" onclick="saveMarketTypeEdit(${idx})">✅ Save</button>
-      <button class="btn btn-ghost btn-sm" onclick="renderMarketTypesList()">✕</button>
-    </div>
-  `;
-  row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:var(--radius-sm);margin-bottom:8px;background:var(--lav-soft);border:2px solid var(--lavender);';
-}
-
-function saveMarketTypeEdit(idx) {
-  const emoji = document.getElementById('edit_emoji_'+idx)?.value.trim() || '📍';
-  const label = document.getElementById('edit_label_'+idx)?.value.trim();
-  if (!label) { toast('⚠️ Label can\'t be empty!'); return; }
-  marketTypes[idx].emoji = emoji;
-  marketTypes[idx].label = label;
-  saveMarketTypes();
-  rebuildTypeDropdowns();
-  renderMarketTypesList();
-  toast('✅ Market type updated!');
+  if (!marketTypes.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">🗂️</div><p>No market types yet!</p></div>'; return; }
+  wrap.innerHTML = marketTypes.map((t, idx) => {
+    const inUse = events.filter(e => e.type === t.id).length;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;margin-bottom:8px;background:var(--white);border:1px solid var(--border);">
+      <div style="font-size:1.3em;width:28px;text-align:center;">${t.emoji}</div>
+      <div style="flex:1;">
+        <div style="font-weight:800;font-size:0.88em;">${t.label}</div>
+        <div style="font-size:0.72em;color:var(--text-soft);">${inUse} event${inUse!==1?'s':''} logged</div>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="deleteMarketType('${t.id}')" ${inUse?'disabled':''}>🗑</button>
+    </div>`;
+  }).join('');
 }
 
 const KEY_LOCATIONS = 'amioki_locations';
-let savedLocations = load(KEY_LOCATIONS, [
-  'Virginia Beach Farmers Market',
-  'Greenbrier Library',
-  'Central Library',
-  'Chesapeake City Park',
-  'Town Center Virginia Beach',
-]);
-
+let savedLocations = load(KEY_LOCATIONS, ['Virginia Beach Farmers Market','Greenbrier Library','Central Library','Chesapeake City Park','Town Center Virginia Beach']);
 function saveLocation(loc) {
   if (!loc || savedLocations.includes(loc)) return;
-  savedLocations.push(loc);
-  save(KEY_LOCATIONS, savedLocations);
-  refreshDataLists();
+  savedLocations.push(loc); save(KEY_LOCATIONS, savedLocations); refreshDataLists();
 }
 
-// ── Robust JSON extractor for Llama output ──
-// Llama often adds prose before/after JSON — this pulls just the JSON
+// ── JSON extractor (handles Llama prose wrapping) ──
 function extractJSON(text, fallback) {
   if (!text) return fallback;
-  // Strip markdown code fences
-  text = text.replace(/```json|```/g, '').trim();
-  // Try parsing directly first
+  text = text.replace(/```json|```/g,'').trim();
   try { return JSON.parse(text); } catch(e) {}
-  // Try extracting first {...} or [...] block
   const objMatch = text.match(/\{[\s\S]*\}/);
   const arrMatch = text.match(/\[[\s\S]*\]/);
-  // Use whichever comes first
-  const obj = objMatch ? { idx: text.indexOf(objMatch[0]), str: objMatch[0] } : null;
-  const arr = arrMatch ? { idx: text.indexOf(arrMatch[0]), str: arrMatch[0] } : null;
+  const obj = objMatch ? {idx:text.indexOf(objMatch[0]), str:objMatch[0]} : null;
+  const arr = arrMatch ? {idx:text.indexOf(arrMatch[0]), str:arrMatch[0]} : null;
   let candidate = null;
   if (obj && arr) candidate = obj.idx < arr.idx ? obj.str : arr.str;
   else if (obj) candidate = obj.str;
   else if (arr) candidate = arr.str;
-  if (candidate) {
-    try { return JSON.parse(candidate); } catch(e) {}
-  }
+  if (candidate) { try { return JSON.parse(candidate); } catch(e) {} }
   return fallback;
 }
 
-
 function calcPredHours() {
-  const start = document.getElementById('pred_start_time')?.value;
-  const end   = document.getElementById('pred_end_time')?.value;
-  const hours = calcHours(start, end);
+  const hrs = calcHours(document.getElementById('pred_start_time')?.value, document.getElementById('pred_end_time')?.value);
   const display = document.getElementById('pred_hours_display');
   const val     = document.getElementById('pred_hours_val');
-  if (display && val) {
-    if (hours) { display.style.display = 'block'; val.textContent = hours; }
-    else { display.style.display = 'none'; }
-  }
+  if (display && val) { if (hrs) { display.style.display='block'; val.textContent=hrs; } else { display.style.display='none'; } }
 }
-
 
 function calcHours(start, end) {
   if (!start || !end) return null;
-  const [sh, sm] = start.split(':').map(Number);
-  const [eh, em] = end.split(':').map(Number);
-  const mins = (eh * 60 + em) - (sh * 60 + sm);
-  return mins > 0 ? (mins / 60).toFixed(1) : null;
+  const [sh,sm] = start.split(':').map(Number);
+  const [eh,em] = end.split(':').map(Number);
+  const mins = (eh*60+em) - (sh*60+sm);
+  return mins > 0 ? (mins/60).toFixed(1) : null;
 }
 
-function updateHoursDisplay() {
-  const start = document.getElementById('ev_start_time')?.value;
-  const end   = document.getElementById('ev_end_time')?.value;
-  const hours = calcHours(start, end);
-  const display = document.getElementById('ev_hours_display');
-  const text    = document.getElementById('ev_hours_text');
-  if (!display || !text) return;
-  if (hours) {
-    display.style.display = 'block';
-    // Also calc revenue per hour if revenue is filled
-    const rev = parseFloat(document.getElementById('ev_revenue')?.value) || 0;
-    const rph = rev > 0 ? ` · 💰 $${(rev/parseFloat(hours)).toFixed(0)}/hr` : '';
-    text.textContent = `${hours} hours at this event${rph}`;
-  } else {
-    display.style.display = 'none';
-  }
-}
-
-
-const KEY_API = 'amioki_api_key';
-
-function getApiKey() {
-  return localStorage.getItem(KEY_API) || '';
-}
-
-function saveApiKey() {
-  const key = document.getElementById('apiKeyInput').value.trim();
-  if (!key) { toast('⚠️ Paste your API key first!'); return; }
-  if (!key.startsWith('sk-ant-')) { 
-    showApiStatus('⚠️ That doesn\'t look like a Claude API key — it should start with sk-ant-', 'coral');
-    return;
-  }
-  localStorage.setItem(KEY_API, key);
-  document.getElementById('apiKeyInput').value = '••••••••••••••••••••' + key.slice(-6);
-  showApiStatus('✅ API key saved! Your AI features are ready to use.', 'mint');
-  toast('🔑 API key saved!');
-}
-
-function clearApiKey() {
-  localStorage.removeItem(KEY_API);
-  document.getElementById('apiKeyInput').value = '';
-  showApiStatus('🗑 API key cleared.', 'yellow');
-  toast('🗑 Key cleared');
-}
-
-function toggleKeyVisibility() {
-  const input = document.getElementById('apiKeyInput');
-  const btn   = document.getElementById('toggleKeyBtn');
-  if (input.type === 'password') {
-    input.type = 'text';
-    btn.textContent = '🙈 Hide';
-  } else {
-    input.type = 'password';
-    btn.textContent = '👁 Show';
-  }
-}
-
-function showApiStatus(msg, color) {
-  const el = document.getElementById('apiKeyStatus');
-  el.style.display = 'block';
-  el.className = 'insight-box';
-  el.style.background = color === 'mint' ? 'var(--mint-soft)' : color === 'coral' ? 'var(--coral-soft)' : 'var(--yellow-soft)';
-  el.style.borderColor = color === 'mint' ? 'var(--mint)' : color === 'coral' ? 'var(--coral)' : 'var(--yellow)';
-  el.textContent = msg;
-}
-
+// ═══════════════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════════════
 async function testApiKey() {
   const resultEl = document.getElementById('apiTestResult');
   resultEl.style.display = 'block';
   resultEl.textContent = '⏳ Testing connection...';
-  resultEl.style.background = 'var(--lav-soft)';
-  resultEl.style.borderColor = 'var(--lavender)';
+  resultEl.style.background = 'var(--lav-soft)'; resultEl.style.borderColor = 'var(--lavender)';
   try {
     const res = await fetch(PROXY_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        messages: [{ role: 'user', content: 'Say "Wayfinder ready!" and nothing else.' }]
-      })
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({messages:[{role:'user',content:'Say "Wayfinder ready!" and nothing else.'}]})
     });
     const data = await res.json();
     const text = data.content?.[0]?.text || '';
     if (text) {
       resultEl.textContent = '✅ Connected! ' + text;
-      resultEl.style.background = 'var(--mint-soft)';
-      resultEl.style.borderColor = 'var(--mint)';
+      resultEl.style.background='var(--mint-soft)'; resultEl.style.borderColor='var(--mint)';
     } else {
-      resultEl.textContent = '⚠️ Connected but unexpected response. Try again!';
-      resultEl.style.background = 'var(--yellow-soft)';
-      resultEl.style.borderColor = 'var(--yellow)';
+      resultEl.textContent = '⚠️ Connected but unexpected response.';
+      resultEl.style.background='var(--yellow-soft)'; resultEl.style.borderColor='var(--yellow)';
     }
   } catch(e) {
     resultEl.textContent = '❌ Connection failed: ' + e.message;
-    resultEl.style.background = 'var(--coral-soft)';
-    resultEl.style.borderColor = 'var(--coral)';
+    resultEl.style.background='var(--coral-soft)'; resultEl.style.borderColor='var(--coral)';
   }
 }
 
 function renderDataStats() {
   const el = document.getElementById('dataStats');
   if (!el) return;
-  el.innerHTML = `
-    <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);">
-      <div class="stat-box"><div class="stat-val">${events.length}</div><div class="stat-lbl">Events</div></div>
-      <div class="stat-box"><div class="stat-val">${notes.length}</div><div class="stat-lbl">Notes</div></div>
-      <div class="stat-box"><div class="stat-val">${savedOrders.length}</div><div class="stat-lbl">Orders</div></div>
-    </div>
-  `;
+  el.innerHTML = `<div class="stat-grid" style="grid-template-columns:repeat(3,1fr);">
+    <div class="stat-box"><div class="stat-val">${events.length}</div><div class="stat-lbl">Events</div></div>
+    <div class="stat-box"><div class="stat-val">${notes.length}</div><div class="stat-lbl">Notes</div></div>
+    <div class="stat-box"><div class="stat-val">${savedOrders.length}</div><div class="stat-lbl">Orders</div></div>
+  </div>`;
 }
 
 function clearAllData() {
-  // Use inline confirm since confirm() is blocked
   const el = document.getElementById('dataStats');
-  el.innerHTML = `
-    <div style="background:var(--coral-soft);border:2px solid var(--coral);border-radius:10px;padding:14px;margin-bottom:10px;">
-      <div style="font-weight:900;color:#991B1B;margin-bottom:10px;">⚠️ Are you sure? This deletes ALL events, notes, orders and plans permanently.</div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn btn-danger btn-sm" onclick="confirmClearAll()">Yes, delete everything</button>
-        <button class="btn btn-ghost btn-sm" onclick="renderDataStats()">Cancel</button>
-      </div>
+  el.innerHTML = `<div style="background:var(--coral-soft);border:2px solid var(--coral);border-radius:10px;padding:14px;margin-bottom:10px;">
+    <div style="font-weight:900;color:#991B1B;margin-bottom:10px;">⚠️ This deletes ALL events, notes, orders and plans permanently.</div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-danger btn-sm" onclick="confirmClearAll()">Yes, delete everything</button>
+      <button class="btn btn-ghost btn-sm" onclick="renderDataStats()">Cancel</button>
     </div>
-  `;
+  </div>`;
 }
 
 function confirmClearAll() {
   [KEY_EVENTS, KEY_NOTES, KEY_PLAN, KEY_ORDERS, KEY_NAMES, KEY_LOCATIONS].forEach(k => localStorage.removeItem(k));
-  events = []; notes = []; planEvents = []; savedOrders = [];
+  events=[]; notes=[]; planEvents=[]; savedOrders=[];
   savedNames = ['Cherry Blossom Fest','Neptune Festival','Water Lantern Festival','Chesapeake Jubilee','VB Farmers Market','Strawberry Festival'];
   savedLocations = ['Virginia Beach Farmers Market','Greenbrier Library','Central Library','Chesapeake City Park','Town Center Virginia Beach'];
-  renderRecentEvents();
-  renderDataStats();
+  renderRecentEvents(); renderDataStats();
   toast('🗑 All data cleared');
 }
 
-function initSettingsTab() {
-  renderDataStats();
-}
+function initSettingsTab() { renderDataStats(); }
 
 const PROXY_URL = 'https://amioki-wayfinder-proxy.amioki-co.workers.dev/';
-
 function apiCall(body) {
-  return fetch(PROXY_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
+  return fetch(PROXY_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
 }
 
-
 function refreshDataLists() {
-  const options = savedNames.map(n => `<option value="${n}">`).join('');
-  ['eventNameList','eventNameList2','eventNameList3','eventNameList4'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.innerHTML = options;
-  });
-  const locOptions = savedLocations.map(l => `<option value="${l}">`).join('');
-  ['locationList','locationList2','locationList3'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.innerHTML = locOptions;
-  });
+  const options = savedNames.map(n=>`<option value="${n}">`).join('');
+  ['eventNameList','eventNameList2','eventNameList3','eventNameList4'].forEach(id => { const el=document.getElementById(id); if(el) el.innerHTML=options; });
+  const locOptions = savedLocations.map(l=>`<option value="${l}">`).join('');
+  ['locationList','locationList2','locationList3'].forEach(id => { const el=document.getElementById(id); if(el) el.innerHTML=locOptions; });
 }
 
 function toast(msg) {
   const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
+  t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2800);
 }
 
@@ -3575,17 +2303,8 @@ function toast(msg) {
 // INIT
 // ═══════════════════════════════════════════════
 (function init() {
-  // Set today's date on date fields
   const today = new Date().toISOString().split('T')[0];
-  ['ev_date','pred_date','plan_date'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = today;
-  });
-  // Auto-calc hours when times change
-  ['ev_start_time','ev_end_time'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener('change', updateHoursDisplay);
-  });
+  ['ev_date','pred_date','plan_date'].forEach(id => { const el=document.getElementById(id); if(el) el.value=today; });
   renderRecentEvents();
   refreshDataLists();
   setPlanRange(1);
