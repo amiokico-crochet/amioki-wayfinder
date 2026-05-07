@@ -1623,8 +1623,18 @@ function renderInsights() {
 
   // Item leaderboard — build individual + category aggregates
   const itemAgg = {};
-  const categoryAgg = {}; // groups items by keyword categories e.g. "Chicken"
-  const CATEGORIES = ['Chicken', 'Axolotl', 'Kirby', 'Capybara', 'Pikachu']; // expandable
+  const categoryAgg = {}; // groups items by keyword categories
+  // Order matters — Stickers must be checked BEFORE plushie names
+  const CATEGORIES = [
+    { key: 'Stickers', match: (name) => name.toLowerCase().includes('sticker') },
+    { key: 'Chicken',  match: (name) => name.toLowerCase().includes('chicken') && !name.toLowerCase().includes('sticker') },
+    { key: 'Axolotl',  match: (name) => name.toLowerCase().includes('axolotl') && !name.toLowerCase().includes('sticker') },
+    { key: 'Capybara', match: (name) => name.toLowerCase().includes('capybara') && !name.toLowerCase().includes('sticker') },
+    { key: 'Kirby',    match: (name) => name.toLowerCase().includes('kirby') && !name.toLowerCase().includes('sticker') },
+    { key: 'Pikachu',  match: (name) => name.toLowerCase().includes('pikachu') && !name.toLowerCase().includes('sticker') },
+    { key: 'Birb',     match: (name) => name.toLowerCase().includes('birb') && !name.toLowerCase().includes('sticker') },
+    { key: 'Octopus',  match: (name) => (name.toLowerCase().includes('octop') || name.toLowerCase().includes('octopi')) && !name.toLowerCase().includes('sticker') },
+  ];
 
   filtered.forEach(ev => {
     ev.items?.forEach(item => {
@@ -1634,15 +1644,15 @@ function renderInsights() {
       if (item.price) itemAgg[item.name].prices.push(item.price);
       itemAgg[item.name].events++;
 
-      // Check if item belongs to a category
+      // Check if item belongs to a category — stickers checked first
       CATEGORIES.forEach(cat => {
-        if (item.name.toLowerCase().includes(cat.toLowerCase())) {
-          if (!categoryAgg[cat]) categoryAgg[cat] = {qty:0, rev:0, variants:{}};
-          categoryAgg[cat].qty += item.qty;
-          categoryAgg[cat].rev += item.rev;
-          if (!categoryAgg[cat].variants[item.name]) categoryAgg[cat].variants[item.name] = {qty:0, rev:0};
-          categoryAgg[cat].variants[item.name].qty += item.qty;
-          categoryAgg[cat].variants[item.name].rev += item.rev;
+        if (cat.match(item.name)) {
+          if (!categoryAgg[cat.key]) categoryAgg[cat.key] = {qty:0, rev:0, variants:{}};
+          categoryAgg[cat.key].qty += item.qty;
+          categoryAgg[cat.key].rev += item.rev;
+          if (!categoryAgg[cat.key].variants[item.name]) categoryAgg[cat.key].variants[item.name] = {qty:0, rev:0};
+          categoryAgg[cat.key].variants[item.name].qty += item.qty;
+          categoryAgg[cat.key].variants[item.name].rev += item.rev;
         }
       });
     });
@@ -1653,6 +1663,8 @@ function renderInsights() {
     const byVal = Object.entries(itemAgg).sort((a,b) => b[1][sortKey]-a[1][sortKey]);
     const maxVal = byVal[0]?.[1]?.[sortKey] || 1;
 
+    const catEmoji = { Stickers:'🏷️', Chicken:'🐔', Axolotl:'🦎', Capybara:'🐾', Kirby:'⭐', Pikachu:'⚡', Birb:'🐦', Octopus:'🐙' };
+
     // Which categories have 2+ variants?
     const multiVariantCats = Object.entries(categoryAgg).filter(([,d]) => Object.keys(d.variants).length > 1);
     const injectedCats = new Set();
@@ -1660,14 +1672,16 @@ function renderInsights() {
     let rank = 0;
     return byVal.slice(0,15).map(([name, d]) => {
       // Check if this item belongs to a multi-variant category we haven't shown yet
-      const cat = multiVariantCats.find(([catName]) =>
-        name.toLowerCase().includes(catName.toLowerCase()) && !injectedCats.has(catName)
+      const catEntry = CATEGORIES.find(cat =>
+        cat.match(name) && !injectedCats.has(cat.key) && multiVariantCats.some(([k]) => k === cat.key)
       );
 
       let catRow = '';
-      if (cat) {
-        const [catName, catData] = cat;
+      if (catEntry) {
+        const catName = catEntry.key;
+        const catData = categoryAgg[catName];
         injectedCats.add(catName);
+        const emoji = catEmoji[catName] || '🗂️';
         const variantList = Object.entries(catData.variants)
           .sort((a,b) => b[1][sortKey]-a[1][sortKey])
           .map(([vn, vd]) => `<div style="display:flex;justify-content:space-between;padding:4px 8px;font-size:0.78em;color:var(--text-mid);font-weight:700;">
@@ -1675,16 +1689,16 @@ function renderInsights() {
             <span>${sortKey==='qty' ? vd.qty+' sold' : '$'+vd.rev.toFixed(0)}</span>
           </div>`).join('');
 
-        const catDetailsId = 'catDetail_'+catName.replace(/\s/g,'');
+        const catDetailsId = 'catDetail_'+catName.replace(/\s/g,'')+'_'+sortKey;
         catRow = `<div style="background:linear-gradient(135deg,var(--rose-soft),var(--lav-soft));border-radius:10px;margin-bottom:8px;border:2px solid var(--rose-mid);overflow:hidden;">
           <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;" onclick="
             const d=document.getElementById('${catDetailsId}');
             d.style.display=d.style.display==='none'?'block':'none';
             this.querySelector('.cat-arrow').textContent=d.style.display==='none'?'▸':'▾';
           ">
-            <div class="lb-rank gold">🐔</div>
+            <div class="lb-rank gold">${emoji}</div>
             <div style="flex:1;">
-              <div style="font-weight:900;font-size:0.9em;">🗂️ All ${catName}s <span style="font-size:0.75em;font-weight:700;color:var(--text-soft);">(${Object.keys(catData.variants).length} types)</span></div>
+              <div style="font-weight:900;font-size:0.9em;">🗂️ All ${catName}${catName==='Stickers'?'':catName.endsWith('s')?'':'s'} <span style="font-size:0.75em;font-weight:700;color:var(--text-soft);">(${Object.keys(catData.variants).length} types)</span></div>
               <div class="lb-bar-wrap"><div class="lb-bar" style="width:${Math.round(catData[sortKey]/maxVal*100)}%"></div></div>
             </div>
             <div style="font-weight:900;color:var(--rose-deep);">${sortKey==='qty' ? catData.qty+' sold' : '$'+catData.rev.toFixed(0)}</div>
