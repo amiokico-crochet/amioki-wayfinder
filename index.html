@@ -742,6 +742,26 @@ textarea { resize: vertical; min-height: 80px; }
         <label>Additional Notes</label>
         <textarea id="pred_notes" placeholder="e.g., First time at this venue, expect families, holiday theme..."></textarea>
       </div>
+
+      <!-- What the AI Knows -->
+      <div id="aiKnowledgeCard" style="margin-bottom:14px;background:linear-gradient(135deg,var(--lav-soft),var(--rose-soft));border-radius:var(--radius-sm);border:2px solid var(--lavender);overflow:hidden;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;cursor:pointer;" onclick="toggleAIKnowledge()">
+          <div style="font-size:0.85em;font-weight:900;color:var(--text);display:flex;align-items:center;gap:8px;">
+            <span>🧠</span> What the AI knows right now
+            <span id="aiKnowledgeBadge" style="font-size:0.75em;font-weight:800;padding:2px 9px;border-radius:99px;background:var(--rose-soft);color:var(--rose-deep);border:1px solid var(--rose-mid);">loading...</span>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();generateAIKnowledgeSummary()" style="font-size:0.75em;padding:5px 12px;">✨ Refresh</button>
+            <span id="aiKnowledgeArrow" style="color:var(--text-soft);">▸</span>
+          </div>
+        </div>
+        <div id="aiKnowledgeBody" style="display:none;padding:0 14px 14px;">
+          <div id="aiKnowledgeContent">
+            <div style="font-size:0.82em;font-weight:700;color:var(--text-mid);padding:8px 0;">Hit ✨ Refresh to generate a summary of what patterns the AI has learned from your events.</div>
+          </div>
+        </div>
+      </div>
+
       <button class="btn btn-primary btn-full" onclick="runPrediction()">🧭 Generate Forecast</button>
     </div>
 
@@ -954,6 +974,37 @@ textarea { resize: vertical; min-height: 80px; }
       <div id="apiTestResult" style="margin-top:12px;display:none;" class="insight-box"></div>
     </div>
     <div class="card">
+      <div class="card-title"><span>🧠</span> AI Rules <span style="font-size:0.72em;font-weight:700;color:var(--text-soft);text-transform:none;letter-spacing:0;margin-left:6px;">hard overrides that always apply</span></div>
+      <p style="font-size:0.82em;font-weight:700;color:var(--text-mid);margin-bottom:14px;">Rules are injected into every prediction with <strong>higher priority than historical data</strong>. Use them to correct outliers, flag supply constraints, or lock in known truths about your markets.</p>
+      <div style="background:var(--lav-soft);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:14px;border:1px solid var(--lavender);">
+        <div style="font-size:0.72em;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-soft);margin-bottom:8px;">💡 Examples</div>
+        <div style="font-size:0.8em;font-weight:700;color:var(--text-mid);line-height:1.8;">
+          "Neptune Festival always performs above average regardless of rain — regulars show up"<br>
+          "Pikachu demand always exceeds my supply — never underestimate it"<br>
+          "Ignore Kara booth events when benchmarking revenue — different operator dynamic"<br>
+          "VB Farmers Market in winter averages $40 less than other seasons"
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;align-items:flex-end;flex-wrap:wrap;">
+        <div style="flex:1;min-width:220px;">
+          <label>New Rule</label>
+          <input type="text" id="new_rule_text" placeholder="e.g., Juried festivals always outperform my baseline by 20–30%">
+        </div>
+        <div style="min-width:140px;">
+          <label>Category</label>
+          <select id="new_rule_cat">
+            <option value="event">🎪 Specific Event</option>
+            <option value="item">📦 Item/Inventory</option>
+            <option value="weather">🌤️ Weather</option>
+            <option value="venue">📍 Venue</option>
+            <option value="general">🧠 General Strategy</option>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="saveAIRule()" style="align-self:flex-end;">+ Add Rule</button>
+      </div>
+      <div id="aiRulesList"></div>
+    </div>
+    <div class="card">
       <div class="card-title"><span>🗄️</span> Data Management</div>
       <p style="font-size:0.82em;font-weight:700;color:var(--text-mid);margin-bottom:14px;">All your Wayfinder data lives in your browser's local storage.</p>
       <div id="dataStats" style="margin-bottom:14px;"></div>
@@ -979,6 +1030,7 @@ const KEY_NOTES  = 'amioki_mkt_notes';
 const KEY_PLAN   = 'amioki_mkt_plan';
 const KEY_NAMES  = 'amioki_event_names';
 const KEY_ORDERS = 'amioki_ctr_orders';
+const KEY_RULES  = 'amioki_ai_rules';
 
 function load(key, def) { try { return JSON.parse(localStorage.getItem(key)) || def; } catch { return def; } }
 function save(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) { console.warn(e); } }
@@ -988,6 +1040,7 @@ let notes      = load(KEY_NOTES,  []);
 let planEvents = load(KEY_PLAN,   []);
 let savedNames = load(KEY_NAMES,  ['Cherry Blossom Fest','Neptune Festival','Water Lantern Festival','Chesapeake Jubilee','VB Farmers Market','Strawberry Festival']);
 let savedOrders = load(KEY_ORDERS, []);
+let aiRules    = load(KEY_RULES,  []);
 
 const CONTRACTORS = {
   ashley: {
@@ -1041,6 +1094,10 @@ function switchTab(id) {
   if (id==='insights') renderInsights();
   if (id==='notes') { renderNotes(); renderMarketTypesList(); }
   if (id==='plan') renderPlan();
+  if (id==='predict') {
+    const badge = document.getElementById('aiKnowledgeBadge');
+    if (badge) badge.textContent = `${events.length} event${events.length!==1?'s':''}${aiRules.length?' · '+aiRules.length+' rule'+(aiRules.length!==1?'s':''):''}`;
+  }
   if (id==='contractors') { setContractor(activeContractor); setTimeout(loadPendingPayOrder, 200); }
   if (id==='settings') initSettingsTab();
   refreshDataLists();
@@ -1542,13 +1599,15 @@ async function runPrediction() {
   events.forEach(ev => {
     ev.items?.forEach(item => {
       if (!item.name || !item.qty) return;
-      if (!itemHistory[item.name]) itemHistory[item.name] = { totalQty:0, totalRev:0, eventCount:0, byEventType:{}, byWeather:{}, byMonopoly:{} };
+      if (!itemHistory[item.name]) itemHistory[item.name] = { totalQty:0, totalRev:0, eventCount:0, qtySamples:[], byEventType:{}, byWeather:{}, byMonopoly:{} };
       const h = itemHistory[item.name];
       h.totalQty  += item.qty;
       h.totalRev  += (item.rev || item.qty * (item.grossEach || item.price || 0));
       h.eventCount++;
-      if (!h.byEventType[ev.type]) h.byEventType[ev.type] = {qty:0, events:0};
+      h.qtySamples.push(item.qty); // track every event's qty for std dev
+      if (!h.byEventType[ev.type]) h.byEventType[ev.type] = {qty:0, events:0, samples:[]};
       h.byEventType[ev.type].qty += item.qty; h.byEventType[ev.type].events++;
+      h.byEventType[ev.type].samples.push(item.qty);
       const wKey = ev.weather || 'Unknown';
       if (!h.byWeather[wKey]) h.byWeather[wKey] = {qty:0, events:0};
       h.byWeather[wKey].qty += item.qty; h.byWeather[wKey].events++;
@@ -1579,6 +1638,9 @@ async function runPrediction() {
   const pastSameLoc= locKeyword ? events.filter(e => e.location && e.location.toLowerCase().includes(locKeyword)) : [];
 
   const allNotesText = notes.map(n => `[${n.cat.toUpperCase()}] ${n.text}`).join('\n');
+  const aiRulesText  = aiRules.length
+    ? '⚠️ HARD RULES — these override historical data and must be respected:\n' + aiRules.map((r,i) => `  ${i+1}. [${r.cat.toUpperCase()}] ${r.text}`).join('\n')
+    : '';
 
   // Per-item detail lines (for inventory prompt)
   const itemDetailLines = Object.entries(itemHistory)
@@ -1646,6 +1708,8 @@ ${pastLocSummary}
 MARKET LEARNINGS:
 ${allNotesText||'None yet.'}
 
+${aiRulesText}
+
 Return JSON only.` }]
     });
 
@@ -1681,8 +1745,8 @@ Return JSON only.` }]
   // ── INVENTORY PLAN — CONTEXTUAL AI ───────────────────────────────────────
   try {
     const invRes = await apiCall({
-      system: `You are an inventory planner for Amioki, a kawaii amigurumi brand in Virginia Beach VA. You have per-item historical data broken down by event type, weather, and conditions. Recommend specific quantities for THIS event by reasoning about each item's past performance in similar conditions — not just overall averages. Contractors: Ashley makes Chickens, Baby Chicks, Octopi, Heart Keychains, Mini Loaf Cat, Bear/Apple Coasters, Cherry Blossom Pouch, Pet Rock, Mama/Baby Possum. Liz makes Leggy Frog, Bees, Birb, Jellyfish. Ami makes the rest (Pikachu, Axolotl, Kirby, Capybara, Snorlax, Mew, Miffy, Penguin, Whale). Pikachu demand always exceeds supply — always recommend as many as possible. Respond with ONLY a raw JSON array. Start with [ end with ]. No other text.
-[{"item":"name","qty":number,"reason":"1-2 sentences specific to THIS event conditions","priority":"high|medium|low","signal":"the data point that most drove this qty"}]`,
+      system: `You are an inventory planner for Amioki, a kawaii amigurumi brand in Virginia Beach VA. You have per-item historical data broken down by event type, weather, and conditions. Recommend specific CYCLE STOCK quantities for THIS event — the amount you expect to sell based on conditions. A separate formula will add safety stock buffer on top. Contractors: Ashley makes Chickens, Baby Chicks, Octopi, Heart Keychains, Mini Loaf Cat, Bear/Apple Coasters, Cherry Blossom Pouch, Pet Rock, Mama/Baby Possum. Liz makes Leggy Frog, Bees, Birb, Jellyfish. Ami makes the rest (Pikachu, Axolotl, Kirby, Capybara, Snorlax, Mew, Miffy, Penguin, Whale). Pikachu demand always exceeds supply — always recommend as many as possible. Respond with ONLY a raw JSON array. Start with [ end with ]. No other text.
+[{"item":"name","cycle_qty":number,"reason":"1-2 sentences specific to THIS event conditions","priority":"high|medium|low","signal":"the data point that most drove this qty"}]`,
       messages: [{ role: 'user', content: `Inventory plan for: ${name} (${type})
 Date: ${date||'upcoming'}, Location: ${location||'TBD'}
 Attendance: ${attendance||'medium'}, Weather: ${weather}, Crowd: ${crowd}
@@ -1698,27 +1762,126 @@ ${pastSameSummary}
 MARKET LEARNINGS:
 ${allNotesText||'None yet.'}
 
-Return 8-12 items. For each, explain WHY you chose that quantity for THESE specific conditions.` }]
+${aiRulesText}
+
+Return 8-12 items. For each, give the CYCLE STOCK quantity — what you expect to sell at this specific event based on conditions. Be specific about why.` }]
     });
 
-    const invData = await invRes.json();
-    const inv     = extractJSON(invData.content?.find(c=>c.type==='text')?.text||'', []);
+    const invData  = await invRes.json();
+    const inv      = extractJSON(invData.content?.find(c=>c.type==='text')?.text||'', []);
+
+    // ── SAFETY STOCK LAYER ────────────────────────────────────────────────
+    // Z-score for 90% service level = 1.28
+    // Safety Stock = Z × σ(item sales) × √(lead_time_days / avg_event_days)
+    // Lead times: Ami items = 1 day (make herself), contractor items = 5 days
+    // σ computed from qtySamples if ≥3 data points; else use fallback coefficient
+    const Z = 1.28; // 90% service level — won't sell out 90% of the time
+
+    // Lead time by maker (days to restock)
+    const LEAD_TIMES = {
+      ashley: 5, liz: 5, ami: 1
+    };
+    const ASHLEY_ITEMS = ['chicken','baby chick','octop','heart keychain','mini loaf cat','bear coaster','cherry blossom pouch','apple coaster','pet rock','mama possum','baby possum','christmas baby chick','baby christmas tree'];
+    const LIZ_ITEMS    = ['leggy frog','bee','birb','jellyfish'];
+
+    function getMaker(itemName) {
+      const n = itemName.toLowerCase();
+      if (ASHLEY_ITEMS.some(k => n.includes(k))) return 'ashley';
+      if (LIZ_ITEMS.some(k => n.includes(k))) return 'liz';
+      return 'ami';
+    }
+
+    function stdDev(samples) {
+      if (!samples || samples.length < 2) return null;
+      const mean = samples.reduce((a,b)=>a+b,0) / samples.length;
+      const variance = samples.reduce((s,x)=>s+Math.pow(x-mean,2),0) / (samples.length-1);
+      return Math.sqrt(variance);
+    }
+
+    function computeSafetyStock(itemName, cycleQty, history) {
+      const maker    = getMaker(itemName);
+      const leadDays = LEAD_TIMES[maker];
+
+      // Get the best sample set: prefer this event type, fall back to all events
+      const h = history[itemName] || history[Object.keys(history).find(k => k.toLowerCase().includes(itemName.toLowerCase().split(' ')[0]))] || null;
+
+      let sigma = null;
+      if (h) {
+        // Prefer type-specific samples if ≥3, else all samples
+        const typeSamples = h.byEventType[type]?.samples;
+        const allSamples  = h.qtySamples;
+        const samples     = (typeSamples && typeSamples.length >= 3) ? typeSamples : allSamples;
+        sigma = stdDev(samples);
+      }
+
+      // Fallback: use % of cycle qty based on priority heuristics
+      if (sigma === null) {
+        // High-demand items (Pikachu-tier) get 30% buffer, others 15%
+        const fallbackPct = ['pikachu','axolotl','kirby'].some(k => itemName.toLowerCase().includes(k)) ? 0.30 : 0.15;
+        sigma = cycleQty * fallbackPct;
+      }
+
+      // Safety Stock = Z × σ × √lead_time  (lead_time in "event-days" unit, so /1)
+      const safetyStock = Math.ceil(Z * sigma * Math.sqrt(leadDays));
+      return { safetyStock, sigma: Math.round(sigma*10)/10, leadDays, maker };
+    }
+
     const priColors = {high:'var(--rose)',medium:'var(--lavender)',low:'var(--sky)'};
+    const makerLabel = {ashley:'👩 Ashley',liz:'👩 Liz',ami:'🌸 Ami'};
+    const makerColor = {ashley:'var(--rose-soft)',liz:'var(--lav-soft)',ami:'var(--mint-soft)'};
+    const makerBorder= {ashley:'var(--rose-mid)',liz:'var(--lavender)',ami:'var(--mint)'};
 
     document.getElementById('predInventory').innerHTML = inv.length
-      ? inv.map(i => `
-        <div class="lb-item" style="flex-direction:column;align-items:flex-start;gap:8px;padding:14px 16px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
-            <div style="font-weight:900;font-size:0.95em;">${i.item}</div>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <div style="font-weight:900;font-size:1.4em;color:var(--rose-deep);">${i.qty}</div>
-              <span class="tag" style="background:${priColors[i.priority]||'var(--lavender)'}1a;color:${priColors[i.priority]||'var(--lavender)'};border-color:${priColors[i.priority]||'var(--lavender)'}66;">${i.priority||'medium'}</span>
+      ? `<div style="font-size:0.75em;font-weight:800;color:var(--text-soft);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;padding:0 2px;">
+          Cycle stock = expected sales · Safety stock = buffer for demand spikes &amp; lead time · Bring = total to pack
+        </div>` +
+        inv.map(i => {
+          const cycleQty = i.cycle_qty || i.qty || 0;
+          const { safetyStock, sigma, leadDays, maker } = computeSafetyStock(i.item, cycleQty, itemHistory);
+          const bringTotal = cycleQty + safetyStock;
+          const cycleWidth = Math.round(cycleQty / bringTotal * 100);
+          const safetyWidth = 100 - cycleWidth;
+
+          return `
+          <div style="background:var(--white);border-radius:var(--radius-sm);margin-bottom:10px;border:2px solid var(--border);overflow:hidden;">
+
+            <!-- Header row -->
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;gap:10px;">
+              <div style="flex:1;">
+                <div style="font-weight:900;font-size:0.95em;">${i.item}</div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:5px;">
+                  <span class="tag" style="background:${priColors[i.priority]||'var(--lavender)'}1a;color:${priColors[i.priority]||'var(--lavender)'};border-color:${priColors[i.priority]||'var(--lavender)'}66;">${i.priority||'medium'}</span>
+                  <span class="tag" style="background:${makerColor[maker]};color:var(--text-mid);border-color:${makerBorder[maker]};">${makerLabel[maker]}</span>
+                  <span class="tag" style="background:var(--yellow-soft);color:#92400E;border-color:var(--yellow);">⏱️ ${leadDays}d lead</span>
+                </div>
+              </div>
+              <!-- Bring total — the headline number -->
+              <div style="text-align:center;background:linear-gradient(135deg,var(--rose-soft),var(--lav-soft));border-radius:10px;padding:8px 14px;border:2px solid var(--rose-mid);flex-shrink:0;">
+                <div style="font-size:0.65em;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-soft);">Bring</div>
+                <div style="font-size:1.8em;font-weight:900;color:var(--rose-deep);line-height:1;">${bringTotal}</div>
+              </div>
             </div>
+
+            <!-- Cycle + Safety breakdown bar -->
+            <div style="padding:0 16px 12px;">
+              <div style="display:flex;border-radius:6px;overflow:hidden;height:20px;margin-bottom:6px;">
+                <div style="width:${cycleWidth}%;background:linear-gradient(90deg,var(--lavender),#9333EA);display:flex;align-items:center;justify-content:center;">
+                  <span style="font-size:0.65em;font-weight:900;color:white;white-space:nowrap;padding:0 4px;">${cycleQty} cycle</span>
+                </div>
+                <div style="width:${safetyWidth}%;background:linear-gradient(90deg,#FDE68A,#F59E0B);display:flex;align-items:center;justify-content:center;">
+                  <span style="font-size:0.65em;font-weight:900;color:#92400E;white-space:nowrap;padding:0 4px;">${safetyStock} safety</span>
+                </div>
+              </div>
+              <div style="display:flex;gap:14px;font-size:0.75em;font-weight:800;color:var(--text-soft);">
+                <span>📊 σ=${sigma} units variability</span>
+                <span>🎯 90% service level</span>
+              </div>
+            </div>
+
+            <!-- AI reasoning -->
+            ${i.reason ? `<div style="padding:10px 16px 12px;border-top:1px solid var(--border);font-size:0.8em;font-weight:700;color:var(--text-mid);line-height:1.5;">${i.reason}${i.signal ? ` <span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:99px;font-size:0.85em;font-weight:800;background:var(--lav-mid);color:var(--text-mid);border:1px solid var(--lavender);margin-left:6px;">📊 ${i.signal}</span>` : ''}</div>` : ''}
           </div>
-          ${i.reason ? `<div style="font-size:0.8em;font-weight:700;color:var(--text-mid);line-height:1.5;">${i.reason}</div>` : ''}
-          ${i.signal ? `<div style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;font-size:0.72em;font-weight:800;background:var(--lav-mid);color:var(--text-mid);border:1px solid var(--lavender);">📊 ${i.signal}</div>` : ''}
-        </div>
-      `).join('')
+        `}).join('')
       : '<div class="empty-state"><p>Log events with item details to get contextual inventory plans!</p></div>';
 
   } catch(e) {
@@ -1873,8 +2036,11 @@ function renderNotes() {
   if (!filtered.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div><p>No notes in this category yet!</p></div>'; return; }
   wrap.innerHTML = filtered.map(n => `
     <div class="note-item">
-      <div class="note-meta">${catLabel[n.cat]||n.cat}${n.event?' · '+n.event:''} · ${n.date}</div>
-      <div style="display:flex;gap:8px;align-items:flex-start;">
+      <div class="note-meta" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;">
+        <span>${catLabel[n.cat]||n.cat}${n.event?' · '+n.event:''} · ${n.date}</span>
+        <span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:99px;font-size:0.85em;font-weight:900;background:linear-gradient(135deg,var(--lav-mid),var(--rose-soft));color:var(--rose-deep);border:1px solid var(--rose-mid);">🔮 Affects predictions</span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:flex-start;margin-top:6px;">
         <div style="flex:1;">${n.text}</div>
         <button onclick="deleteNote(${n.id})" style="background:none;border:none;cursor:pointer;color:var(--coral);">🗑</button>
       </div>
@@ -2271,15 +2437,159 @@ function clearAllData() {
 }
 
 function confirmClearAll() {
-  [KEY_EVENTS, KEY_NOTES, KEY_PLAN, KEY_ORDERS, KEY_NAMES, KEY_LOCATIONS].forEach(k => localStorage.removeItem(k));
-  events=[]; notes=[]; planEvents=[]; savedOrders=[];
+  [KEY_EVENTS, KEY_NOTES, KEY_PLAN, KEY_ORDERS, KEY_NAMES, KEY_LOCATIONS, KEY_RULES].forEach(k => localStorage.removeItem(k));
+  events=[]; notes=[]; planEvents=[]; savedOrders=[]; aiRules=[];
   savedNames = ['Cherry Blossom Fest','Neptune Festival','Water Lantern Festival','Chesapeake Jubilee','VB Farmers Market','Strawberry Festival'];
   savedLocations = ['Virginia Beach Farmers Market','Greenbrier Library','Central Library','Chesapeake City Park','Town Center Virginia Beach'];
   renderRecentEvents(); renderDataStats();
   toast('🗑 All data cleared');
 }
 
-function initSettingsTab() { renderDataStats(); }
+// ═══════════════════════════════════════════════
+// AI RULES
+// ═══════════════════════════════════════════════
+function saveAIRule() {
+  const text = document.getElementById('new_rule_text')?.value.trim();
+  const cat  = document.getElementById('new_rule_cat')?.value || 'general';
+  if (!text) { toast('⚠️ Write a rule first!'); return; }
+  aiRules.unshift({ id: Date.now(), text, cat, date: new Date().toISOString().split('T')[0] });
+  save(KEY_RULES, aiRules);
+  document.getElementById('new_rule_text').value = '';
+  toast('🧠 AI Rule saved — active on next prediction!');
+  renderAIRules();
+}
+
+function deleteAIRule(id) {
+  aiRules = aiRules.filter(r => r.id !== id);
+  save(KEY_RULES, aiRules);
+  renderAIRules();
+  toast('🗑 Rule removed');
+}
+
+function renderAIRules() {
+  const wrap = document.getElementById('aiRulesList');
+  if (!wrap) return;
+  if (!aiRules.length) {
+    wrap.innerHTML = '<div style="font-size:0.82em;font-weight:700;color:var(--text-soft);padding:8px 0;">No rules yet — add your first override above!</div>';
+    return;
+  }
+  const catEmoji = {event:'🎪',item:'📦',weather:'🌤️',venue:'📍',general:'🧠'};
+  wrap.innerHTML = aiRules.map(r => `
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:11px 13px;background:var(--white);border-radius:var(--radius-sm);margin-bottom:8px;border:2px solid var(--lavender);">
+      <div style="font-size:1.1em;flex-shrink:0;margin-top:1px;">${catEmoji[r.cat]||'🧠'}</div>
+      <div style="flex:1;">
+        <div style="font-weight:800;font-size:0.88em;color:var(--text);line-height:1.4;">${r.text}</div>
+        <div style="font-size:0.72em;font-weight:800;color:var(--text-soft);margin-top:4px;text-transform:uppercase;letter-spacing:0.4px;">${r.cat} · added ${r.date} · <span style="color:var(--rose-deep);">⚡ Always active</span></div>
+      </div>
+      <button onclick="deleteAIRule(${r.id})" style="background:none;border:none;cursor:pointer;color:var(--coral);font-size:1em;flex-shrink:0;">🗑</button>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════
+// WHAT THE AI KNOWS — KNOWLEDGE SUMMARY
+// ═══════════════════════════════════════════════
+function toggleAIKnowledge() {
+  const body  = document.getElementById('aiKnowledgeBody');
+  const arrow = document.getElementById('aiKnowledgeArrow');
+  if (!body || !arrow) return;
+  const isOpen = body.style.display !== 'none';
+  body.style.display  = isOpen ? 'none' : 'block';
+  arrow.textContent   = isOpen ? '▸' : '▾';
+}
+
+async function generateAIKnowledgeSummary() {
+  const body    = document.getElementById('aiKnowledgeBody');
+  const content = document.getElementById('aiKnowledgeContent');
+  const badge   = document.getElementById('aiKnowledgeBadge');
+  if (!body || !content) return;
+
+  body.style.display = 'block';
+  document.getElementById('aiKnowledgeArrow').textContent = '▾';
+  content.innerHTML = '<div class="ai-loading"><div class="dots"><span></span><span></span><span></span></div> Analyzing your event history...</div>';
+
+  if (!events.length) {
+    content.innerHTML = '<div style="font-size:0.82em;font-weight:700;color:var(--text-mid);padding:4px 0;">No events logged yet — start logging events on the Log Event tab and the AI will learn from them!</div>';
+    return;
+  }
+
+  // Build compact stats for the summary prompt
+  const typeRevStats = {};
+  const weatherRevStats = {};
+  const itemAgg = {};
+  events.forEach(ev => {
+    if (!typeRevStats[ev.type]) typeRevStats[ev.type] = {total:0, count:0};
+    typeRevStats[ev.type].total += ev.revenue; typeRevStats[ev.type].count++;
+    const wKey = ev.weather || 'Unknown';
+    if (!weatherRevStats[wKey]) weatherRevStats[wKey] = {total:0, count:0};
+    weatherRevStats[wKey].total += ev.revenue; weatherRevStats[wKey].count++;
+    ev.items?.forEach(item => {
+      if (!itemAgg[item.name]) itemAgg[item.name] = {qty:0, rev:0, count:0};
+      itemAgg[item.name].qty += item.qty;
+      itemAgg[item.name].rev += item.rev || 0;
+      itemAgg[item.name].count++;
+    });
+  });
+
+  const typeSummary = Object.entries(typeRevStats).map(([t,d]) => `${t}: $${(d.total/d.count).toFixed(0)} avg (${d.count} events)`).join(', ');
+  const weatherSummary = Object.entries(weatherRevStats).map(([w,d]) => `${w}: $${(d.total/d.count).toFixed(0)} avg`).join(', ');
+  const topItems = Object.entries(itemAgg).sort((a,b)=>b[1].qty-a[1].qty).slice(0,8).map(([n,d])=>`${n}: ${d.qty} sold, avg ${(d.qty/d.count).toFixed(1)}/event`).join(', ');
+  const allNotesForSummary = notes.map(n=>n.text).join(' | ');
+  const rulesForSummary = aiRules.map(r=>r.text).join(' | ');
+  const totalRev = events.reduce((s,e)=>s+e.revenue,0);
+  const bestEv = events.reduce((a,b)=>b.revenue>a.revenue?b:a, events[0]);
+
+  try {
+    const res = await apiCall({
+      system: `You are summarizing what an AI prediction model has learned about Amioki, a kawaii amigurumi market vendor. Write a friendly, specific summary of the patterns visible in the data. Use bullet points. Be concrete — cite actual numbers from the data. Highlight surprising or actionable patterns. Keep it under 250 words. Write directly to Ami (use "you/your").`,
+      messages: [{ role: 'user', content: `Summarize what the AI has learned from this data:
+
+EVENTS: ${events.length} total, $${totalRev.toFixed(0)} total revenue, $${(totalRev/events.length).toFixed(0)} avg per event
+BEST EVENT: ${bestEv.name} — $${bestEv.revenue} (${bestEv.weather}, ${bestEv.crowd})
+
+REVENUE BY MARKET TYPE: ${typeSummary||'N/A'}
+REVENUE BY WEATHER: ${weatherSummary||'N/A'}
+TOP SELLING ITEMS: ${topItems||'N/A'}
+
+MARKET NOTES: ${allNotesForSummary||'None yet'}
+ACTIVE AI RULES: ${rulesForSummary||'None set'}
+
+Write 4-6 bullet points summarizing the clearest patterns and what they mean for future predictions. End with one sentence about what data would help improve accuracy.` }]
+    });
+
+    const data = await res.json();
+    const text = data.content?.find(c=>c.type==='text')?.text || '';
+
+    if (badge) badge.textContent = `${events.length} event${events.length!==1?'s':''}${aiRules.length ? ' · '+aiRules.length+' rule'+(aiRules.length!==1?'s':'') : ''}`;
+
+    // Render as formatted bullets
+    const lines = text.split('\n').filter(l => l.trim());
+    content.innerHTML = `
+      <div style="font-size:0.82em;font-weight:700;color:var(--text);line-height:1.7;">
+        ${lines.map(line => {
+          const clean = line.replace(/^[-•*]\s*/, '').trim();
+          if (!clean) return '';
+          const isBullet = /^[-•*]/.test(line.trim()) || line.trim().startsWith('–');
+          return isBullet || lines.length > 2
+            ? `<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid rgba(244,114,182,0.1);"><span style="color:var(--rose);flex-shrink:0;">✦</span><span>${clean}</span></div>`
+            : `<div style="padding:4px 0;">${clean}</div>`;
+        }).join('')}
+      </div>
+      ${aiRules.length ? `<div style="margin-top:10px;padding:8px 12px;background:var(--lav-soft);border-radius:8px;border:1px solid var(--lavender);">
+        <div style="font-size:0.72em;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-soft);margin-bottom:6px;">⚡ Active AI Rules (${aiRules.length})</div>
+        ${aiRules.map(r=>`<div style="font-size:0.78em;font-weight:700;color:var(--text-mid);padding:2px 0;">• ${r.text}</div>`).join('')}
+      </div>` : ''}
+    `;
+
+  } catch(e) {
+    content.innerHTML = '<div style="font-size:0.82em;font-weight:700;color:var(--coral);">Couldn\'t generate summary — check your AI connection!</div>';
+  }
+}
+
+function initSettingsTab() {
+  renderDataStats();
+  renderAIRules();
+}
 
 const PROXY_URL = 'https://amioki-wayfinder-proxy.amioki-co.workers.dev/';
 function apiCall(body) {
