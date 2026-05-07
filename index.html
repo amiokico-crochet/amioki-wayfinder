@@ -2270,178 +2270,351 @@ function renderPlan() {
     <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
       <div style="font-weight:900;font-size:0.9em;margin-bottom:8px;">🗓️ Master Prep List</div>
       <p style="font-size:0.82em;font-weight:700;color:var(--text-mid);margin-bottom:10px;">Get a combined prep list across all ${inRange.length} event${inRange.length!==1?'s':''} — totals per item with a priority breakdown by event.</p>
-      <button class="btn btn-primary btn-sm" onclick="getMasterPrepList()">🧭 Get ${planRange===1?'1-Month':planRange+'-Month'} Master Prep List</button>
+      <button class="btn btn-primary btn-sm" onclick="renderProductionSchedule()">📋 Generate Production Schedule</button>
     </div>
     <div id="masterPrepResult" style="margin-top:14px;display:none;"></div>
   `;
 }
 
-async function getMasterPrepList() {
+// ═══════════════════════════════════════════════
+// PRODUCTION SCHEDULE (formula-based, no AI)
+// ═══════════════════════════════════════════════
+
+// All items each contractor makes with avg time per piece
+const CONTRACTOR_ITEMS = {
+  ashley: [
+    'Chickens', 'Baby Chicks', 'Octopi', 'Heart Keychain',
+    'Mini Loaf Cat', 'Bear Coasters', 'Cherry Blossom Pouch',
+    'Apple Coasters', 'Pet Rock', 'Christmas Baby Chick', 'Baby Christmas Tree',
+    'Mama Possum', 'Baby Possum'
+  ],
+  liz: [
+    'Leggy Frog', 'Bees', 'Pastel Rainbow Birb', 'Jellyfish',
+    'All Birb Designs', 'Birb'
+  ]
+};
+
+function getContractorForItem(itemName) {
+  const n = itemName.toLowerCase();
+  if (CONTRACTOR_ITEMS.ashley.some(i => n.includes(i.toLowerCase()) || i.toLowerCase().includes(n.split(' ')[0]))) return 'ashley';
+  if (CONTRACTOR_ITEMS.liz.some(i => n.includes(i.toLowerCase()) || i.toLowerCase().includes(n.split(' ')[0]))) return 'liz';
+  return 'ami';
+}
+
+function needByDate(eventDate) {
+  const d = new Date(eventDate + 'T12:00');
+  d.setDate(d.getDate() - 2);
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function renderProductionSchedule() {
   const resultEl = document.getElementById('masterPrepResult');
   if (!resultEl) return;
   resultEl.style.display = 'block';
-  resultEl.innerHTML = `<div class="ai-loading"><div class="dots"><span></span><span></span><span></span></div> Building master prep list across all events...</div>`;
 
-  // Build event context
   const now = new Date();
   const cutoff = new Date(now);
   cutoff.setMonth(cutoff.getMonth() + planRange);
   const inRange = planEvents.filter(e => {
     const d = new Date(e.date);
     return d >= now && d <= cutoff;
-  }).sort((a,b) => new Date(a.date)-new Date(b.date));
+  }).sort((a,b) => new Date(a.date) - new Date(b.date));
 
   if (!inRange.length) {
     resultEl.innerHTML = `<div class="insight-box" style="background:var(--yellow-soft);border-color:var(--yellow);">No events in range — add some to your plan first!</div>`;
     return;
   }
 
-  // Past item history
+  // Build item list from historical sales
   const itemAgg = {};
-  events.forEach(ev => {
+  const relevantEvents = events.filter(e => inRange.some(p => p.type === e.type));
+  const allEvents = relevantEvents.length ? relevantEvents : events;
+
+  allEvents.forEach(ev => {
     ev.items?.forEach(item => {
+      if (!item.name) return;
       if (!itemAgg[item.name]) itemAgg[item.name] = { qty: 0, count: 0 };
       itemAgg[item.name].qty += item.qty;
       itemAgg[item.name].count++;
     });
   });
-  const historyStr = Object.entries(itemAgg)
-    .sort((a,b) => b[1].qty - a[1].qty)
-    .slice(0, 12)
-    .map(([n,d]) => `${n}: avg ${(d.qty/d.count).toFixed(1)}/event`)
-    .join(', ') || 'No past history yet';
 
-  const eventList = inRange.map((e,i) =>
-    `Event ${i+1}: ${e.name} on ${e.date} (${e.type}${e.location ? ', '+e.location : ''}${e.attendance ? ', ~'+e.attendance+' attendance' : ''})`
-  ).join('\n');
+  // Per-event quantities: avg sold per event for that item
+  // Assign items to each planned event based on avg
+  const schedule = {}; // itemName -> { who, events: [{evName, date, qty, needBy}], total }
+
+  inRange.forEach(ev => {
+    Object.entries(itemAgg).forEach(([name, d]) => {
+      const avgQty = Math.ceil(d.qty / d.count);
+      if (avgQty < 1) return;
+      const who = getContractorForItem(name);
+      if (!schedule[name]) schedule[name] = { who, events: [], total: 0 };
+      schedule[name].events.push({
+        evName: ev.name,
+        date: ev.date,
+        qty: avgQty,
+        needBy: needByDate(ev.date)
+      });
+      schedule[name].total += avgQty;
+    });
+  });
+
+  // Also add contractor's known items even if no history
+  ['ashley','liz'].forEach(who => {
+    CONTRACTOR_ITEMS[who].forEach(itemName => {
+      if (!schedule[itemName]) {
+        // No history — suggest 5 per event as starter
+        const evs = inRange.map(ev => ({
+          evName: ev.name, date: ev.date, qty: 5, needBy: needByDate(ev.date)
+        }));
+        schedule[itemName] = { who, events: evs, total: evs.length * 5, noHistory: true };
+      }
+    });
+  });
+
+  // Group by contractor
+  const byWho = { ashley: {}, liz: {}, ami: {} };
+  Object.entries(schedule).forEach(([name, d]) => {
+    if (byWho[d.who]) byWho[d.who][name] = d;
+  });
+
+  // Store for pay tab
+  window._productionSchedule = schedule;
+
+  resultEl.innerHTML = `
+    <div style="font-size:0.82em;font-weight:700;color:var(--text-mid);margin-bottom:14px;">
+      📋 Production schedule across <strong>${inRange.length} events</strong> — quantities based on your sales history.
+      Quantities with ⭐ are estimates (no past sales data).
+    </div>
+    ${renderContractorSection('ashley', byWho.ashley, 'Ashley')}
+    ${renderContractorSection('liz', byWho.liz, 'Liz')}
+    ${renderContractorSection('ami', byWho.ami, 'Ami')}
+    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+      <button class="btn btn-primary btn-sm" onclick="sendScheduleToPayTab('ashley')">💸 Send Ashley's to Pay</button>
+      <button class="btn btn-secondary btn-sm" onclick="sendScheduleToPayTab('liz')">💸 Send Liz's to Pay</button>
+      <button class="btn btn-ghost btn-sm" onclick="renderProductionSchedule()">🔄 Recalculate</button>
+    </div>
+
+    <div style="margin-top:14px;padding:14px;background:var(--lav-soft);border-radius:var(--radius-sm);border:2px solid var(--lavender);">
+      <div style="font-size:0.78em;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-soft);margin-bottom:8px;">🤖 Ask AI to Adjust</div>
+      <textarea id="scheduleAdjustInput" placeholder="e.g. I think Axolotls will sell way more at the strawberry festival — bump those up and reduce Kirby. Also add 10 extra Heart Keychains across all events." style="width:100%;min-height:70px;padding:10px;border:2px solid var(--lavender);border-radius:8px;font-family:'Nunito',sans-serif;font-size:0.85em;font-weight:600;resize:vertical;"></textarea>
+      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+        <button class="btn btn-primary btn-sm" onclick="aiAdjustSchedule()">✨ Apply AI Adjustments</button>
+        <span style="font-size:0.75em;font-weight:700;color:var(--text-soft);align-self:center;">AI will suggest changes — you approve before anything updates</span>
+      </div>
+      <div id="scheduleAdjustResult" style="display:none;margin-top:12px;"></div>
+    </div>
+  `;
+}
+
+function renderContractorSection(who, items, label) {
+  if (!Object.keys(items).length) return '';
+  const whoColors = { ashley: '#FCE7F3', liz: '#EDE9FE', ami: '#ECFDF5' };
+  const whoBorder = { ashley: '#F472B6', liz: '#C4B5FD', ami: '#6EE7B7' };
+  const totalItems = Object.values(items).reduce((s, d) => s + d.total, 0);
+  const sectionId = 'prodsec_' + who;
+  const meetupId = 'meetup_' + who;
+
+  const meetupDate = localStorage.getItem('meetup_' + who) || '';
+
+  const itemRows = Object.entries(items).sort((a,b) => b[1].total - a[1].total).map(([name, d]) => {
+    const detailId = 'proditem_' + who + '_' + name.replace(/\s/g,'');
+
+    // Split events into before/after next meetup
+    let beforeMeetup = [], afterMeetup = [];
+    if (meetupDate) {
+      const mu = new Date(meetupDate + 'T12:00');
+      d.events.forEach(ev => {
+        if (new Date(ev.date) <= mu) beforeMeetup.push(ev);
+        else afterMeetup.push(ev);
+      });
+    }
+
+    const evRows = d.events.map(ev => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 10px;border-bottom:1px dashed var(--border);font-size:0.78em;font-weight:700;color:var(--text-mid);">
+        <span>📅 ${ev.evName} <span style="color:var(--text-soft);font-weight:600;">(${new Date(ev.date+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})})</span></span>
+        <span style="color:var(--text);">${ev.qty} · <span style="color:var(--coral);font-size:0.9em;">need by ${ev.needBy}</span></span>
+      </div>
+    `).join('');
+
+    const meetupAlert = meetupDate && beforeMeetup.length ? `
+      <div style="background:#FEF9C3;border-left:3px solid #EAB308;padding:5px 10px;font-size:0.75em;font-weight:800;color:#854D0E;">
+        🔔 ${beforeMeetup.reduce((s,e)=>s+e.qty,0)} needed for next meetup (${new Date(meetupDate+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})})
+      </div>` : '';
+
+    return `
+      <div style="background:var(--white);border-radius:8px;margin-bottom:6px;border:1px solid var(--border);overflow:hidden;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;cursor:pointer;background:${d.noHistory?'var(--yellow-soft)':'var(--white)'};"
+          onclick="const el=document.getElementById('${detailId}');el.style.display=el.style.display==='none'?'block':'none';this.querySelector('.arr').textContent=el.style.display==='none'?'▸':'▾';">
+          <div>
+            <span style="font-weight:900;font-size:0.88em;">${name}</span>
+            ${d.noHistory ? '<span style="font-size:0.7em;color:#92400E;margin-left:6px;">⭐ estimated</span>' : ''}
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-weight:900;font-size:1.1em;color:var(--rose-deep);">${d.total}</span>
+            <span class="arr" style="color:var(--text-soft);">▸</span>
+          </div>
+        </div>
+        <div id="${detailId}" style="display:none;border-top:1px solid var(--border);">
+          ${meetupAlert}
+          ${evRows}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <div style="margin-bottom:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;background:${whoColors[who]};border-radius:10px;border:2px solid ${whoBorder[who]};cursor:pointer;margin-bottom:8px;"
+        onclick="const s=document.getElementById('${sectionId}');s.style.display=s.style.display==='none'?'block':'none';this.querySelector('.sarr').textContent=s.style.display==='none'?'▸':'▾';">
+        <div>
+          <span style="font-weight:900;font-size:0.92em;">${who==='ami'?'🌸':'👩'} ${label} — ${Object.keys(items).length} items · ${totalItems} total</span>
+        </div>
+        <span class="sarr" style="color:var(--text-mid);">▾</span>
+      </div>
+      <div id="${sectionId}">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding:8px 12px;background:var(--white);border-radius:8px;border:1px solid var(--border);">
+          <span style="font-size:0.8em;font-weight:800;color:var(--text-mid);white-space:nowrap;">📅 Next meetup:</span>
+          <input type="date" value="${meetupDate}" onchange="saveMeetupDate('${who}',this.value);renderProductionSchedule();"
+            style="padding:5px 8px;border:2px solid var(--rose-mid);border-radius:6px;font-size:0.82em;font-weight:700;flex:1;">
+          ${meetupDate ? `<span style="font-size:0.75em;font-weight:700;color:var(--text-soft);">${new Date(meetupDate+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>` : '<span style="font-size:0.75em;color:var(--text-soft);">set date to see meetup highlights</span>'}
+        </div>
+        ${itemRows}
+      </div>
+    </div>
+  `;
+}
+
+function saveMeetupDate(who, date) {
+  localStorage.setItem('meetup_' + who, date);
+  toast('📅 Meetup date saved for ' + (who === 'ashley' ? 'Ashley' : who === 'liz' ? 'Liz' : 'Ami'));
+}
+
+async function aiAdjustSchedule() {
+  const note = document.getElementById('scheduleAdjustInput')?.value.trim();
+  if (!note) { toast('⚠️ Tell the AI what to adjust first!'); return; }
+
+  const schedule = window._productionSchedule;
+  if (!schedule) { toast('⚠️ Generate a schedule first!'); return; }
+
+  const resultEl = document.getElementById('scheduleAdjustResult');
+  resultEl.style.display = 'block';
+  resultEl.innerHTML = '<div class="ai-loading"><div class="dots"><span></span><span></span><span></span></div> Calculating adjustments...</div>';
+
+  // Build current schedule summary for AI
+  const scheduleSummary = Object.entries(schedule).map(([name, d]) =>
+    `${name} (${d.who}): ${d.total} total across ${d.events.length} events`
+  ).join(', ');
+
+  const eventList = (window._productionSchedule ? Object.values(schedule)[0]?.events.map(e => e.evName).join(', ') : '') || 'various events';
 
   try {
     const res = await apiCall({
-      system: `Prep planner for Amioki amigurumi brand. 
-Ashley makes: Chickens, Baby Chicks, Octopi, Heart Keychain, Mini Loaf Cat, Bear Coasters, Pet Rock.
-Liz makes: Leggy Frog, Bees, Birbs, Jellyfish.
-Ami makes: Pikachu, Axolotl, Kirby, Capybara, Snorlax, Mew, Miffy, Penguin, Whale, Baby Shark.
-You MUST respond with ONLY raw JSON. Start with { end with }. No other text.
-Schema: {"items":[{"name":"string","who":"ashley|liz|ami","total":number,"priority":"high|medium|low","events":[{"event":"string","qty":number,"reason":"string"}]}],"summary":"string"}`,
-      messages: [{ role: 'user', content: `Master prep for ${inRange.length} events (${planRange} month):
-${eventList}
-History: ${historyStr}
-Return top 6 items max. Keep event reasons under 5 words.` }]
+      system: `You are a production quantity adjuster for Amioki amigurumi brand. You receive a current production schedule and a user's adjustment request. Return ONLY a JSON array of changes. Start with [ end with ]. No other text.
+Schema: [{"item":"item name","change":"increase|decrease|set","amount":number,"reason":"brief reason"}]`,
+      messages: [{ role: 'user', content: `Current schedule: ${scheduleSummary}
+
+User's adjustment request: "${note}"
+
+Return a JSON array of specific quantity changes to make. Be precise with item names and amounts.` }]
     });
 
     const data = await res.json();
-    let raw = (data.content?.find(c=>c.type==='text')?.text || '');
-    const result = extractJSON(raw, {});
-    if (!result.items || !result.items.length) {
-      // Llama returned something but not in expected format — show raw text
-      resultEl.innerHTML = `<div class="insight-box" style="background:var(--yellow-soft);border-color:var(--yellow);">
-        <div class="insight-label">⚠️ AI returned an unexpected format</div>
-        <div style="font-size:0.85em;white-space:pre-wrap;">${raw.slice(0,500)}</div>
-        <button class="btn btn-secondary btn-sm" style="margin-top:10px;" onclick="getMasterPrepList()">🔄 Try Again</button>
-      </div>`;
+    const raw = data.content?.find(c => c.type === 'text')?.text || '';
+    const changes = extractJSON(raw, []);
+
+    if (!changes.length) {
+      resultEl.innerHTML = `<div class="insight-box" style="background:var(--yellow-soft);border-color:var(--yellow);">AI couldn't parse that request — try being more specific about item names and quantities.</div>`;
       return;
     }
-    renderMasterPrepList(result, inRange);
 
-  } catch(e) {
-    resultEl.innerHTML = `<div class="insight-box" style="background:var(--coral-soft);border-color:var(--coral);">
-      <div class="insight-label">❌ Error</div>
-      ${e.message || 'Unknown error'} — check your internet connection and try again.
-      <button class="btn btn-secondary btn-sm" style="margin-top:10px;" onclick="getMasterPrepList()">🔄 Try Again</button>
-    </div>`;
-  }
-}
-
-function renderMasterPrepList(result, inRange) {
-  const resultEl = document.getElementById('masterPrepResult');
-  if (!resultEl) return;
-  if (!result.items || !result.items.length) {
-    resultEl.innerHTML = `<div class="insight-box" style="background:var(--yellow-soft);border-color:var(--yellow);">AI didn't return a valid prep list. Try again!</div>`;
-    return;
-  }
-
-  const whoColors = { ashley: '#FCE7F3', liz: '#EDE9FE', ami: '#ECFDF5' };
-  const whoBorder = { ashley: '#F472B6', liz: '#C4B5FD', ami: '#6EE7B7' };
-  const whoLabel  = { ashley: '👩 Ashley', liz: '👩 Liz', ami: '🌸 Ami' };
-  const priColors = { high: '#FEF2F2', medium: '#FFFBEB', low: '#F0F9FF' };
-  const priBorder = { high: '#FCA5A5', medium: '#FDE68A', low: '#BAE6FD' };
-  const priLabel  = { high: '🔴 High', medium: '🟡 Medium', low: '🔵 Low' };
-
-  // Group by who
-  const byWho = { ashley: [], liz: [], ami: [] };
-  result.items.forEach(item => { if (byWho[item.who]) byWho[item.who].push(item); });
-
-  const renderGroup = (who, items) => {
-    if (!items.length) return '';
-    return `
-      <div style="margin-bottom:14px;">
-        <div style="font-weight:900;font-size:0.85em;margin-bottom:8px;padding:6px 10px;background:${whoColors[who]};border-radius:8px;border:1px solid ${whoBorder[who]};">
-          ${whoLabel[who]} — ${items.reduce((s,i)=>s+i.total,0)} items total
-        </div>
-        ${items.map(item => `
-          <div style="background:var(--white);border-radius:8px;margin-bottom:6px;border:2px solid ${priBorder[item.priority]||'var(--border)'};overflow:hidden;">
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:${priColors[item.priority]||'var(--white)'};">
-              <div>
-                <span style="font-weight:900;font-size:0.9em;">${item.name}</span>
-                <span style="font-size:0.72em;font-weight:700;color:var(--text-soft);margin-left:8px;">${priLabel[item.priority]||item.priority}</span>
-              </div>
-              <div style="font-weight:900;font-size:1.2em;color:var(--rose-deep);">${item.total} total</div>
+    // Show suggestion card for approval
+    resultEl.innerHTML = `
+      <div style="background:var(--white);border-radius:10px;border:2px solid var(--lavender);overflow:hidden;">
+        <div style="padding:10px 14px;background:var(--lav-soft);font-weight:900;font-size:0.85em;">✨ Suggested Adjustments — Review & Approve</div>
+        ${changes.map((c, i) => `
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);">
+            <input type="checkbox" id="chg_${i}" checked style="width:16px;height:16px;accent-color:var(--rose);">
+            <div style="flex:1;">
+              <div style="font-weight:800;font-size:0.88em;">${c.item}</div>
+              <div style="font-size:0.75em;color:var(--text-soft);">${c.reason||''}</div>
             </div>
-            <div style="padding:6px 12px 8px;">
-              ${item.events.map(ev => `
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px dashed var(--border);font-size:0.78em;font-weight:700;color:var(--text-mid);">
-                  <span>📅 ${ev.event}</span>
-                  <span style="color:var(--text);">${ev.qty} · <span style="color:var(--text-soft);font-weight:600;">${ev.reason||''}</span></span>
-                </div>
-              `).join('')}
+            <div style="font-weight:900;color:${c.change==='increase'?'#065F46':c.change==='decrease'?'#991B1B':'var(--text)'};">
+              ${c.change==='increase'?'↑ +':c.change==='decrease'?'↓ -':'→ '}${c.amount}
             </div>
           </div>
         `).join('')}
+        <div style="padding:12px 14px;display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-primary btn-sm" onclick="applyScheduleChanges(${JSON.stringify(changes).replace(/"/g,'&quot;')})">✅ Apply Selected</button>
+          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('scheduleAdjustResult').style.display='none'">✕ Cancel</button>
+        </div>
       </div>
     `;
-  };
 
-  resultEl.innerHTML = `
-    ${result.summary ? `<div class="insight-box" style="margin-bottom:14px;"><div class="insight-label">📋 Overview</div>${result.summary}</div>` : ''}
-    ${renderGroup('ashley', byWho.ashley)}
-    ${renderGroup('liz', byWho.liz)}
-    ${renderGroup('ami', byWho.ami)}
-    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
-      <button class="btn btn-primary btn-sm" onclick="sendMasterToPayTab('ashley')">💸 Send Ashley's to Pay</button>
-      <button class="btn btn-secondary btn-sm" onclick="sendMasterToPayTab('liz')">💸 Send Liz's to Pay</button>
-      <button class="btn btn-ghost btn-sm" onclick="getMasterPrepList()">🔄 Regenerate</button>
-    </div>
-  `;
+    // Store changes for apply function
+    window._pendingScheduleChanges = changes;
 
-  // Store for pay tab use
-  window._masterPrepData = result;
+  } catch(e) {
+    resultEl.innerHTML = `<div class="insight-box" style="background:var(--coral-soft);border-color:var(--coral);">❌ Could not get AI adjustments. Check your connection and try again.</div>`;
+  }
 }
 
-function sendMasterToPayTab(who) {
-  const data = window._masterPrepData;
-  if (!data) { toast('⚠️ Generate master prep list first!'); return; }
-  const items = data.items.filter(i => i.who === who);
-  if (!items.length) { toast(`No items assigned to ${who} in this prep list!`); return; }
+function applyScheduleChanges(changes) {
+  const schedule = window._productionSchedule;
+  if (!schedule) return;
 
-  const entries = items.map(item => ({
-    itemName: item.name,
-    qty: item.total,
-    rate: 0, labor: 0, materials: 0
-  }));
+  // Only apply checked ones
+  const checked = changes.filter((c, i) => document.getElementById('chg_'+i)?.checked);
 
+  checked.forEach(change => {
+    // Find matching item (fuzzy match)
+    const matchKey = Object.keys(schedule).find(k =>
+      k.toLowerCase().includes(change.item.toLowerCase()) ||
+      change.item.toLowerCase().includes(k.toLowerCase())
+    );
+    if (!matchKey) return;
+
+    const item = schedule[matchKey];
+    const perEvent = Math.ceil(item.total / (item.events.length || 1));
+
+    if (change.change === 'increase') {
+      const addPerEvent = Math.ceil(change.amount / (item.events.length || 1));
+      item.events.forEach(ev => ev.qty += addPerEvent);
+      item.total += change.amount;
+    } else if (change.change === 'decrease') {
+      const subPerEvent = Math.ceil(change.amount / (item.events.length || 1));
+      item.events.forEach(ev => ev.qty = Math.max(0, ev.qty - subPerEvent));
+      item.total = Math.max(0, item.total - change.amount);
+    } else if (change.change === 'set') {
+      const newPerEvent = Math.ceil(change.amount / (item.events.length || 1));
+      item.events.forEach(ev => ev.qty = newPerEvent);
+      item.total = change.amount;
+    }
+  });
+
+  toast(`✅ ${checked.length} adjustment${checked.length!==1?'s':''} applied!`);
+  document.getElementById('scheduleAdjustInput').value = '';
+  renderProductionSchedule();
+}
+
+
+function sendScheduleToPayTab(who) {
+  const schedule = window._productionSchedule;
+  if (!schedule) { toast('⚠️ Generate production schedule first!'); return; }
+  const entries = Object.entries(schedule)
+    .filter(([, d]) => d.who === who)
+    .map(([name, d]) => ({ itemName: name, qty: d.total, rate: 0, labor: 0, materials: 0 }));
+  if (!entries.length) { toast('No items for ' + who + ' in this schedule!'); return; }
   window._pendingPayOrder = {
-    evName: `${planRange}-Month Master Prep`,
+    evName: `${planRange}-Month Production`,
     ashley: who === 'ashley' ? entries : [],
     liz:    who === 'liz'    ? entries : []
   };
-
-  document.querySelectorAll('.tab-btn').forEach(b => {
-    if (b.textContent.includes('Pay')) b.click();
-  });
-  // Set correct contractor
+  document.querySelectorAll('.tab-btn').forEach(b => { if (b.textContent.includes('Pay')) b.click(); });
   setTimeout(() => { setContractor(who); loadPendingPayOrder(); }, 300);
-  toast(`💸 Sent ${who === 'ashley' ? 'Ashley' : 'Liz'}'s items to Pay tab!`);
+  toast('💸 Sent ' + (who === 'ashley' ? 'Ashley' : 'Liz') + "'s items to Pay tab!");
 }
+
 
 
 function setNoteFilter(el) {
