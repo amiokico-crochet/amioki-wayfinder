@@ -775,6 +775,11 @@ textarea { resize: vertical; min-height: 80px; }
           <input type="number" id="plan_attendance" placeholder="500">
         </div>
       </div>
+      <div class="form-group">
+        <label>Location / Venue</label>
+        <input type="text" id="plan_location" placeholder="e.g., Virginia Beach Farmers Market..." list="locationList3">
+        <datalist id="locationList3"></datalist>
+      </div>
       <button class="btn btn-primary" onclick="addToPlan()">+ Add to Plan</button>
     </div>
 
@@ -1503,6 +1508,28 @@ function cancelEdit() {
 }
 
 function deleteEvent(id) {
+  const existing = document.getElementById('deleteConfirm_'+id);
+  if (existing) { existing.remove(); return; }
+
+  // Remove any other open confirmations first
+  document.querySelectorAll('[id^="deleteConfirm_"]').forEach(el => el.remove());
+
+  const ev = events.find(e => e.id === id);
+  const row = document.querySelector(`button[onclick="deleteEvent(${id})"]`)?.closest('.lb-item');
+  if (!row) return;
+
+  const confirm = document.createElement('div');
+  confirm.id = 'deleteConfirm_'+id;
+  confirm.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--coral-soft);border-radius:8px;margin-top:6px;border:1px solid var(--coral);flex-wrap:wrap;';
+  confirm.innerHTML = `
+    <span style="font-size:0.82em;font-weight:800;color:#991B1B;flex:1;">Delete "${ev?.name}"? This can't be undone.</span>
+    <button class="btn btn-danger btn-sm" onclick="confirmDeleteEvent(${id})">🗑 Yes, delete</button>
+    <button class="btn btn-ghost btn-sm" onclick="document.getElementById('deleteConfirm_${id}').remove()">Cancel</button>
+  `;
+  row.parentNode.insertBefore(confirm, row.nextSibling);
+}
+
+function confirmDeleteEvent(id) {
   events = events.filter(e => e.id !== id);
   save(KEY_EVENTS, events);
   renderRecentEvents();
@@ -1539,8 +1566,11 @@ function renderInsights() {
     chipsWrap.innerHTML += `<div class="chip ${currentFilter===t?'active':''}" data-filter="${t}" onclick="setFilter(this)">${typeLabel[t]||t}</div>`;
   });
 
-  // Item leaderboard
+  // Item leaderboard — build individual + category aggregates
   const itemAgg = {};
+  const categoryAgg = {}; // groups items by keyword categories e.g. "Chicken"
+  const CATEGORIES = ['Chicken', 'Axolotl', 'Kirby', 'Capybara', 'Pikachu']; // expandable
+
   filtered.forEach(ev => {
     ev.items?.forEach(item => {
       if (!itemAgg[item.name]) itemAgg[item.name] = {qty:0, rev:0, prices:[], events:0};
@@ -1548,38 +1578,93 @@ function renderInsights() {
       itemAgg[item.name].rev  += item.rev;
       if (item.price) itemAgg[item.name].prices.push(item.price);
       itemAgg[item.name].events++;
+
+      // Check if item belongs to a category
+      CATEGORIES.forEach(cat => {
+        if (item.name.toLowerCase().includes(cat.toLowerCase())) {
+          if (!categoryAgg[cat]) categoryAgg[cat] = {qty:0, rev:0, variants:{}};
+          categoryAgg[cat].qty += item.qty;
+          categoryAgg[cat].rev += item.rev;
+          if (!categoryAgg[cat].variants[item.name]) categoryAgg[cat].variants[item.name] = {qty:0, rev:0};
+          categoryAgg[cat].variants[item.name].qty += item.qty;
+          categoryAgg[cat].variants[item.name].rev += item.rev;
+        }
+      });
     });
   });
 
-  const byQty = Object.entries(itemAgg).sort((a,b) => b[1].qty-a[1].qty);
-  const byRev = Object.entries(itemAgg).sort((a,b) => b[1].rev-a[1].rev);
-  const maxQty = byQty[0]?.[1]?.qty || 1;
-  const maxRev = byRev[0]?.[1]?.rev || 1;
+  // Build display list: inject category rows for multi-variant categories
+  const buildLeaderboard = (sortKey) => {
+    const byVal = Object.entries(itemAgg).sort((a,b) => b[1][sortKey]-a[1][sortKey]);
+    const maxVal = byVal[0]?.[1]?.[sortKey] || 1;
 
-  const rankClass = i => i===0?'gold':i===1?'silver':i===2?'bronze':'other';
+    // Which categories have 2+ variants?
+    const multiVariantCats = Object.entries(categoryAgg).filter(([,d]) => Object.keys(d.variants).length > 1);
+    const injectedCats = new Set();
 
-  document.getElementById('lbUnits').innerHTML = byQty.length ? byQty.slice(0,10).map(([name,d],i) => `
-    <div class="lb-item">
-      <div class="lb-rank ${rankClass(i)}">${i<3?['🥇','🥈','🥉'][i]:i+1}</div>
-      <div style="flex:1;">
-        <div class="lb-name">${name}</div>
-        <div class="lb-bar-wrap"><div class="lb-bar" style="width:${Math.round(d.qty/maxQty*100)}%"></div></div>
-      </div>
-      <div class="lb-val">${d.qty} sold</div>
-    </div>
-  `).join('') : '<div class="empty-state"><div class="empty-icon">📦</div><p>Log events with item data to see rankings!</p></div>';
+    let rank = 0;
+    return byVal.slice(0,15).map(([name, d]) => {
+      // Check if this item belongs to a multi-variant category we haven't shown yet
+      const cat = multiVariantCats.find(([catName]) =>
+        name.toLowerCase().includes(catName.toLowerCase()) && !injectedCats.has(catName)
+      );
 
-  document.getElementById('lbRevenue').innerHTML = byRev.length ? byRev.slice(0,10).map(([name,d],i) => `
-    <div class="lb-item">
-      <div class="lb-rank ${rankClass(i)}">${i<3?['🥇','🥈','🥉'][i]:i+1}</div>
-      <div style="flex:1;">
-        <div class="lb-name">${name}</div>
-        <div class="lb-meta">$${d.rev>0?(d.rev/d.qty).toFixed(2):0} avg price · ${d.events} event${d.events!==1?'s':''}</div>
-        <div class="lb-bar-wrap"><div class="lb-bar" style="width:${Math.round(d.rev/maxRev*100)}%"></div></div>
-      </div>
-      <div class="lb-val">$${d.rev.toFixed(0)}</div>
-    </div>
-  `).join('') : '<div class="empty-state"><div class="empty-icon">💸</div><p>Log events with item data to see revenue rankings!</p></div>';
+      let catRow = '';
+      if (cat) {
+        const [catName, catData] = cat;
+        injectedCats.add(catName);
+        const variantList = Object.entries(catData.variants)
+          .sort((a,b) => b[1][sortKey]-a[1][sortKey])
+          .map(([vn, vd]) => `<div style="display:flex;justify-content:space-between;padding:4px 8px;font-size:0.78em;color:var(--text-mid);font-weight:700;">
+            <span>↳ ${vn}</span>
+            <span>${sortKey==='qty' ? vd.qty+' sold' : '$'+vd.rev.toFixed(0)}</span>
+          </div>`).join('');
+
+        const catDetailsId = 'catDetail_'+catName.replace(/\s/g,'');
+        catRow = `<div style="background:linear-gradient(135deg,var(--rose-soft),var(--lav-soft));border-radius:10px;margin-bottom:8px;border:2px solid var(--rose-mid);overflow:hidden;">
+          <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;" onclick="
+            const d=document.getElementById('${catDetailsId}');
+            d.style.display=d.style.display==='none'?'block':'none';
+            this.querySelector('.cat-arrow').textContent=d.style.display==='none'?'▸':'▾';
+          ">
+            <div class="lb-rank gold">🐔</div>
+            <div style="flex:1;">
+              <div style="font-weight:900;font-size:0.9em;">🗂️ All ${catName}s <span style="font-size:0.75em;font-weight:700;color:var(--text-soft);">(${Object.keys(catData.variants).length} types)</span></div>
+              <div class="lb-bar-wrap"><div class="lb-bar" style="width:${Math.round(catData[sortKey]/maxVal*100)}%"></div></div>
+            </div>
+            <div style="font-weight:900;color:var(--rose-deep);">${sortKey==='qty' ? catData.qty+' sold' : '$'+catData.rev.toFixed(0)}</div>
+            <span class="cat-arrow" style="color:var(--text-soft);font-size:0.9em;margin-left:4px;">▸</span>
+          </div>
+          <div id="${catDetailsId}" style="display:none;border-top:1px solid var(--border);padding:4px 0 8px;">
+            ${variantList}
+          </div>
+        </div>`;
+      }
+
+      rank++;
+      const i = rank - 1;
+      const rc = i===0?'gold':i===1?'silver':i===2?'bronze':'other';
+      const itemRow = `<div class="lb-item">
+        <div class="lb-rank ${rc}">${i<3?['🥇','🥈','🥉'][i]:rank}</div>
+        <div style="flex:1;">
+          <div class="lb-name">${name}</div>
+          ${sortKey==='rev' ? `<div class="lb-meta">$${d.rev>0?(d.rev/d.qty).toFixed(2):0} avg · ${d.events} event${d.events!==1?'s':''}</div>` : ''}
+          <div class="lb-bar-wrap"><div class="lb-bar" style="width:${Math.round(d[sortKey]/maxVal*100)}%"></div></div>
+        </div>
+        <div class="lb-val">${sortKey==='qty' ? d.qty+' sold' : '$'+d.rev.toFixed(0)}</div>
+      </div>`;
+
+      return catRow + itemRow;
+    }).join('');
+  };
+
+  document.getElementById('lbUnits').innerHTML = Object.keys(itemAgg).length
+    ? buildLeaderboard('qty')
+    : '<div class="empty-state"><div class="empty-icon">📦</div><p>Log events with item data to see rankings!</p></div>';
+
+  document.getElementById('lbRevenue').innerHTML = Object.keys(itemAgg).length
+    ? buildLeaderboard('rev')
+    : '<div class="empty-state"><div class="empty-icon">💸</div><p>Log events with item data to see revenue rankings!</p></div>';
 
   // Price suggestions from notes
   const allNotes = notes.map(n=>n.text).join(' ') + ' ' + events.map(e=>e.notes||'').join(' ');
@@ -1822,13 +1907,18 @@ function addToPlan() {
   if (!name || !date || !type) { toast('⚠️ Fill in name, date, and type!'); return; }
 
   const attendance = parseInt(document.getElementById('plan_attendance').value)||0;
-  // Quick revenue estimate from history
-  const similar = events.filter(e => e.type === type);
+  const location   = document.getElementById('plan_location').value.trim();
+  // Revenue estimate: prefer past same event at same location, then same event, then same type
+  const sameLocSameType = location
+    ? events.filter(e => e.type === type && e.location && e.location.toLowerCase().includes(location.toLowerCase().split(' ')[0]))
+    : [];
+  const similar = sameLocSameType.length ? sameLocSameType : events.filter(e => e.type === type);
   const avgRev = similar.length ? similar.reduce((s,e)=>s+e.revenue,0)/similar.length : null;
 
-  planEvents.push({ id: Date.now(), name, date, type, attendance, estRev: avgRev });
+  planEvents.push({ id: Date.now(), name, date, type, attendance, location, estRev: avgRev });
   save(KEY_PLAN, planEvents);
-  ['plan_name','plan_date','plan_attendance'].forEach(id => document.getElementById(id).value = '');
+  if (location) saveLocation(location);
+  ['plan_name','plan_date','plan_attendance','plan_location'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('plan_type').value = '';
   toast('📅 Added to plan!');
   renderPlan();
@@ -1871,21 +1961,27 @@ function renderPlan() {
     <div class="card">
       <div class="month-header">📅 ${month}</div>
       ${evs.map(ev => {
-        const similar = events.filter(e => e.type === ev.type);
-        const avg = similar.length ? similar.reduce((s,e)=>s+e.revenue,0)/similar.length : null;
+        // Location-aware revenue estimate: same event+location > same event > same type
+        const pastSameLocSame = ev.location
+          ? events.filter(e => e.name.replace(/\d{4}/,'').trim().toLowerCase() === ev.name.replace(/\d{4}/,'').trim().toLowerCase() && e.location && e.location.toLowerCase().includes(ev.location.toLowerCase().split(' ')[0]))
+          : [];
         const pastSame = events.filter(e => e.name.replace(/\d{4}/,'').trim().toLowerCase() === ev.name.replace(/\d{4}/,'').trim().toLowerCase());
-        const pastAvg = pastSame.length ? pastSame.reduce((s,e)=>s+e.revenue,0)/pastSame.length : null;
-        const estRev = pastAvg || avg;
+        const similar  = events.filter(e => e.type === ev.type);
+        const pastLocAvg  = pastSameLocSame.length ? pastSameLocSame.reduce((s,e)=>s+e.revenue,0)/pastSameLocSame.length : null;
+        const pastAvg     = pastSame.length ? pastSame.reduce((s,e)=>s+e.revenue,0)/pastSame.length : null;
+        const avg         = similar.length ? similar.reduce((s,e)=>s+e.revenue,0)/similar.length : null;
+        const estRev      = pastLocAvg || pastAvg || avg;
+        const estTag      = pastLocAvg ? '<span class="tag green">Same event + location</span>' : pastAvg ? '<span class="tag green">Same past event</span>' : avg ? '<span class="tag purple">Similar market type</span>' : '';
         return `<div class="plan-event">
           <div class="plan-event-header">
             <div>
               <div class="plan-event-name">${typeEmoji[ev.type]||''} ${ev.name}</div>
-              <div class="plan-event-date">${new Date(ev.date+'T12:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})} · <span class="tag">${typeLabel[ev.type]||ev.type}</span>${ev.attendance ? ` · ~${ev.attendance.toLocaleString()} attendance` : ''}</div>
+              <div class="plan-event-date">${new Date(ev.date+'T12:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})} · <span class="tag">${typeLabel[ev.type]||ev.type}</span>${ev.attendance ? ` · ~${ev.attendance.toLocaleString()} attendance` : ''}${ev.location ? ` · 📍 ${ev.location}` : ''}</div>
             </div>
             <button class="plan-remove" onclick="removePlanEvent(${ev.id})">✕</button>
           </div>
           <div class="plan-forecast">
-            ${estRev ? `💰 Est. revenue: <strong>$${(estRev*0.85).toFixed(0)}–$${(estRev*1.2).toFixed(0)}</strong> ${pastAvg ? '<span class="tag green">Based on past same event</span>' : '<span class="tag purple">Based on similar market type</span>'}` : `💰 Est. revenue: <span class="tag">Log similar events for forecast!</span>`}
+            ${estRev ? `💰 Est. revenue: <strong>$${(estRev*0.85).toFixed(0)}–$${(estRev*1.2).toFixed(0)}</strong> ${estTag}` : `💰 Est. revenue: <span class="tag">Log similar events for forecast!</span>`}
           </div>
         </div>`;
       }).join('')}
@@ -2472,7 +2568,7 @@ function refreshDataLists() {
     if (el) el.innerHTML = options;
   });
   const locOptions = savedLocations.map(l => `<option value="${l}">`).join('');
-  ['locationList','locationList2'].forEach(id => {
+  ['locationList','locationList2','locationList3'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.innerHTML = locOptions;
   });
