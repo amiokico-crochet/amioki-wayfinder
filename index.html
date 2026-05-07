@@ -1350,12 +1350,10 @@ function saveEvent() {
     const q     = parseFloat(document.getElementById('iqty_'+id)?.value)||0;
     const gross = parseFloat(document.getElementById('igross_'+id)?.value)||0;
     const shelf = parseFloat(document.getElementById('iprice_'+id)?.value)||0;
-    // price = shelf price (true sell price); grossEach = post-tax Square amount
     if (n) items.push({ name:n, qty:q, price:shelf, grossEach:gross, rev: q*(gross||shelf) });
   });
 
-  const ev = {
-    id: Date.now(),
+  const evData = {
     name, date, type,
     location: document.getElementById('ev_location').value.trim(),
     duration: parseInt(document.getElementById('ev_duration').value)||1,
@@ -1369,16 +1367,33 @@ function saveEvent() {
     items
   };
 
-  events.unshift(ev);
+  const editingId = window._editingEventId;
+  if (editingId) {
+    // UPDATE existing event
+    const idx = events.findIndex(e => e.id === editingId);
+    if (idx !== -1) {
+      events[idx] = { ...events[idx], ...evData };
+    }
+    window._editingEventId = null;
+    document.getElementById('editBanner')?.remove();
+    const saveBtn = document.querySelector('#tab-log .btn-primary.btn-full');
+    if (saveBtn) { saveBtn.textContent = '✨ Save Event'; saveBtn.style.background = ''; }
+    toast('✅ Event updated!');
+  } else {
+    // NEW event
+    events.unshift({ id: Date.now(), ...evData });
+    toast('🌸 Event saved!');
+  }
+
   save(KEY_EVENTS, events);
 
   // Save event name and location for datalists
   if (!savedNames.includes(name)) { savedNames.push(name); save(KEY_NAMES, savedNames); }
-  if (ev.location) saveLocation(ev.location);
+  if (evData.location) saveLocation(evData.location);
 
   // Auto-save notes if any
-  if (ev.notes) {
-    notes.unshift({ id: Date.now()+1, text: ev.notes, event: name, cat: 'general', date });
+  if (evData.notes) {
+    notes.unshift({ id: Date.now()+1, text: evData.notes, event: name, cat: 'general', date });
     save(KEY_NOTES, notes);
   }
 
@@ -1389,7 +1404,6 @@ function saveEvent() {
   document.getElementById('csvPreview').style.display = 'none';
   itemRows = 0;
 
-  toast('🌸 Event saved!');
   renderRecentEvents();
   refreshDataLists();
 }
@@ -1411,9 +1425,81 @@ function renderRecentEvents() {
         <div style="font-weight:900;color:var(--rose-deep);">$${ev.revenue.toFixed(0)}</div>
         <div style="font-size:0.72em;color:var(--text-soft);">${ev.itemsSold||ev.items?.reduce((s,i)=>s+i.qty,0)||0} items</div>
       </div>
-      <button class="btn btn-danger btn-sm" onclick="deleteEvent(${ev.id})" style="margin-left:8px;">🗑</button>
+      <button class="btn btn-secondary btn-sm" onclick="editEvent(${ev.id})" style="margin-left:6px;">✏️</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteEvent(${ev.id})" style="margin-left:4px;">🗑</button>
     </div>
   `).join('') + (events.length>10 ? `<p style="text-align:center;font-size:0.8em;color:var(--text-soft);padding:10px;">+${events.length-10} more events</p>` : '');
+}
+
+function editEvent(id) {
+  const ev = events.find(e => e.id === id);
+  if (!ev) return;
+
+  // Scroll to top of log form
+  document.querySelector('#tab-log .card').scrollIntoView({ behavior: 'smooth' });
+
+  // Mark as editing
+  window._editingEventId = id;
+
+  // Pre-fill all fields
+  document.getElementById('ev_name').value     = ev.name || '';
+  document.getElementById('ev_date').value     = ev.date || '';
+  document.getElementById('ev_location').value = ev.location || '';
+  document.getElementById('ev_type').value     = ev.type || '';
+  document.getElementById('ev_duration').value = ev.duration || 1;
+  document.getElementById('ev_revenue').value  = ev.revenue || '';
+  document.getElementById('ev_attendance').value = ev.attendance || '';
+  document.getElementById('ev_items').value    = ev.itemsSold || '';
+  document.getElementById('ev_notes').value    = ev.notes || '';
+
+  // Pre-fill weather/crowd/vendor pills
+  const weatherPill = document.querySelector(`#weatherPills [data-w="${ev.weather}"]`);
+  if (weatherPill) { document.querySelectorAll('#weatherPills .pill').forEach(p=>p.classList.remove('active')); weatherPill.classList.add('active'); pillState.weather = ev.weather; }
+  const crowdPill = document.querySelector(`#crowdPills [data-c="${ev.crowd}"]`);
+  if (crowdPill) { document.querySelectorAll('#crowdPills .pill').forEach(p=>p.classList.remove('active')); crowdPill.classList.add('active'); pillState.crowd = ev.crowd; }
+  const vendorPill = document.querySelector(`#vendorPills [data-v="${ev.vendor}"]`);
+  if (vendorPill) { document.querySelectorAll('#vendorPills .pill').forEach(p=>p.classList.remove('active')); vendorPill.classList.add('active'); pillState.vendor = ev.vendor; }
+
+  // Pre-fill item rows
+  document.getElementById('itemSalesRows').innerHTML = '';
+  itemRows = 0;
+  if (ev.items?.length) {
+    ev.items.forEach(item => addItemRow(item.name, item.qty, item.grossEach || '', item.price || ''));
+  }
+  syncItemsTotal();
+
+  // Change save button to show "Update Event"
+  const saveBtn = document.querySelector('#tab-log .btn-primary.btn-full');
+  if (saveBtn) {
+    saveBtn.textContent = '✅ Update Event';
+    saveBtn.style.background = 'linear-gradient(135deg,#10B981,#059669)';
+  }
+
+  // Show editing banner
+  const existingBanner = document.getElementById('editBanner');
+  if (existingBanner) existingBanner.remove();
+  const banner = document.createElement('div');
+  banner.id = 'editBanner';
+  banner.className = 'insight-box';
+  banner.style.cssText = 'background:var(--yellow-soft);border-color:var(--yellow);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;';
+  banner.innerHTML = `
+    <div><div class="insight-label">✏️ Editing Event</div><strong>${ev.name}</strong> — make your changes and hit Update Event</div>
+    <button class="btn btn-ghost btn-sm" onclick="cancelEdit()">✕ Cancel</button>
+  `;
+  document.querySelector('#tab-log').insertBefore(banner, document.querySelector('#tab-log .card'));
+  toast('✏️ Editing ' + ev.name);
+}
+
+function cancelEdit() {
+  window._editingEventId = null;
+  document.getElementById('editBanner')?.remove();
+  ['ev_name','ev_date','ev_location','ev_revenue','ev_attendance','ev_items','ev_notes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('ev_type').value = '';
+  document.getElementById('itemSalesRows').innerHTML = '';
+  itemRows = 0;
+  const saveBtn = document.querySelector('#tab-log .btn-primary.btn-full');
+  if (saveBtn) { saveBtn.textContent = '✨ Save Event'; saveBtn.style.background = ''; }
+  toast('✕ Edit cancelled');
 }
 
 function deleteEvent(id) {
