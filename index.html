@@ -1065,40 +1065,22 @@ textarea { resize: vertical; min-height: 80px; }
   <div id="tab-settings" class="tab-panel">
 
     <div class="card" style="background:linear-gradient(135deg,var(--rose-soft),var(--lav-soft));border:2px solid var(--rose-mid);">
-      <div class="card-title"><span>🔑</span> Claude API Key</div>
-      <p style="font-size:0.85em;font-weight:700;color:var(--text-mid);margin-bottom:16px;line-height:1.6;">
-        Your API key is stored <strong>only in your browser</strong> — it never goes to GitHub or anywhere else. Required for AI predictions, forecasts, and inventory suggestions.
-      </p>
-
-      <div class="form-group">
-        <label>API Key</label>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." style="flex:1;font-family:monospace;letter-spacing:0.05em;">
-          <button class="btn btn-ghost btn-sm" onclick="toggleKeyVisibility()" id="toggleKeyBtn" style="flex-shrink:0;">👁 Show</button>
-        </div>
+      <div class="card-title"><span>🤖</span> AI Connection</div>
+      <div class="insight-box" style="background:var(--mint-soft);border-color:var(--mint);margin-bottom:14px;">
+        <div class="insight-label">✅ Powered by Cloudflare Workers AI</div>
+        Using <strong>Llama 3.1 8B</strong> — free, no API key needed. Runs on Cloudflare's global network.
       </div>
-
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
-        <button class="btn btn-primary" onclick="saveApiKey()">💾 Save Key</button>
-        <button class="btn btn-danger btn-sm" onclick="clearApiKey()">🗑 Clear Key</button>
-      </div>
-
-      <div id="apiKeyStatus" style="margin-top:14px;display:none;"></div>
-
-      <div class="divider"></div>
-
-      <div style="font-size:0.8em;font-weight:700;color:var(--text-soft);line-height:1.7;">
-        <div>📍 Get your key at <strong>console.anthropic.com</strong> → API Keys</div>
-        <div>💳 Load $5 credit — lasts ~150–300 AI calls</div>
-        <div>🔒 Key saves to localStorage only, never transmitted anywhere</div>
-        <div>🚫 Never paste your key in a chat or email</div>
+      <div style="font-size:0.8em;font-weight:700;color:var(--text-soft);line-height:1.8;">
+        <div>🌐 Proxy: <strong>amioki-wayfinder-proxy.amioki-co.workers.dev</strong></div>
+        <div>🆓 Free tier: 10,000 requests/day — resets at midnight UTC</div>
+        <div>🔒 No API key stored anywhere — fully private</div>
       </div>
     </div>
 
     <div class="card">
       <div class="card-title"><span>🧪</span> Test Connection</div>
-      <p style="font-size:0.82em;font-weight:700;color:var(--text-mid);margin-bottom:14px;">Make sure your key is working before using the AI features.</p>
-      <button class="btn btn-secondary" onclick="testApiKey()">🧪 Test API Key</button>
+      <p style="font-size:0.82em;font-weight:700;color:var(--text-mid);margin-bottom:14px;">Make sure the AI is working before using predictions.</p>
+      <button class="btn btn-secondary" onclick="testApiKey()">🧪 Test AI Connection</button>
       <div id="apiTestResult" style="margin-top:12px;display:none;" class="insight-box"></div>
     </div>
 
@@ -3288,39 +3270,29 @@ function showApiStatus(msg, color) {
 }
 
 async function testApiKey() {
-  const key = getApiKey();
   const resultEl = document.getElementById('apiTestResult');
   resultEl.style.display = 'block';
-  resultEl.textContent = '⏳ Testing...';
+  resultEl.textContent = '⏳ Testing connection...';
   resultEl.style.background = 'var(--lav-soft)';
   resultEl.style.borderColor = 'var(--lavender)';
-
-  if (!key) {
-    resultEl.textContent = '⚠️ No API key saved yet — go save one first!';
-    resultEl.style.background = 'var(--yellow-soft)';
-    resultEl.style.borderColor = 'var(--yellow)';
-    return;
-  }
-
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch(PROXY_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 20,
         messages: [{ role: 'user', content: 'Say "Wayfinder ready!" and nothing else.' }]
       })
     });
     const data = await res.json();
-    if (data.content?.[0]?.text) {
-      resultEl.textContent = '✅ Connected! ' + data.content[0].text;
+    const text = data.content?.[0]?.text || '';
+    if (text) {
+      resultEl.textContent = '✅ Connected! ' + text;
       resultEl.style.background = 'var(--mint-soft)';
       resultEl.style.borderColor = 'var(--mint)';
-    } else if (data.error) {
-      resultEl.textContent = '❌ Error: ' + data.error.message;
-      resultEl.style.background = 'var(--coral-soft)';
-      resultEl.style.borderColor = 'var(--coral)';
+    } else {
+      resultEl.textContent = '⚠️ Connected but unexpected response. Try again!';
+      resultEl.style.background = 'var(--yellow-soft)';
+      resultEl.style.borderColor = 'var(--yellow)';
     }
   } catch(e) {
     resultEl.textContent = '❌ Connection failed: ' + e.message;
@@ -3366,27 +3338,16 @@ function confirmClearAll() {
 }
 
 function initSettingsTab() {
-  const key = getApiKey();
-  const input = document.getElementById('apiKeyInput');
-  if (key && input) input.value = '••••••••••••••••••••' + key.slice(-6);
   renderDataStats();
 }
 
+const PROXY_URL = 'https://amioki-wayfinder-proxy.amioki-co.workers.dev/';
+
 function apiCall(body) {
-  const key = getApiKey();
-  if (!key) {
-    toast('⚠️ Add your Claude API key in the Settings tab first!');
-    switchTab('settings');
-    throw new Error('No API key');
-  }
-  return fetch('https://api.anthropic.com/v1/messages', {
+  return fetch(PROXY_URL, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': key,
-      'anthropic-version': '2023-06-01'
-    },
-    body: JSON.stringify({ ...body, model: 'claude-sonnet-4-20250514', max_tokens: 1000 })
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
   });
 }
 
