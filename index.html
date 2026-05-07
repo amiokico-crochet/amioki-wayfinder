@@ -2350,8 +2350,8 @@ For each recommended item, break down how many to bring to EACH event specifical
     renderMasterPrepList(result, inRange);
 
   } catch(e) {
-    if (e.message === 'No API key') return;
-    resultEl.innerHTML = `<div class="insight-box" style="background:var(--coral-soft);border-color:var(--coral);">Could not generate master prep list. Check your API key in Settings.</div>`;
+    
+    resultEl.innerHTML = `<div class="insight-box" style="background:var(--coral-soft);border-color:var(--coral);">Could not generate master prep list. Check your internet connection and try again!</div>`;
   }
 }
 
@@ -2835,7 +2835,7 @@ Return 8-12 items with realistic quantities. Consider who makes each item.` }]
     const items = extractJSON(raw, []);
     renderPrepTable(planId, ev.name, items);
   } catch(e) {
-    if (e.message === 'No API key') return;
+    
     // Fallback: build from history without AI
     const fallback = Object.entries(itemAgg)
       .sort((a,b) => b[1].qty - a[1].qty)
@@ -2847,7 +2847,7 @@ Return 8-12 items with realistic quantities. Consider who makes each item.` }]
     if (fallback.length) {
       renderPrepTable(planId, ev.name, fallback);
     } else {
-      wrap.innerHTML = `<div class="insight-box" style="background:var(--coral-soft);border-color:var(--coral);">Could not generate prep list. Log more events or check your API key in Settings.</div>`;
+      wrap.innerHTML = `<div class="insight-box" style="background:var(--coral-soft);border-color:var(--coral);">Could not generate prep list. Check your internet connection or log more events first!</div>`;
     }
   }
 }
