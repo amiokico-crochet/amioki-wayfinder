@@ -2347,17 +2347,33 @@ For each recommended item, break down how many to bring to EACH event specifical
     const data = await res.json();
     let raw = (data.content?.find(c=>c.type==='text')?.text || '');
     const result = extractJSON(raw, {});
+    if (!result.items || !result.items.length) {
+      // Llama returned something but not in expected format — show raw text
+      resultEl.innerHTML = `<div class="insight-box" style="background:var(--yellow-soft);border-color:var(--yellow);">
+        <div class="insight-label">⚠️ AI returned an unexpected format</div>
+        <div style="font-size:0.85em;white-space:pre-wrap;">${raw.slice(0,500)}</div>
+        <button class="btn btn-secondary btn-sm" style="margin-top:10px;" onclick="getMasterPrepList()">🔄 Try Again</button>
+      </div>`;
+      return;
+    }
     renderMasterPrepList(result, inRange);
 
   } catch(e) {
-    
-    resultEl.innerHTML = `<div class="insight-box" style="background:var(--coral-soft);border-color:var(--coral);">Could not generate master prep list. Check your internet connection and try again!</div>`;
+    resultEl.innerHTML = `<div class="insight-box" style="background:var(--coral-soft);border-color:var(--coral);">
+      <div class="insight-label">❌ Error</div>
+      ${e.message || 'Unknown error'} — check your internet connection and try again.
+      <button class="btn btn-secondary btn-sm" style="margin-top:10px;" onclick="getMasterPrepList()">🔄 Try Again</button>
+    </div>`;
   }
 }
 
 function renderMasterPrepList(result, inRange) {
   const resultEl = document.getElementById('masterPrepResult');
-  if (!resultEl || !result.items) return;
+  if (!resultEl) return;
+  if (!result.items || !result.items.length) {
+    resultEl.innerHTML = `<div class="insight-box" style="background:var(--yellow-soft);border-color:var(--yellow);">AI didn't return a valid prep list. Try again!</div>`;
+    return;
+  }
 
   const whoColors = { ashley: '#FCE7F3', liz: '#EDE9FE', ami: '#ECFDF5' };
   const whoBorder = { ashley: '#F472B6', liz: '#C4B5FD', ami: '#6EE7B7' };
