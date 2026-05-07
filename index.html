@@ -518,16 +518,7 @@ textarea { resize: vertical; min-height: 80px; }
       <div class="grid-2">
         <div class="form-group">
           <label>Market Type</label>
-          <select id="ev_type">
-            <option value="">Select type...</option>
-            <option value="vb_farmers_market">🌿 VB Farmers Market (Home Base)</option>
-            <option value="farmers_market">🌿 Farmers Market (Other)</option>
-            <option value="special_event">⭐ Special Event</option>
-            <option value="festival">🎡 Festival (Single Day)</option>
-            <option value="festival_multi">🎡 Premium Festival (Multi-Day)</option>
-            <option value="holiday_market">🎄 Holiday Market</option>
-            <option value="popup">🏪 Pop-Up / Indoor Venue</option>
-          </select>
+          <select id="ev_type"></select>
         </div>
         <div class="form-group">
           <label>Duration</label>
@@ -690,16 +681,7 @@ textarea { resize: vertical; min-height: 80px; }
       <div class="grid-2">
         <div class="form-group">
           <label>Market Type</label>
-          <select id="pred_type">
-            <option value="">Select type...</option>
-            <option value="vb_farmers_market">🌿 VB Farmers Market (Home Base)</option>
-            <option value="farmers_market">🌿 Farmers Market (Other)</option>
-            <option value="special_event">⭐ Special Event</option>
-            <option value="festival">🎡 Festival (Single Day)</option>
-            <option value="festival_multi">🎡 Premium Festival (Multi-Day)</option>
-            <option value="holiday_market">🎄 Holiday Market</option>
-            <option value="popup">🏪 Pop-Up / Indoor Venue</option>
-          </select>
+          <select id="pred_type"></select>
         </div>
         <div class="form-group">
           <label>Expected Attendance</label>
@@ -777,16 +759,7 @@ textarea { resize: vertical; min-height: 80px; }
       <div class="grid-2">
         <div class="form-group">
           <label>Market Type</label>
-          <select id="plan_type">
-            <option value="">Select type...</option>
-            <option value="vb_farmers_market">🌿 VB Farmers Market</option>
-            <option value="farmers_market">🌿 Farmers Market (Other)</option>
-            <option value="special_event">⭐ Special Event</option>
-            <option value="festival">🎡 Festival</option>
-            <option value="festival_multi">🎡 Premium Festival (Multi-Day)</option>
-            <option value="holiday_market">🎄 Holiday Market</option>
-            <option value="popup">🏪 Pop-Up</option>
-          </select>
+          <select id="plan_type"></select>
         </div>
         <div class="form-group">
           <label>Expected Attendance</label>
@@ -865,7 +838,17 @@ textarea { resize: vertical; min-height: 80px; }
     </div>
 
     <div class="card">
-      <div class="card-title"><span>🤖</span> Ask the AI About Your Markets</div>
+      <div class="card-title"><span>🗂️</span> Manage Market Types</div>
+      <p style="font-size:0.82em;font-weight:700;color:var(--text-mid);margin-bottom:14px;">Add your own market types — they'll appear in all dropdowns across the app.</p>
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+        <input type="text" id="mt_emoji" placeholder="🌿" style="width:60px;text-align:center;">
+        <input type="text" id="mt_label" placeholder="VB Farmers Market - First Sunday" style="flex:1;min-width:180px;">
+        <button class="btn btn-primary btn-sm" onclick="addMarketType()">+ Add</button>
+      </div>
+      <div id="marketTypesList"></div>
+    </div>
+
+
       <div class="form-group">
         <textarea id="aiQuestion" placeholder="e.g., Which items should I make more of for summer festivals? When should I raise Pikachu prices? What's my best market type?"></textarea>
       </div>
@@ -1040,7 +1023,7 @@ function switchTab(id) {
   document.getElementById('tab-'+id).classList.add('active');
   event.target.classList.add('active');
   if (id==='insights') renderInsights();
-  if (id==='notes') renderNotes();
+  if (id==='notes') { renderNotes(); renderMarketTypesList(); }
   if (id==='plan') renderPlan();
   if (id==='contractors') { setContractor(activeContractor); }
   refreshDataLists();
@@ -1060,19 +1043,38 @@ function togglePill(el, group) {
 // ═══════════════════════════════════════════════
 // ITEM ROWS
 // ═══════════════════════════════════════════════
-function addItemRow(name='', qty='', price='') {
+function addItemRow(name='', qty='', grossEach='', shelfPrice='') {
   itemRows++;
+  // Auto-calculate shelf price from gross if not provided (gross × 1.06, rounded to nearest $0.50)
+  const calcShelf = grossEach && !shelfPrice
+    ? (Math.round((parseFloat(grossEach) * 1.06) / 0.5) * 0.5).toFixed(2)
+    : shelfPrice;
   const row = document.createElement('div');
-  row.className = 'grid-3';
   row.id = 'irow_'+itemRows;
-  row.style.cssText = 'gap:8px;margin-bottom:8px;align-items:end;';
+  row.style.cssText = 'display:grid;grid-template-columns:1.5fr 60px 90px 90px auto;gap:8px;margin-bottom:8px;align-items:end;';
   row.innerHTML = `
     <div><label>Item Name</label><input type="text" placeholder="Pikachu" value="${name}" id="iname_${itemRows}" list="knownItems"></div>
-    <div><label>Qty Sold</label><input type="number" placeholder="3" value="${qty}" id="iqty_${itemRows}" min="0" oninput="syncItemsTotal()"></div>
-    <div><label>Price Each ($)</label><div style="display:flex;gap:6px;"><input type="number" placeholder="18" value="${price}" id="iprice_${itemRows}" min="0" step="0.01" style="flex:1;"><button class="btn btn-ghost btn-sm" onclick="document.getElementById('irow_${itemRows}').remove();syncItemsTotal();" style="padding:8px 10px;">✕</button></div></div>
+    <div><label>Qty</label><input type="number" placeholder="3" value="${qty}" id="iqty_${itemRows}" min="0" oninput="syncItemsTotal()" style="text-align:center;"></div>
+    <div>
+      <label style="color:var(--text-soft);">Gross/ea ($) <span title="Post-tax amount Square records" style="cursor:help;">ⓘ</span></label>
+      <input type="number" placeholder="11.79" value="${grossEach}" id="igross_${itemRows}" min="0" step="0.01" oninput="autoCalcShelf(${itemRows})">
+    </div>
+    <div>
+      <label>Shelf Price ($) <span title="Your actual sell price including tax" style="cursor:help;">ⓘ</span></label>
+      <input type="number" placeholder="12.50" value="${calcShelf}" id="iprice_${itemRows}" min="0" step="0.50" style="font-weight:900;border-color:var(--rose);">
+    </div>
+    <div style="padding-bottom:2px;"><button class="btn btn-ghost btn-sm" onclick="document.getElementById('irow_${itemRows}').remove();syncItemsTotal();" style="padding:8px 10px;">✕</button></div>
   `;
   document.getElementById('itemSalesRows').appendChild(row);
   syncItemsTotal();
+}
+
+function autoCalcShelf(id) {
+  const gross = parseFloat(document.getElementById('igross_'+id)?.value) || 0;
+  const shelf = document.getElementById('iprice_'+id);
+  if (shelf && gross > 0) {
+    shelf.value = (Math.round((gross * 1.06) / 0.5) * 0.5).toFixed(2);
+  }
 }
 
 function syncItemsTotal() {
@@ -1220,7 +1222,8 @@ function handleCSV(e) {
       Object.entries(itemsMap)
         .sort((a,b) => b[1].rev - a[1].rev)
         .forEach(([name, {qty, rev}]) => {
-          addItemRow(name, qty, qty > 0 ? (rev / qty).toFixed(2) : '');
+          const grossEach = qty > 0 ? (rev / qty).toFixed(2) : '';
+          addItemRow(name, qty, grossEach); // shelf price auto-calculates from gross
         });
 
       // ── Add custom sales to total revenue & create editable rows ──
@@ -1233,7 +1236,7 @@ function handleCSV(e) {
           const perItem = c.qty > 1 ? (c.gross / c.qty).toFixed(2) : c.gross.toFixed(2);
           const count = c.qty > 1 ? c.qty : 1;
           for (let i = 0; i < count; i++) {
-            addItemRow('', 1, perItem);
+            addItemRow('', 1, perItem); // gross each, shelf auto-calculates
           }
         });
       }
@@ -1307,11 +1310,13 @@ function saveEvent() {
   // Collect items
   const items = [];
   document.querySelectorAll('[id^="irow_"]').forEach(row => {
-    const id = row.id.replace('irow_','');
-    const n = document.getElementById('iname_'+id)?.value.trim();
-    const q = parseFloat(document.getElementById('iqty_'+id)?.value)||0;
-    const p = parseFloat(document.getElementById('iprice_'+id)?.value)||0;
-    if (n) items.push({name:n, qty:q, price:p, rev: q*p});
+    const id    = row.id.replace('irow_','');
+    const n     = document.getElementById('iname_'+id)?.value.trim();
+    const q     = parseFloat(document.getElementById('iqty_'+id)?.value)||0;
+    const gross = parseFloat(document.getElementById('igross_'+id)?.value)||0;
+    const shelf = parseFloat(document.getElementById('iprice_'+id)?.value)||0;
+    // price = shelf price (true sell price); grossEach = post-tax Square amount
+    if (n) items.push({ name:n, qty:q, price:shelf, grossEach:gross, rev: q*(gross||shelf) });
   });
 
   const ev = {
@@ -1358,7 +1363,7 @@ function saveEvent() {
 function renderRecentEvents() {
   const wrap = document.getElementById('recentEvents');
   if (!events.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">🌸</div><p>No events yet!</p></div>'; return; }
-  const typeLabel = {vb_farmers_market:'VB Farmers Market',farmers_market:'Farmers Market',special_event:'Special Event',festival:'Festival',festival_multi:'Premium Festival',holiday_market:'Holiday Market',popup:'Pop-Up'};
+  const typeLabel = Object.fromEntries(marketTypes.map(t => [t.id, t.label]));
   wrap.innerHTML = events.slice(0,10).map(ev => `
     <div class="lb-item">
       <div style="flex:1;">
@@ -1404,7 +1409,7 @@ function renderInsights() {
 
   // Type chips
   const types = [...new Set(events.map(e=>e.type))];
-  const typeLabel = {vb_farmers_market:'VB FM',farmers_market:'Other FM',special_event:'Special',festival:'Festival',festival_multi:'Premium Festival',holiday_market:'Holiday',popup:'Pop-Up'};
+  const typeLabel = Object.fromEntries(marketTypes.map(t => [t.id, t.label]));
   const chipsWrap = document.getElementById('typeChips');
   chipsWrap.innerHTML = `<div class="chip ${currentFilter==='all'?'active':''}" data-filter="all" onclick="setFilter(this)">All Markets</div>`;
   types.forEach(t => {
@@ -1716,8 +1721,8 @@ function renderPlan() {
     return d >= now && d <= cutoff;
   }).sort((a,b) => new Date(a.date)-new Date(b.date));
 
-  const typeLabel = {vb_farmers_market:'VB Farmers Market',farmers_market:'Farmers Market',special_event:'Special Event',festival:'Festival',festival_multi:'Premium Festival',holiday_market:'Holiday Market',popup:'Pop-Up'};
-  const typeEmoji = {vb_farmers_market:'🌿',farmers_market:'🌿',special_event:'⭐',festival:'🎡',festival_multi:'🎡',holiday_market:'🎄',popup:'🏪'};
+  const typeLabel = Object.fromEntries(marketTypes.map(t => [t.id, t.label]));
+  const typeEmoji = Object.fromEntries(marketTypes.map(t => [t.id, t.emoji]));
 
   if (!inRange.length) {
     document.getElementById('planCalendar').innerHTML = '<div class="empty-state card"><div class="empty-icon">📅</div><p>No events in the next '+(planRange===1?'month':planRange+' months')+'. Add some above!</p></div>';
@@ -2110,6 +2115,78 @@ function renderMonthlyBreakdown() {
   }).join('');
 }
 
+// ═══════════════════════════════════════════════
+// MARKET TYPES
+// ═══════════════════════════════════════════════
+const KEY_MARKET_TYPES = 'amioki_market_types';
+
+const DEFAULT_MARKET_TYPES = [
+  { id: 'vb_farmers_market',  emoji: '🌿', label: 'VB Farmers Market - First Sunday' },
+  { id: 'farmers_market',     emoji: '🌿', label: 'Farmers Market (Other)' },
+  { id: 'special_event',      emoji: '⭐', label: 'Special Event' },
+  { id: 'festival',           emoji: '🎡', label: 'Festival (Single Day)' },
+  { id: 'festival_multi',     emoji: '🎡', label: 'Premium Festival (Multi-Day)' },
+  { id: 'holiday_market',     emoji: '🎄', label: 'Holiday Market' },
+  { id: 'popup',              emoji: '🏪', label: 'Pop-Up / Indoor Venue' },
+];
+
+let marketTypes = load(KEY_MARKET_TYPES, DEFAULT_MARKET_TYPES);
+
+function saveMarketTypes() { save(KEY_MARKET_TYPES, marketTypes); }
+
+function rebuildTypeDropdowns() {
+  const opts = '<option value="">Select type...</option>' +
+    marketTypes.map(t => `<option value="${t.id}">${t.emoji} ${t.label}</option>`).join('');
+  ['ev_type','pred_type','plan_type'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = opts;
+  });
+}
+
+function addMarketType() {
+  const emoji = document.getElementById('mt_emoji').value.trim() || '📍';
+  const label = document.getElementById('mt_label').value.trim();
+  if (!label) { toast('⚠️ Enter a market type name!'); return; }
+  const id = 'custom_' + Date.now();
+  marketTypes.push({ id, emoji, label });
+  saveMarketTypes();
+  document.getElementById('mt_emoji').value = '';
+  document.getElementById('mt_label').value = '';
+  rebuildTypeDropdowns();
+  renderMarketTypesList();
+  toast('✅ Market type added!');
+}
+
+function deleteMarketType(id) {
+  const inUse = events.some(e => e.type === id);
+  if (inUse) { toast('⚠️ This type has events logged — can\'t delete!'); return; }
+  marketTypes = marketTypes.filter(t => t.id !== id);
+  saveMarketTypes();
+  rebuildTypeDropdowns();
+  renderMarketTypesList();
+  toast('🗑 Market type removed');
+}
+
+function renderMarketTypesList() {
+  const wrap = document.getElementById('marketTypesList');
+  if (!wrap) return;
+  wrap.innerHTML = marketTypes.map(t => {
+    const isDefault = DEFAULT_MARKET_TYPES.some(d => d.id === t.id);
+    const inUse = events.filter(e => e.type === t.id).length;
+    return `<div class="lb-item">
+      <div style="font-size:1.3em;width:28px;text-align:center;">${t.emoji}</div>
+      <div style="flex:1;">
+        <div style="font-weight:800;font-size:0.88em;">${t.label}</div>
+        ${inUse ? `<div style="font-size:0.72em;color:var(--text-soft);">${inUse} event${inUse!==1?'s':''} logged</div>` : ''}
+      </div>
+      ${isDefault
+        ? `<span class="tag purple">Default</span>`
+        : `<button class="btn btn-danger btn-sm" onclick="deleteMarketType('${t.id}')">🗑</button>`
+      }
+    </div>`;
+  }).join('');
+}
+
 function refreshDataLists() {
   const options = savedNames.map(n => `<option value="${n}">`).join('');
   ['eventNameList','eventNameList2','eventNameList3','eventNameList4'].forEach(id => {
@@ -2138,6 +2215,8 @@ function toast(msg) {
   renderRecentEvents();
   refreshDataLists();
   setPlanRange(1);
+  rebuildTypeDropdowns();
+  renderMarketTypesList();
 })();
 </script>
 </body>
