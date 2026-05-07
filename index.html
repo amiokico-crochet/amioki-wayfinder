@@ -571,12 +571,10 @@ textarea { resize: vertical; min-height: 80px; }
       </div>
 
       <div class="form-group">
-        <label>Vendor Situation</label>
+        <label>Booth Operator</label>
         <div class="pill-row" id="vendorPills">
-          <div class="pill active" data-v="Solo (just me)" onclick="togglePill(this,'vendor')">🙋 Solo</div>
-          <div class="pill" data-v="With Ashley" onclick="togglePill(this,'vendor')">👩‍🤝‍👩 With Ashley</div>
-          <div class="pill" data-v="With Liz" onclick="togglePill(this,'vendor')">👩‍🤝‍👩 With Liz</div>
-          <div class="pill" data-v="Full Team" onclick="togglePill(this,'vendor')">👥 Full Team</div>
+          <div class="pill active" data-v="Ami" onclick="togglePill(this,'vendor')">🌸 Ami</div>
+          <div class="pill" data-v="Kara" onclick="togglePill(this,'vendor')">🌸 Kara</div>
         </div>
       </div>
     </div>
@@ -950,7 +948,7 @@ textarea { resize: vertical; min-height: 80px; }
 // ═══════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════
-let pillState = { weather:'☀️ Sunny', crowd:'🔥 Packed', vendor:'Solo (just me)', predWeather:'☀️ Sunny', predCrowd:'🔥 Packed' };
+let pillState = { weather:'☀️ Sunny', crowd:'🔥 Packed', vendor:'Ami', predWeather:'☀️ Sunny', predCrowd:'🔥 Packed' };
 let currentFilter = 'all';
 let planRange = 1;
 let noteFilter = 'all';
@@ -2170,21 +2168,51 @@ function deleteMarketType(id) {
 function renderMarketTypesList() {
   const wrap = document.getElementById('marketTypesList');
   if (!wrap) return;
-  wrap.innerHTML = marketTypes.map(t => {
-    const isDefault = DEFAULT_MARKET_TYPES.some(d => d.id === t.id);
+  if (!marketTypes.length) {
+    wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">🗂️</div><p>No market types yet!</p></div>';
+    return;
+  }
+  wrap.innerHTML = marketTypes.map((t, idx) => {
     const inUse = events.filter(e => e.type === t.id).length;
-    return `<div class="lb-item">
+    return `<div class="lb-item" id="mtrow_${idx}">
       <div style="font-size:1.3em;width:28px;text-align:center;">${t.emoji}</div>
       <div style="flex:1;">
         <div style="font-weight:800;font-size:0.88em;">${t.label}</div>
         ${inUse ? `<div style="font-size:0.72em;color:var(--text-soft);">${inUse} event${inUse!==1?'s':''} logged</div>` : ''}
       </div>
-      ${isDefault
-        ? `<span class="tag purple">Default</span>`
-        : `<button class="btn btn-danger btn-sm" onclick="deleteMarketType('${t.id}')">🗑</button>`
-      }
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button class="btn btn-secondary btn-sm" onclick="editMarketType(${idx})">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteMarketType('${t.id}')" ${inUse ? 'disabled style="opacity:0.4;cursor:not-allowed;"' : ''}>🗑</button>
+      </div>
     </div>`;
   }).join('');
+}
+
+function editMarketType(idx) {
+  const t = marketTypes[idx];
+  const row = document.getElementById('mtrow_'+idx);
+  if (!row) return;
+  row.innerHTML = `
+    <input type="text" id="edit_emoji_${idx}" value="${t.emoji}" style="width:50px;text-align:center;padding:6px;">
+    <input type="text" id="edit_label_${idx}" value="${t.label}" style="flex:1;padding:6px;">
+    <div style="display:flex;gap:6px;">
+      <button class="btn btn-primary btn-sm" onclick="saveMarketTypeEdit(${idx})">✅ Save</button>
+      <button class="btn btn-ghost btn-sm" onclick="renderMarketTypesList()">✕</button>
+    </div>
+  `;
+  row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:var(--radius-sm);margin-bottom:8px;background:var(--lav-soft);border:2px solid var(--lavender);';
+}
+
+function saveMarketTypeEdit(idx) {
+  const emoji = document.getElementById('edit_emoji_'+idx)?.value.trim() || '📍';
+  const label = document.getElementById('edit_label_'+idx)?.value.trim();
+  if (!label) { toast('⚠️ Label can\'t be empty!'); return; }
+  marketTypes[idx].emoji = emoji;
+  marketTypes[idx].label = label;
+  saveMarketTypes();
+  rebuildTypeDropdowns();
+  renderMarketTypesList();
+  toast('✅ Market type updated!');
 }
 
 function refreshDataLists() {
