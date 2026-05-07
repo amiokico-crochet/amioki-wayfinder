@@ -1055,36 +1055,61 @@ function togglePill(el, group) {
 // ═══════════════════════════════════════════════
 function addItemRow(name='', qty='', grossEach='', shelfPrice='') {
   itemRows++;
-  // Auto-calculate shelf price from gross if not provided (gross × 1.06, rounded to nearest $0.50)
+  // Shelf = gross × 1.06 (exact, no rounding — matches Square CSV)
+  // Gross = shelf ÷ 1.06
   const calcShelf = grossEach && !shelfPrice
-    ? (Math.round((parseFloat(grossEach) * 1.06) / 0.5) * 0.5).toFixed(2)
-    : shelfPrice;
+    ? (parseFloat(grossEach) * 1.06).toFixed(2)
+    : shelfPrice || '';
+  const calcGross = calcShelf && !grossEach
+    ? (parseFloat(calcShelf) / 1.06).toFixed(2)
+    : grossEach || '';
+  const taxAmt = calcShelf ? ((parseFloat(calcShelf) - parseFloat(calcShelf)/1.06)).toFixed(2) : '0.00';
+
   const row = document.createElement('div');
   row.id = 'irow_'+itemRows;
-  row.style.cssText = 'display:grid;grid-template-columns:1.5fr 60px 90px 90px auto;gap:8px;margin-bottom:8px;align-items:end;';
+  row.style.cssText = 'margin-bottom:10px;padding:10px 12px;background:var(--white);border-radius:10px;border:1px solid var(--border);';
   row.innerHTML = `
-    <div><label>Item Name</label><input type="text" placeholder="Pikachu" value="${name}" id="iname_${itemRows}" list="knownItems"></div>
-    <div><label>Qty</label><input type="number" placeholder="3" value="${qty}" id="iqty_${itemRows}" min="0" oninput="syncItemsTotal()" style="text-align:center;"></div>
-    <div>
-      <label style="color:var(--text-soft);">Gross/ea ($) <span title="Post-tax amount Square records" style="cursor:help;">ⓘ</span></label>
-      <input type="number" placeholder="11.79" value="${grossEach}" id="igross_${itemRows}" min="0" step="0.01" oninput="autoCalcShelf(${itemRows})">
+    <div style="display:grid;grid-template-columns:1.6fr 55px 85px 85px auto;gap:8px;align-items:end;">
+      <div><label>Item Name</label><input type="text" placeholder="Pikachu" value="${name}" id="iname_${itemRows}" list="knownItems"></div>
+      <div><label>Qty</label><input type="number" placeholder="1" value="${qty}" id="iqty_${itemRows}" min="0" oninput="syncItemsTotal()" style="text-align:center;"></div>
+      <div>
+        <label>Shelf Price <span style="font-weight:600;font-size:0.85em;color:var(--text-soft);">(incl. tax)</span></label>
+        <input type="number" placeholder="6.80" value="${calcShelf}" id="iprice_${itemRows}" min="0" step="0.50" oninput="calcFromShelf(${itemRows})" style="font-weight:900;border-color:var(--rose);">
+      </div>
+      <div>
+        <label>Square Gross <span style="font-weight:600;font-size:0.85em;color:var(--text-soft);">(ex. tax)</span></label>
+        <input type="number" placeholder="6.42" value="${calcGross}" id="igross_${itemRows}" min="0" step="0.01" oninput="calcFromGross(${itemRows})">
+      </div>
+      <div style="padding-bottom:2px;"><button class="btn btn-ghost btn-sm" onclick="document.getElementById('irow_${itemRows}').remove();syncItemsTotal();" style="padding:8px 10px;">✕</button></div>
     </div>
-    <div>
-      <label>Shelf Price ($) <span title="Your actual sell price including tax" style="cursor:help;">ⓘ</span></label>
-      <input type="number" placeholder="12.50" value="${calcShelf}" id="iprice_${itemRows}" min="0" step="0.50" style="font-weight:900;border-color:var(--rose);">
+    <div id="itax_${itemRows}" style="font-size:0.75em;font-weight:700;color:var(--text-soft);margin-top:5px;padding-left:2px;">
+      🏷️ Tax portion: <strong>$${taxAmt}</strong> per item
     </div>
-    <div style="padding-bottom:2px;"><button class="btn btn-ghost btn-sm" onclick="document.getElementById('irow_${itemRows}').remove();syncItemsTotal();" style="padding:8px 10px;">✕</button></div>
   `;
   document.getElementById('itemSalesRows').appendChild(row);
   syncItemsTotal();
 }
 
-function autoCalcShelf(id) {
+function calcFromShelf(id) {
+  const shelf = parseFloat(document.getElementById('iprice_'+id)?.value) || 0;
+  if (!shelf) return;
+  const gross = (shelf / 1.06).toFixed(2);
+  const tax   = (shelf - shelf/1.06).toFixed(2);
+  const grossEl = document.getElementById('igross_'+id);
+  const taxEl   = document.getElementById('itax_'+id);
+  if (grossEl) grossEl.value = gross;
+  if (taxEl)   taxEl.innerHTML = `🏷️ Tax portion: <strong>$${tax}</strong> per item &nbsp;·&nbsp; Square records: <strong>$${gross}</strong>`;
+}
+
+function calcFromGross(id) {
   const gross = parseFloat(document.getElementById('igross_'+id)?.value) || 0;
-  const shelf = document.getElementById('iprice_'+id);
-  if (shelf && gross > 0) {
-    shelf.value = (Math.round((gross * 1.06) / 0.5) * 0.5).toFixed(2);
-  }
+  if (!gross) return;
+  const shelf = (gross * 1.06).toFixed(2);
+  const tax   = (parseFloat(shelf) - gross).toFixed(2);
+  const shelfEl = document.getElementById('iprice_'+id);
+  const taxEl   = document.getElementById('itax_'+id);
+  if (shelfEl) shelfEl.value = shelf;
+  if (taxEl)   taxEl.innerHTML = `🏷️ Tax portion: <strong>$${tax}</strong> per item &nbsp;·&nbsp; Shelf price: <strong>$${shelf}</strong>`;
 }
 
 function syncItemsTotal() {
@@ -1347,8 +1372,9 @@ function saveEvent() {
   events.unshift(ev);
   save(KEY_EVENTS, events);
 
-  // Save event name for datalists
+  // Save event name and location for datalists
   if (!savedNames.includes(name)) { savedNames.push(name); save(KEY_NAMES, savedNames); }
+  if (ev.location) saveLocation(ev.location);
 
   // Auto-save notes if any
   if (ev.notes) {
@@ -2153,11 +2179,60 @@ function saveMarketTypes() { save(KEY_MARKET_TYPES, marketTypes); }
 
 function rebuildTypeDropdowns() {
   const opts = '<option value="">Select type...</option>' +
-    marketTypes.map(t => `<option value="${t.id}">${t.emoji} ${t.label}</option>`).join('');
+    marketTypes.map(t => `<option value="${t.id}">${t.emoji} ${t.label}</option>`).join('') +
+    '<option value="__add_new__">➕ Add new market type...</option>';
   ['ev_type','pred_type','plan_type'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.innerHTML = opts;
+    if (!el) return;
+    const prev = el.value;
+    el.innerHTML = opts;
+    el.value = prev;
+    // Remove old listener before adding new one
+    el.onchange = null;
+    el.addEventListener('change', function() {
+      if (this.value === '__add_new__') {
+        this.value = '';
+        showInlineAddType(id);
+      }
+    });
   });
+}
+
+function showInlineAddType(selectId) {
+  // Remove any existing inline add form
+  document.querySelectorAll('.inline-add-type').forEach(el => el.remove());
+
+  const select = document.getElementById(selectId);
+  if (!select) return;
+
+  const wrap = document.createElement('div');
+  wrap.className = 'inline-add-type';
+  wrap.style.cssText = 'display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center;padding:10px 12px;background:var(--lav-soft);border-radius:10px;border:2px solid var(--lavender);';
+  wrap.innerHTML = `
+    <input type="text" id="inline_emoji" placeholder="🎪" style="width:50px;text-align:center;padding:7px;border:2px solid var(--rose-mid);border-radius:8px;font-size:1em;">
+    <input type="text" id="inline_label" placeholder="Type name e.g. Pungo Strawberry Festival" style="flex:1;min-width:160px;padding:7px;border:2px solid var(--rose-mid);border-radius:8px;font-size:0.88em;font-weight:700;">
+    <button class="btn btn-primary btn-sm" onclick="saveInlineType('${selectId}')">✅ Add</button>
+    <button class="btn btn-ghost btn-sm" onclick="this.closest('.inline-add-type').remove()">✕</button>
+  `;
+  select.parentNode.insertBefore(wrap, select.nextSibling);
+  document.getElementById('inline_label').focus();
+}
+
+function saveInlineType(selectId) {
+  const emoji = document.getElementById('inline_emoji')?.value.trim() || '📍';
+  const label = document.getElementById('inline_label')?.value.trim();
+  if (!label) { toast('⚠️ Enter a name for this market type!'); return; }
+  const id = 'custom_' + Date.now();
+  marketTypes.push({ id, emoji, label });
+  saveMarketTypes();
+  rebuildTypeDropdowns();
+  renderMarketTypesList();
+  // Auto-select the new type in the triggering dropdown
+  const el = document.getElementById(selectId);
+  if (el) el.value = id;
+  // Remove inline form
+  document.querySelectorAll('.inline-add-type').forEach(el => el.remove());
+  toast('✅ ' + emoji + ' ' + label + ' added!');
 }
 
 function addMarketType() {
@@ -2191,20 +2266,74 @@ function renderMarketTypesList() {
     wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">🗂️</div><p>No market types yet!</p></div>';
     return;
   }
-  wrap.innerHTML = marketTypes.map((t, idx) => {
-    const inUse = events.filter(e => e.type === t.id).length;
-    return `<div class="lb-item" id="mtrow_${idx}">
-      <div style="font-size:1.3em;width:28px;text-align:center;">${t.emoji}</div>
-      <div style="flex:1;">
-        <div style="font-weight:800;font-size:0.88em;">${t.label}</div>
-        ${inUse ? `<div style="font-size:0.72em;color:var(--text-soft);">${inUse} event${inUse!==1?'s':''} logged</div>` : ''}
-      </div>
-      <div style="display:flex;gap:6px;align-items:center;">
-        <button class="btn btn-secondary btn-sm" onclick="editMarketType(${idx})">✏️</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteMarketType('${t.id}')" ${inUse ? 'disabled style="opacity:0.4;cursor:not-allowed;"' : ''}>🗑</button>
-      </div>
-    </div>`;
-  }).join('');
+  wrap.innerHTML = `
+    <div style="font-size:0.72em;font-weight:800;color:var(--text-soft);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">
+      ☰ Drag to reorder — order reflects in all dropdowns
+    </div>
+    ${marketTypes.map((t, idx) => {
+      const inUse = events.filter(e => e.type === t.id).length;
+      return `<div id="mtrow_${idx}" draggable="true"
+        ondragstart="mtDragStart(event,${idx})"
+        ondragover="mtDragOver(event)"
+        ondrop="mtDrop(event,${idx})"
+        ondragend="mtDragEnd(event)"
+        style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;margin-bottom:8px;background:var(--white);border:1px solid var(--border);cursor:grab;transition:opacity 0.2s,transform 0.1s;">
+        <div style="color:var(--text-soft);font-size:1.1em;cursor:grab;flex-shrink:0;">☰</div>
+        <div style="font-size:1.3em;width:28px;text-align:center;flex-shrink:0;">${t.emoji}</div>
+        <div style="flex:1;">
+          <div style="font-weight:800;font-size:0.88em;">${t.label}</div>
+          ${inUse
+            ? `<div style="font-size:0.72em;color:var(--text-soft);">${inUse} event${inUse!==1?'s':''} logged</div>`
+            : '<div style="font-size:0.72em;color:var(--text-soft);">No events yet</div>'}
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="editMarketType(${idx})" style="flex-shrink:0;">✏️ Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteMarketType('${t.id}')" style="flex-shrink:0;"
+          ${inUse ? 'disabled' : ''}>🗑</button>
+      </div>`;
+    }).join('')}
+  `;
+}
+
+// ── Drag & Drop state ──
+let mtDragIdx = null;
+
+function mtDragStart(e, idx) {
+  mtDragIdx = idx;
+  e.dataTransfer.effectAllowed = 'move';
+  setTimeout(() => {
+    const el = document.getElementById('mtrow_'+idx);
+    if (el) el.style.opacity = '0.4';
+  }, 0);
+}
+
+function mtDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  // Highlight drop target
+  document.querySelectorAll('[id^="mtrow_"]').forEach(el => el.style.transform = '');
+  const target = e.currentTarget;
+  if (target) target.style.transform = 'translateY(-2px)';
+}
+
+function mtDrop(e, toIdx) {
+  e.preventDefault();
+  if (mtDragIdx === null || mtDragIdx === toIdx) return;
+  // Reorder array
+  const moved = marketTypes.splice(mtDragIdx, 1)[0];
+  marketTypes.splice(toIdx, 0, moved);
+  saveMarketTypes();
+  rebuildTypeDropdowns();
+  renderMarketTypesList();
+  toast('✅ Order updated!');
+  mtDragIdx = null;
+}
+
+function mtDragEnd(e) {
+  document.querySelectorAll('[id^="mtrow_"]').forEach(el => {
+    el.style.opacity = '';
+    el.style.transform = '';
+  });
+  mtDragIdx = null;
 }
 
 function editMarketType(idx) {
@@ -2234,14 +2363,28 @@ function saveMarketTypeEdit(idx) {
   toast('✅ Market type updated!');
 }
 
+const KEY_LOCATIONS = 'amioki_locations';
+let savedLocations = load(KEY_LOCATIONS, [
+  'Virginia Beach Farmers Market',
+  'Greenbrier Library',
+  'Central Library',
+  'Chesapeake City Park',
+  'Town Center Virginia Beach',
+]);
+
+function saveLocation(loc) {
+  if (!loc || savedLocations.includes(loc)) return;
+  savedLocations.push(loc);
+  save(KEY_LOCATIONS, savedLocations);
+  refreshDataLists();
+}
+
 function refreshDataLists() {
   const options = savedNames.map(n => `<option value="${n}">`).join('');
   ['eventNameList','eventNameList2','eventNameList3','eventNameList4'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.innerHTML = options;
   });
-  // Location datalists
-  const savedLocations = [...new Set(events.map(e => e.location).filter(Boolean))];
   const locOptions = savedLocations.map(l => `<option value="${l}">`).join('');
   ['locationList','locationList2'].forEach(id => {
     const el = document.getElementById(id);
