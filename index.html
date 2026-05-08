@@ -1467,7 +1467,7 @@ function handleCSV(e) {
 
       if (isItemsReport) {
         rows.forEach(r => {
-          const name = r['item name'] || '';
+          const name = normalizeItemName(r['item name'] || '');
           const qty  = parseFloat(r['items sold'] || r['units sold'] || '0') || 0;
           const gross= parseFloat((r['gross sales'] || '0').replace(/[$,]/g,'')) || 0;
           if (!name || ['custom amount','other','custom sale'].includes(name.toLowerCase())) {
@@ -1555,7 +1555,7 @@ function saveEvent() {
   const items = [];
   document.querySelectorAll('[id^="irow_"]').forEach(row => {
     const id    = row.id.replace('irow_','');
-    const n     = document.getElementById('iname_'+id)?.value.trim();
+    const n     = normalizeItemName(document.getElementById('iname_'+id)?.value.trim() || '');
     const q     = parseFloat(document.getElementById('iqty_'+id)?.value)||0;
     const gross = parseFloat(document.getElementById('igross_'+id)?.value)||0;
     const shelf = parseFloat(document.getElementById('iprice_'+id)?.value)||0;
@@ -4331,6 +4331,28 @@ function toast(msg) {
 (function init() {
   const today = new Date().toISOString().split('T')[0];
   ['ev_date','pred_date','plan_date'].forEach(id => { const el=document.getElementById(id); if(el) el.value=today; });
+
+  // ── One-time migration: normalize item names in existing stored events ──
+  // Runs silently on load — cleans decorator symbols from all saved item names
+  const MIGRATION_KEY = 'amioki_name_normalize_v1';
+  if (!localStorage.getItem(MIGRATION_KEY)) {
+    let changed = 0;
+    events = events.map(ev => {
+      if (!ev.items?.length) return ev;
+      const cleanItems = ev.items.map(item => {
+        const clean = normalizeItemName(item.name);
+        if (clean && clean !== item.name) { changed++; return {...item, name: clean}; }
+        return item;
+      });
+      return {...ev, items: cleanItems};
+    });
+    if (changed > 0) {
+      save(KEY_EVENTS, events);
+      console.log(`🌸 Migrated ${changed} item name(s) — decorator symbols removed`);
+    }
+    localStorage.setItem(MIGRATION_KEY, '1');
+  }
+
   // Init eventRosterState from defaults
   roster.forEach(c => { eventRosterState[c.id] = c.active; });
   renderRecentEvents();
