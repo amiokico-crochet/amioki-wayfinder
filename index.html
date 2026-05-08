@@ -909,9 +909,10 @@ textarea { resize: vertical; min-height: 80px; }
         <span style="font-weight:800;font-size:0.85em;color:var(--text-mid);">Viewing:</span>
         <button class="btn btn-primary btn-sm" onclick="setContractor('ashley')" id="ctr-ashley-btn">👩‍🎨 Ashley</button>
         <button class="btn btn-ghost btn-sm" onclick="setContractor('liz')" id="ctr-liz-btn">👩‍🎨 Liz</button>
+        <button class="btn btn-ghost btn-sm" onclick="setContractor('sydni')" id="ctr-sydni-btn">👩‍🎨 Sydni</button>
       </div>
       <div style="margin-top:10px;font-size:0.8em;font-weight:700;color:var(--text-soft);">
-        Rate: <strong style="color:var(--rose-deep);">$12.77/hr</strong> · Updated January 2026 · <span id="ctr-note" style="color:var(--text-soft);">High-volume producer · SKU prefix CA-</span>
+        Rate: <strong style="color:var(--rose-deep);" id="ctr-rate-display">$12.77/hr</strong> · <span id="ctr-note" style="color:var(--text-soft);">High-volume producer · SKU prefix CA-</span>
       </div>
     </div>
     <div class="card">
@@ -957,6 +958,40 @@ textarea { resize: vertical; min-height: 80px; }
     <div class="card">
       <div class="card-title"><span>📂</span> Saved Orders</div>
       <div id="ctr-saved-orders"><div class="empty-state"><div class="empty-icon">🗂️</div><p>No saved orders yet.</p></div></div>
+    </div>
+
+    <!-- CONTRACT TRACKER -->
+    <div class="card" style="border:2px solid var(--rose-mid);">
+      <div class="card-title"><span>📑</span> Contract Tracker
+        <span style="font-size:0.7em;font-weight:700;color:var(--text-soft);text-transform:none;letter-spacing:0;margin-left:6px;">track live progress across all active contracts</span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px;">
+        <div style="flex:1;min-width:180px;">
+          <label>Active Contract</label>
+          <select id="tracker_contract_select" onchange="loadTrackerContract()" style="border-color:var(--rose);">
+            <option value="">— Select a contract —</option>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="showNewContractForm()" style="align-self:flex-end;">+ New Contract</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteTrackerContract()" style="align-self:flex-end;">🗑 Delete</button>
+      </div>
+      <div id="new_contract_form" style="display:none;background:var(--lav-soft);border-radius:var(--radius-sm);padding:14px;margin-bottom:14px;border:2px solid var(--lavender);">
+        <div style="font-size:0.78em;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-soft);margin-bottom:10px;">📋 New Contract</div>
+        <div class="grid-2" style="gap:10px;margin-bottom:10px;">
+          <div><label>Contract Name</label><input type="text" id="nc_label" placeholder="e.g., Neptune Prep — May 2026"></div>
+          <div class="grid-2" style="gap:8px;">
+            <div><label>Start Date</label><input type="date" id="nc_from"></div>
+            <div><label>End Date</label><input type="date" id="nc_to"></div>
+          </div>
+        </div>
+        <div style="font-size:0.78em;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-soft);margin-bottom:8px;">Contracted Quantities</div>
+        <div id="nc_items_wrap"></div>
+        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+          <button class="btn btn-primary btn-sm" onclick="saveTrackerContract()">💾 Save Contract</button>
+          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('new_contract_form').style.display='none'">✕ Cancel</button>
+        </div>
+      </div>
+      <div id="tracker_body"><div class="empty-state"><div class="empty-icon">📑</div><p>Select or create a contract above to start tracking!</p></div></div>
     </div>
 
     <!-- CONTRACT GAP ANALYSIS -->
@@ -1117,6 +1152,16 @@ textarea { resize: vertical; min-height: 80px; }
       <div id="aiRulesList"></div>
     </div>
     <div class="card">
+      <div class="card-title"><span>📊</span> Google Sheets — Piece Rate Sync</div>
+      <p style="font-size:0.82em;font-weight:700;color:var(--text-mid);margin-bottom:10px;">Connect each contractor's Google Sheet to auto-refresh their piece rates. Publish the sheet as CSV first: <strong>File → Share → Publish to web → CSV</strong>. Rates refresh every time you open the Pay tab.</p>
+      <div style="font-size:0.78em;font-weight:700;color:var(--text-soft);margin-bottom:14px;padding:8px 12px;background:var(--lav-soft);border-radius:8px;border:1px solid var(--lavender);">
+        📋 Your Sheet ID is the long string in the URL:<br>
+        <code style="background:var(--lav-mid);padding:2px 6px;border-radius:4px;font-size:0.95em;display:inline-block;margin-top:4px;">docs.google.com/spreadsheets/d/<strong>[SHEET ID HERE]</strong>/edit</code>
+      </div>
+      <div id="sheets_settings_rows"></div>
+    </div>
+
+    <div class="card">
       <div class="card-title"><span>🗄️</span> Data Management</div>
       <p style="font-size:0.82em;font-weight:700;color:var(--text-mid);margin-bottom:14px;">All your Wayfinder data lives in your browser's local storage.</p>
       <div id="dataStats" style="margin-bottom:14px;"></div>
@@ -1199,18 +1244,37 @@ const CONTRACTORS = {
     name: 'Liz',
     note: 'Premium items · SKU prefix CL- · Pungo & premium markets',
     anniversary: 'May 8',
+    rate: 13.00,
+    rateLabel: '$13.00/hr · Updated May 2026',
+    sheetsId: '', sheetsTab: '',
     items: [
-      { name: 'Leggy Frog',         labor: 4.26, materials: 0.35, total: 4.61, time: 20 },
-      { name: 'Bees',               labor: 5.32, materials: 2.06, total: 7.38, time: 25 },
-      { name: 'Pastel Rainbow Birb',labor: 5.32, materials: 1.00, total: 6.32, time: 25 },
-      { name: 'Jellyfish',          labor: 5.32, materials: 0.33, total: 5.65, time: 25 },
-      { name: 'All Birb Designs',   labor: 5.32, materials: 0.42, total: 5.74, time: 25 },
+      { name: 'Leggy Frog',         labor: 4.33, materials: 0.35, total: 4.68, time: 20 },
+      { name: 'Bees',               labor: 5.42, materials: 2.06, total: 7.48, time: 25 },
+      { name: 'Pastel Rainbow Birb',labor: 5.42, materials: 1.00, total: 6.42, time: 25 },
+      { name: 'Jellyfish',          labor: 5.42, materials: 0.33, total: 5.75, time: 25 },
+      { name: 'All Birb Designs',   labor: 5.42, materials: 0.42, total: 5.84, time: 25 },
+    ]
+  },
+  sydni: {
+    name: 'Sydni',
+    note: 'Lead class instructor · SKU prefix CS-',
+    anniversary: '',
+    rate: 12.77,
+    rateLabel: '$12.77/hr · Updated January 2026',
+    sheetsId: '', sheetsTab: '',
+    items: [
+      { name: 'Turtle',         labor: 7.73, materials: 0.06, total: 7.79, time: 36 },
+      { name: 'Flower Coaster', labor: 4.82, materials: 0.00, total: 4.82, time: 23 },
     ]
   }
 };
 
 let activeContractor = 'ashley';
 let ctrCustomItems = [];
+
+// Contract Tracker state
+const KEY_TRACKER_CONTRACTS = 'amioki_tracker_contracts';
+let trackerContracts = load(KEY_TRACKER_CONTRACTS, []);
 
 // ═══════════════════════════════════════════════
 // TABS
@@ -2238,13 +2302,236 @@ async function askAI() {
 // ═══════════════════════════════════════════════
 function setContractor(who) {
   activeContractor = who; ctrCustomItems = [];
-  document.getElementById('ctr-ashley-btn').className = 'btn btn-sm '+(who==='ashley'?'btn-primary':'btn-ghost');
-  document.getElementById('ctr-liz-btn').className    = 'btn btn-sm '+(who==='liz'?'btn-primary':'btn-ghost');
+  ['ashley','liz','sydni'].forEach(id => {
+    const btn = document.getElementById('ctr-'+id+'-btn');
+    if (btn) btn.className = 'btn btn-sm ' + (who===id ? 'btn-primary' : 'btn-ghost');
+  });
   const ctr = CONTRACTORS[who];
-  document.getElementById('ctr-note').textContent = ctr.note + ' · Contract anniversary ' + ctr.anniversary;
+  const rateEl = document.getElementById('ctr-rate-display');
+  if (rateEl) rateEl.textContent = ctr.rateLabel || '$12.77/hr';
+  document.getElementById('ctr-note').textContent = ctr.note + (ctr.anniversary ? ' · Anniversary ' + ctr.anniversary : '');
   document.getElementById('ctr-name-inline').textContent = ctr.name;
+  if (ctr.sheetsId && ctr.sheetsTab) fetchSheetsRates(who);
   renderContractorItems(); renderSavedOrders(); renderMonthlyBreakdown();
   renderContractForm(); renderSavedContracts();
+  populateTrackerContractSelect(); loadTrackerContract();
+}
+
+// ── Google Sheets rate fetcher ────────────────────────────────────────────
+async function fetchSheetsRates(who) {
+  const ctr = CONTRACTORS[who];
+  if (!ctr.sheetsId || !ctr.sheetsTab) return;
+  const url = `https://docs.google.com/spreadsheets/d/${ctr.sheetsId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(ctr.sheetsTab)}`;
+  try {
+    const res  = await fetch(url);
+    const text = await res.text();
+    const rows = text.split('\n').slice(1)
+      .map(r => r.split(',').map(c => c.replace(/"/g,'').trim()))
+      .filter(r => r[0] && r[0].toLowerCase() !== 'item');
+    const parsed = rows.map(r => ({
+      name: r[0], time: parseFloat(r[1])||0,
+      labor: parseFloat(r[2])||0, materials: parseFloat(r[3])||0,
+      total: parseFloat(r[4]) || ((parseFloat(r[2])||0)+(parseFloat(r[3])||0))
+    })).filter(r => r.name && r.total > 0);
+    if (parsed.length) {
+      ctr.items = parsed;
+      toast(`✅ ${ctr.name}'s rates refreshed from Google Sheets!`);
+      renderContractorItems();
+    }
+  } catch(e) { console.warn('Sheets fetch failed:', e); }
+}
+
+// ── Contract Tracker ──────────────────────────────────────────────────────
+function populateTrackerContractSelect() {
+  const sel = document.getElementById('tracker_contract_select');
+  if (!sel) return;
+  const mine = trackerContracts.filter(c => c.contractor === activeContractor);
+  sel.innerHTML = '<option value="">— Select a contract —</option>' +
+    mine.sort((a,b)=>b.id-a.id).map(c => {
+      const done  = c.items.reduce((s,i)=>s+(i.done||0),0);
+      const total = c.items.reduce((s,i)=>s+(i.contracted||0),0);
+      const pct   = total>0 ? Math.round(done/total*100) : 0;
+      return `<option value="${c.id}">${c.label} · ${pct}% done</option>`;
+    }).join('');
+}
+
+function showNewContractForm() {
+  const ctr  = CONTRACTORS[activeContractor];
+  const wrap = document.getElementById('nc_items_wrap');
+  if (!wrap) return;
+  wrap.innerHTML = ctr.items.map((item,i) => `
+    <div style="display:grid;grid-template-columns:1fr 110px;gap:8px;align-items:center;padding:7px 8px;background:var(--white);border-radius:8px;margin-bottom:5px;border:1px solid var(--border);">
+      <div style="font-weight:800;font-size:0.85em;">${item.name}<span style="font-size:0.8em;color:var(--text-soft);margin-left:6px;">$${item.total.toFixed(2)}/ea</span></div>
+      <input type="number" min="0" value="0" id="nc_qty_${i}"
+        style="padding:6px;border:2px solid var(--rose-mid);border-radius:6px;text-align:center;font-weight:900;font-size:0.9em;">
+    </div>`).join('');
+  const today  = new Date().toISOString().split('T')[0];
+  const plus30 = new Date(Date.now()+30*24*60*60*1000).toISOString().split('T')[0];
+  document.getElementById('nc_from').value  = today;
+  document.getElementById('nc_to').value    = plus30;
+  document.getElementById('nc_label').value = '';
+  document.getElementById('new_contract_form').style.display = 'block';
+}
+
+function saveTrackerContract() {
+  const label    = document.getElementById('nc_label')?.value.trim();
+  const dateFrom = document.getElementById('nc_from')?.value;
+  const dateTo   = document.getElementById('nc_to')?.value;
+  if (!label) { toast('⚠️ Give this contract a name!'); return; }
+  const ctr   = CONTRACTORS[activeContractor];
+  const items = ctr.items.map((item,i) => ({
+    name: item.name, contracted: parseInt(document.getElementById('nc_qty_'+i)?.value)||0,
+    done: 0, rate: item.total, labor: item.labor||0
+  })).filter(item => item.contracted > 0);
+  if (!items.length) { toast('⚠️ Enter at least one quantity!'); return; }
+  const contract = { id: Date.now(), contractor: activeContractor, label, dateFrom, dateTo, items, paid: false };
+  trackerContracts.push(contract);
+  save(KEY_TRACKER_CONTRACTS, trackerContracts);
+  document.getElementById('new_contract_form').style.display = 'none';
+  populateTrackerContractSelect();
+  document.getElementById('tracker_contract_select').value = contract.id;
+  loadTrackerContract();
+  toast('💾 Contract saved!');
+}
+
+function loadTrackerContract() {
+  const sel  = document.getElementById('tracker_contract_select');
+  const id   = parseInt(sel?.value);
+  const wrap = document.getElementById('tracker_body');
+  if (!wrap) return;
+  if (!id) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">📑</div><p>Select or create a contract above!</p></div>'; return; }
+  const contract = trackerContracts.find(c => c.id === id);
+  if (!contract) return;
+  renderTrackerBody(contract);
+}
+
+function renderTrackerBody(contract) {
+  const wrap = document.getElementById('tracker_body');
+  if (!wrap) return;
+  const totalContracted = contract.items.reduce((s,i)=>s+(i.contracted||0),0);
+  const totalDone       = contract.items.reduce((s,i)=>s+(i.done||0),0);
+  const totalRemaining  = totalContracted - totalDone;
+  const totalOwed       = contract.items.reduce((s,i)=>s+(i.done||0)*i.rate,0);
+  const overallPct      = totalContracted>0 ? Math.round(totalDone/totalContracted*100) : 0;
+  const daysLeft        = contract.dateTo ? Math.max(0,Math.ceil((new Date(contract.dateTo)-new Date())/(1000*60*60*24))) : null;
+  const urgencyColor    = daysLeft===null?'#065F46':daysLeft<=3?'#EF4444':daysLeft<=7?'#F59E0B':'#065F46';
+
+  wrap.innerHTML = `
+    <div style="background:linear-gradient(135deg,var(--rose-soft),var(--lav-soft));border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:14px;border:2px solid var(--rose-mid);">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+        <div>
+          <div style="font-weight:900;font-size:0.95em;">${contract.label}</div>
+          <div style="font-size:0.75em;font-weight:700;color:var(--text-soft);">
+            ${contract.dateFrom||'?'} → ${contract.dateTo||'?'}
+            ${daysLeft!==null?` · <strong style="color:${urgencyColor};">${daysLeft}d left</strong>`:''}
+          </div>
+        </div>
+        <div style="text-align:center;background:white;border-radius:10px;padding:8px 16px;border:2px solid var(--rose-mid);">
+          <div style="font-size:1.8em;font-weight:900;color:var(--rose-deep);">${overallPct}%</div>
+          <div style="font-size:0.65em;font-weight:900;text-transform:uppercase;color:var(--text-soft);">Complete</div>
+        </div>
+      </div>
+      <div style="height:12px;background:var(--rose-soft);border-radius:99px;overflow:hidden;margin-bottom:10px;">
+        <div style="height:12px;width:${overallPct}%;background:linear-gradient(90deg,var(--rose),#C026D3);border-radius:99px;transition:width .5s;"></div>
+      </div>
+      <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:0;">
+        <div class="stat-box"><div class="stat-val" style="font-size:1.1em;">${totalContracted}</div><div class="stat-lbl">Contracted</div></div>
+        <div class="stat-box" style="background:var(--mint-soft);"><div class="stat-val" style="font-size:1.1em;color:#065F46;">${totalDone}</div><div class="stat-lbl">Done ✓</div></div>
+        <div class="stat-box" style="background:${totalRemaining>0?'var(--yellow-soft)':'var(--mint-soft)'};"><div class="stat-val" style="font-size:1.1em;color:${totalRemaining>0?'#92400E':'#065F46'};">${totalRemaining}</div><div class="stat-lbl">Left</div></div>
+        <div class="stat-box" style="background:var(--lav-mid);"><div class="stat-val" style="font-size:1.1em;color:#5B21B6;">$${totalOwed.toFixed(0)}</div><div class="stat-lbl">Owed Now</div></div>
+      </div>
+    </div>
+
+    <div style="font-size:0.72em;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-soft);margin-bottom:8px;">Per-Item Progress</div>
+    ${contract.items.map((item,idx) => {
+      const pct     = item.contracted>0 ? Math.round((item.done||0)/item.contracted*100) : 0;
+      const rem     = (item.contracted||0)-(item.done||0);
+      const owedItem= (item.done||0)*item.rate;
+      return `<div style="background:var(--white);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px;border:2px solid ${rem<=0?'var(--mint)':'var(--border)'};">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px;flex-wrap:wrap;">
+          <div style="font-weight:900;font-size:0.9em;">${item.name}</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            ${rem<=0?'<span class="tag green">✓ Complete!</span>':`<span style="font-size:0.78em;font-weight:800;color:var(--text-soft);">${rem} remaining</span>`}
+            <span style="font-weight:900;color:var(--rose-deep);">$${owedItem.toFixed(2)}</span>
+          </div>
+        </div>
+        <div style="height:8px;background:var(--rose-soft);border-radius:99px;overflow:hidden;margin-bottom:8px;">
+          <div style="height:8px;width:${pct}%;background:${rem<=0?'linear-gradient(90deg,var(--mint),#059669)':'linear-gradient(90deg,var(--lavender),#9333EA)'};border-radius:99px;transition:width .4s;"></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <div style="font-size:0.75em;font-weight:800;color:var(--text-soft);">${item.done||0} / ${item.contracted} done (${pct}%)</div>
+          <div style="display:flex;gap:6px;align-items:center;margin-left:auto;flex-wrap:wrap;">
+            <span style="font-size:0.75em;font-weight:800;color:var(--text-soft);">Log:</span>
+            <input type="number" min="1" placeholder="qty" id="tracker_log_${contract.id}_${idx}"
+              style="width:58px;padding:4px 8px;border:2px solid var(--rose-mid);border-radius:6px;text-align:center;font-weight:900;font-size:0.85em;">
+            <button class="btn btn-primary btn-sm" style="padding:5px 10px;font-size:0.75em;"
+              onclick="logTrackerProgress(${contract.id},${idx},document.getElementById('tracker_log_${contract.id}_${idx}').value)">+ Done</button>
+            <button class="btn btn-ghost btn-sm" style="padding:5px 10px;font-size:0.75em;"
+              onclick="logTrackerProgress(${contract.id},${idx},-document.getElementById('tracker_log_${contract.id}_${idx}').value)">− Undo</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('')}
+
+    <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="markContractPaid(${contract.id})" ${contract.paid?'disabled style="opacity:0.5;"':''}>
+        ${contract.paid?'✅ Paid':'💸 Mark Paid — $'+totalOwed.toFixed(2)}
+      </button>
+      ${totalDone>0&&!contract.paid?`<button class="btn btn-secondary btn-sm" onclick="saveContractAsOrder(${contract.id})">💾 Save as Pay Order</button>`:''}
+    </div>
+    ${contract.paid?'<div style="margin-top:8px;font-size:0.8em;font-weight:800;color:#065F46;">✅ This contract was paid out.</div>':''}
+  `;
+}
+
+function logTrackerProgress(contractId, itemIdx, rawQty) {
+  const qty = parseInt(rawQty)||0;
+  if (!qty) { toast('⚠️ Enter a quantity first!'); return; }
+  const contract = trackerContracts.find(c=>c.id===contractId);
+  if (!contract) return;
+  const item    = contract.items[itemIdx];
+  item.done     = Math.max(0, Math.min(item.contracted, (item.done||0)+qty));
+  save(KEY_TRACKER_CONTRACTS, trackerContracts);
+  populateTrackerContractSelect();
+  renderTrackerBody(contract);
+  const el = document.getElementById(`tracker_log_${contractId}_${itemIdx}`);
+  if (el) el.value = '';
+  toast(qty>0 ? `✅ Logged ${qty} ${item.name}!` : `↩️ Adjusted ${item.name}`);
+}
+
+function markContractPaid(contractId) {
+  const contract = trackerContracts.find(c=>c.id===contractId);
+  if (!contract) return;
+  contract.paid = true;
+  save(KEY_TRACKER_CONTRACTS, trackerContracts);
+  renderTrackerBody(contract);
+  toast('💸 Contract marked as paid!');
+}
+
+function saveContractAsOrder(contractId) {
+  const contract = trackerContracts.find(c=>c.id===contractId);
+  if (!contract) return;
+  const lines = contract.items.filter(i=>(i.done||0)>0).map(i=>({
+    name:i.name, qty:i.done, rate:i.rate, labor:i.labor||0, materials:0, subtotal:i.done*i.rate
+  }));
+  if (!lines.length) { toast('⚠️ No completed items to save!'); return; }
+  const totalOwed = lines.reduce((s,l)=>s+l.subtotal,0);
+  savedOrders.unshift({id:Date.now(), label:contract.label+' (tracker)', contractor:contract.contractor, date:new Date().toISOString().split('T')[0], items:lines, totalItems:lines.reduce((s,l)=>s+l.qty,0), totalOwed, paid:false});
+  save(KEY_ORDERS, savedOrders);
+  renderSavedOrders(); renderMonthlyBreakdown();
+  toast('💾 Saved to Pay orders!');
+}
+
+function deleteTrackerContract() {
+  const sel = document.getElementById('tracker_contract_select');
+  const id  = parseInt(sel?.value);
+  if (!id) { toast('⚠️ Select a contract first!'); return; }
+  const contract = trackerContracts.find(c=>c.id===id);
+  if (!confirm(`Delete "${contract?.label}"? This can\'t be undone.`)) return;
+  trackerContracts = trackerContracts.filter(c=>c.id!==id);
+  save(KEY_TRACKER_CONTRACTS, trackerContracts);
+  populateTrackerContractSelect();
+  document.getElementById('tracker_body').innerHTML = '<div class="empty-state"><div class="empty-icon">📑</div><p>Select or create a contract above!</p></div>';
+  toast('🗑 Contract deleted');
 }
 
 function renderContractorItems() {
@@ -2397,7 +2684,7 @@ function renderMonthlyBreakdown() {
 function loadPendingPayOrder() {
   const order = window._pendingPayOrder;
   if (!order) return;
-  const items = activeContractor === 'ashley' ? order.ashley : order.liz;
+  const items = order[activeContractor] || (activeContractor==='ashley'?order.ashley:activeContractor==='liz'?order.liz:order.sydni) || [];
   if (!items?.length) { toast(`No ${activeContractor} items — switch contractors if needed.`); return; }
   document.getElementById('ctr_order_label').value = (order.evName||'') + ' Prep';
   const ctr = CONTRACTORS[activeContractor];
@@ -2596,7 +2883,7 @@ function clearAllData() {
 }
 
 function confirmClearAll() {
-  [KEY_EVENTS, KEY_NOTES, KEY_PLAN, KEY_ORDERS, KEY_NAMES, KEY_LOCATIONS, KEY_RULES, KEY_ROSTER, KEY_CONTRACTS].forEach(k => localStorage.removeItem(k));
+  [KEY_EVENTS, KEY_NOTES, KEY_PLAN, KEY_ORDERS, KEY_NAMES, KEY_LOCATIONS, KEY_RULES, KEY_ROSTER, KEY_CONTRACTS, KEY_TRACKER_CONTRACTS].forEach(k => localStorage.removeItem(k)); trackerContracts=[];
   events=[]; notes=[]; planEvents=[]; savedOrders=[]; aiRules=[]; roster=[...DEFAULT_ROSTER]; eventRosterState={}; contracts=[];
   savedNames = ['Cherry Blossom Fest','Neptune Festival','Water Lantern Festival','Chesapeake Jubilee','VB Farmers Market','Strawberry Festival'];
   savedLocations = ['Virginia Beach Farmers Market','Greenbrier Library','Central Library','Chesapeake City Park','Town Center Virginia Beach'];
@@ -3299,7 +3586,7 @@ function renderProductionSchedule() {
     });
   });
 
-  const byWho = { ashley: {}, liz: {}, ami: {} };
+  const byWho = { ashley: {}, liz: {}, sydni: {}, ami: {} };
   Object.entries(schedule).forEach(([name, d]) => {
     const bucket = byWho[d.who] ? d.who : 'ami';
     byWho[bucket][name] = d;
@@ -3651,6 +3938,38 @@ function initSettingsTab() {
   renderDataStats();
   renderAIRules();
   renderRosterSettings();
+  renderSheetsSettings();
+}
+
+function renderSheetsSettings() {
+  const wrap = document.getElementById('sheets_settings_rows');
+  if (!wrap) return;
+  wrap.innerHTML = ['ashley','liz','sydni'].map(who => {
+    const ctr = CONTRACTORS[who];
+    return `<div style="padding:12px 14px;background:var(--white);border-radius:var(--radius-sm);margin-bottom:10px;border:1px solid var(--border);">
+      <div style="font-weight:900;font-size:0.88em;margin-bottom:10px;">👩 ${ctr.name} <span style="font-size:0.8em;font-weight:700;color:var(--text-soft);">${ctr.rateLabel||'$12.77/hr'}</span></div>
+      <div class="grid-2" style="gap:8px;margin-bottom:8px;">
+        <div><label>Sheet ID</label><input type="text" id="sheets_id_${who}" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms" value="${ctr.sheetsId||''}"></div>
+        <div><label>Tab Name</label><input type="text" id="sheets_tab_${who}" placeholder="Ashley Piece Rates" value="${ctr.sheetsTab||''}"></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-secondary btn-sm" onclick="saveSheetsSettings('${who}')">💾 Save</button>
+        <button class="btn btn-ghost btn-sm" onclick="fetchSheetsRates('${who}')">🔄 Refresh Now</button>
+        ${ctr.sheetsId?'<span class="tag green">✓ Connected</span>':'<span class="tag" style="background:var(--yellow-soft);border-color:var(--yellow);color:#92400E;">Not connected</span>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function saveSheetsSettings(who) {
+  const ctr   = CONTRACTORS[who];
+  const idEl  = document.getElementById('sheets_id_'+who);
+  const tabEl = document.getElementById('sheets_tab_'+who);
+  ctr.sheetsId  = idEl?.value.trim()  || '';
+  ctr.sheetsTab = tabEl?.value.trim() || '';
+  renderSheetsSettings();
+  if (ctr.sheetsId && ctr.sheetsTab) fetchSheetsRates(who);
+  toast(`✅ ${ctr.name}'s Sheets connection saved!`);
 }
 
 const PROXY_URL = 'https://amioki-wayfinder-proxy.amioki-co.workers.dev/';
