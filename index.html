@@ -2129,6 +2129,10 @@ function renderPlan() {
             <button class="plan-remove" onclick="removePlanEvent(${ev.id})">✕</button>
           </div>
           <div class="plan-forecast">${estRev ? `💰 Est: <strong>$${(estRev*0.85).toFixed(0)}–$${(estRev*1.2).toFixed(0)}</strong> ${estTag}` : '💰 Log similar events for a forecast estimate!'}</div>
+          <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-primary btn-sm" onclick="getPrepList(${ev.id})">🧭 Get AI Prep List</button>
+          </div>
+          <div id="preplist_${ev.id}" style="display:none;margin-top:12px;"></div>
         </div>`;
       }).join('')}
     </div>
@@ -2151,6 +2155,12 @@ function renderPlan() {
       <div class="insight-label">💡 Planning Tip</div>
       ${inRange.length} event${inRange.length!==1?'s':''} in the next ${planRange===1?'month':planRange+' months'}. ${totalEst > 0 ? `Based on your history, expect roughly $${totalEst.toFixed(0)} across this period.` : 'Log past events to get revenue estimates!'}
     </div>
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+      <div style="font-weight:900;font-size:0.9em;margin-bottom:8px;">🗓️ Master Prep List</div>
+      <p style="font-size:0.82em;font-weight:700;color:var(--text-mid);margin-bottom:10px;">Get a combined prep list across all ${inRange.length} event${inRange.length!==1?'s':''} — totals per item with a priority breakdown by event.</p>
+      <button class="btn btn-primary btn-sm" onclick="renderProductionSchedule()">📋 Generate Production Schedule</button>
+    </div>
+    <div id="masterPrepResult" style="margin-top:14px;display:none;"></div>
   `;
 }
 
@@ -3205,6 +3215,436 @@ function deleteContract(id) {
   renderSavedContracts();
   document.getElementById('gapResults').style.display = 'none';
   toast('🗑 Contract deleted');
+}
+
+// ═══════════════════════════════════════════════
+// PLAN → PREP → PAY PIPELINE (restored)
+// ═══════════════════════════════════════════════
+
+const CONTRACTOR_ITEMS = {
+  ashley: ['Chickens','Baby Chicks','Octopi','Heart Keychain','Mini Loaf Cat','Bear Coasters','Cherry Blossom Pouch','Apple Coasters','Pet Rock','Christmas Baby Chick','Baby Christmas Tree','Mama Possum','Baby Possum'],
+  liz:    ['Leggy Frog','Bees','Pastel Rainbow Birb','Jellyfish','All Birb Designs','Birb']
+};
+
+function getContractorForItem(itemName) {
+  const n = itemName.toLowerCase();
+  // First check dynamic roster keywords
+  for (const c of roster) {
+    if (c.isAmi) continue;
+    if (c.itemKeywords && c.itemKeywords.some(k => n.includes(k) || k.includes(n.split(' ')[0]))) return c.id;
+  }
+  // Fallback to static CONTRACTOR_ITEMS
+  if (CONTRACTOR_ITEMS.ashley.some(i => n.includes(i.toLowerCase()) || i.toLowerCase().includes(n.split(' ')[0]))) return 'ashley';
+  if (CONTRACTOR_ITEMS.liz.some(i => n.includes(i.toLowerCase()) || i.toLowerCase().includes(n.split(' ')[0]))) return 'liz';
+  return 'ami';
+}
+
+function needByDate(eventDate) {
+  const d = new Date(eventDate + 'T12:00');
+  d.setDate(d.getDate() - 2);
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function renderProductionSchedule() {
+  const resultEl = document.getElementById('masterPrepResult');
+  if (!resultEl) return;
+  resultEl.style.display = 'block';
+
+  const now    = new Date();
+  const cutoff = new Date(now);
+  cutoff.setMonth(cutoff.getMonth() + planRange);
+  const inRange = planEvents.filter(e => {
+    const d = new Date(e.date);
+    return d >= now && d <= cutoff;
+  }).sort((a,b) => new Date(a.date) - new Date(b.date));
+
+  if (!inRange.length) {
+    resultEl.innerHTML = `<div class="insight-box" style="background:var(--yellow-soft);border-color:var(--yellow);">No events in range — add some to your plan first!</div>`;
+    return;
+  }
+
+  const itemAgg = {};
+  const relevantEvents = events.filter(e => inRange.some(p => p.type === e.type));
+  const allEvs = relevantEvents.length ? relevantEvents : events;
+
+  allEvs.forEach(ev => {
+    ev.items?.forEach(item => {
+      if (!item.name) return;
+      if (!itemAgg[item.name]) itemAgg[item.name] = { qty: 0, count: 0 };
+      itemAgg[item.name].qty   += item.qty;
+      itemAgg[item.name].count += 1;
+    });
+  });
+
+  const schedule = {};
+
+  inRange.forEach(ev => {
+    Object.entries(itemAgg).forEach(([name, d]) => {
+      const avgQty = Math.ceil(d.qty / d.count);
+      if (avgQty < 1) return;
+      const who = getContractorForItem(name);
+      if (!schedule[name]) schedule[name] = { who, events: [], total: 0 };
+      schedule[name].events.push({ evName: ev.name, date: ev.date, qty: avgQty, needBy: needByDate(ev.date) });
+      schedule[name].total += avgQty;
+    });
+  });
+
+  // Seed known contractor items with no history
+  ['ashley','liz'].forEach(who => {
+    CONTRACTOR_ITEMS[who].forEach(itemName => {
+      if (!schedule[itemName]) {
+        const evs = inRange.map(ev => ({ evName: ev.name, date: ev.date, qty: 5, needBy: needByDate(ev.date) }));
+        schedule[itemName] = { who, events: evs, total: evs.length * 5, noHistory: true };
+      }
+    });
+  });
+
+  const byWho = { ashley: {}, liz: {}, ami: {} };
+  Object.entries(schedule).forEach(([name, d]) => {
+    const bucket = byWho[d.who] ? d.who : 'ami';
+    byWho[bucket][name] = d;
+  });
+
+  window._productionSchedule = schedule;
+
+  resultEl.innerHTML = `
+    <div style="font-size:0.82em;font-weight:700;color:var(--text-mid);margin-bottom:14px;">
+      📋 Production schedule across <strong>${inRange.length} events</strong>. Quantities marked ⭐ are estimates (no past sales data).
+    </div>
+    ${renderContractorSection('ashley', byWho.ashley, 'Ashley')}
+    ${renderContractorSection('liz', byWho.liz, 'Liz')}
+    ${renderContractorSection('ami', byWho.ami, 'Ami')}
+    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+      <button class="btn btn-primary btn-sm" onclick="sendScheduleToPayTab('ashley')">💸 Send Ashley's to Pay</button>
+      <button class="btn btn-secondary btn-sm" onclick="sendScheduleToPayTab('liz')">💸 Send Liz's to Pay</button>
+      <button class="btn btn-ghost btn-sm" onclick="renderProductionSchedule()">🔄 Recalculate</button>
+    </div>
+    <div style="margin-top:14px;padding:14px;background:var(--lav-soft);border-radius:var(--radius-sm);border:2px solid var(--lavender);">
+      <div style="font-size:0.78em;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-soft);margin-bottom:8px;">🤖 Ask AI to Adjust</div>
+      <textarea id="scheduleAdjustInput" placeholder="e.g. Axolotls will sell way more at the strawberry festival — bump those up. Add 10 extra Heart Keychains across all events." style="width:100%;min-height:70px;padding:10px;border:2px solid var(--lavender);border-radius:8px;font-family:'Nunito',sans-serif;font-size:0.85em;font-weight:600;resize:vertical;"></textarea>
+      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+        <button class="btn btn-primary btn-sm" onclick="aiAdjustSchedule()">✨ Apply AI Adjustments</button>
+        <span style="font-size:0.75em;font-weight:700;color:var(--text-soft);align-self:center;">AI suggests changes — you approve before anything updates</span>
+      </div>
+      <div id="scheduleAdjustResult" style="display:none;margin-top:12px;"></div>
+    </div>
+  `;
+}
+
+function renderContractorSection(who, items, label) {
+  if (!Object.keys(items).length) return '';
+  const whoColors  = { ashley:'#FCE7F3', liz:'#EDE9FE', ami:'#ECFDF5' };
+  const whoBorder  = { ashley:'#F472B6', liz:'#C4B5FD', ami:'#6EE7B7' };
+  const totalItems = Object.values(items).reduce((s, d) => s + d.total, 0);
+  const sectionId  = 'prodsec_' + who;
+  const meetupDate = localStorage.getItem('meetup_' + who) || '';
+
+  const itemRows = Object.entries(items).sort((a,b) => b[1].total - a[1].total).map(([name, d]) => {
+    const detailId = 'proditem_' + who + '_' + name.replace(/\s/g,'_');
+    const evRows = d.events.map(ev => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 10px;border-bottom:1px dashed var(--border);font-size:0.78em;font-weight:700;color:var(--text-mid);">
+        <span>📅 ${ev.evName} <span style="color:var(--text-soft);font-weight:600;">(${new Date(ev.date+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})})</span></span>
+        <span style="color:var(--text);">${ev.qty} · <span style="color:var(--coral);font-size:0.9em;">need by ${ev.needBy}</span></span>
+      </div>
+    `).join('');
+
+    const meetupAlert = meetupDate && d.events.some(ev => new Date(ev.date) <= new Date(meetupDate+'T12:00'))
+      ? `<div style="background:#FEF9C3;border-left:3px solid #EAB308;padding:5px 10px;font-size:0.75em;font-weight:800;color:#854D0E;">
+          🔔 Some items needed before meetup (${new Date(meetupDate+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})})
+        </div>` : '';
+
+    return `
+      <div style="background:var(--white);border-radius:8px;margin-bottom:6px;border:1px solid var(--border);overflow:hidden;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;cursor:pointer;background:${d.noHistory?'var(--yellow-soft)':'var(--white)'};"
+          onclick="const el=document.getElementById('${detailId}');el.style.display=el.style.display==='none'?'block':'none';this.querySelector('.arr').textContent=el.style.display==='none'?'▸':'▾';">
+          <div>
+            <span style="font-weight:900;font-size:0.88em;">${name}</span>
+            ${d.noHistory ? '<span style="font-size:0.7em;color:#92400E;margin-left:6px;">⭐ estimated</span>' : ''}
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-weight:900;font-size:1.1em;color:var(--rose-deep);">${d.total}</span>
+            <span class="arr" style="color:var(--text-soft);">▸</span>
+          </div>
+        </div>
+        <div id="${detailId}" style="display:none;border-top:1px solid var(--border);">
+          ${meetupAlert}${evRows}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <div style="margin-bottom:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;background:${whoColors[who]||'var(--lav-soft)'};border-radius:10px;border:2px solid ${whoBorder[who]||'var(--lavender)'};cursor:pointer;margin-bottom:8px;"
+        onclick="const s=document.getElementById('${sectionId}');s.style.display=s.style.display==='none'?'block':'none';this.querySelector('.sarr').textContent=s.style.display==='none'?'▸':'▾';">
+        <span style="font-weight:900;font-size:0.92em;">${who==='ami'?'🌸':'👩'} ${label} — ${Object.keys(items).length} items · ${totalItems} total</span>
+        <span class="sarr" style="color:var(--text-mid);">▾</span>
+      </div>
+      <div id="${sectionId}">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding:8px 12px;background:var(--white);border-radius:8px;border:1px solid var(--border);">
+          <span style="font-size:0.8em;font-weight:800;color:var(--text-mid);white-space:nowrap;">📅 Next meetup:</span>
+          <input type="date" value="${meetupDate}" onchange="saveMeetupDate('${who}',this.value);renderProductionSchedule();"
+            style="padding:5px 8px;border:2px solid var(--rose-mid);border-radius:6px;font-size:0.82em;font-weight:700;flex:1;">
+          ${meetupDate ? `<span style="font-size:0.75em;font-weight:700;color:var(--text-soft);">${new Date(meetupDate+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>` : '<span style="font-size:0.75em;color:var(--text-soft);">set date to see meetup highlights</span>'}
+        </div>
+        ${itemRows}
+      </div>
+    </div>
+  `;
+}
+
+function saveMeetupDate(who, date) {
+  localStorage.setItem('meetup_' + who, date);
+  toast('📅 Meetup date saved for ' + (who==='ashley'?'Ashley':who==='liz'?'Liz':'Ami'));
+}
+
+async function aiAdjustSchedule() {
+  const note = document.getElementById('scheduleAdjustInput')?.value.trim();
+  if (!note) { toast('⚠️ Tell the AI what to adjust first!'); return; }
+  const schedule = window._productionSchedule;
+  if (!schedule) { toast('⚠️ Generate a schedule first!'); return; }
+
+  const resultEl = document.getElementById('scheduleAdjustResult');
+  resultEl.style.display = 'block';
+  resultEl.innerHTML = '<div class="ai-loading"><div class="dots"><span></span><span></span><span></span></div> Calculating adjustments...</div>';
+
+  const scheduleSummary = Object.entries(schedule).map(([name, d]) =>
+    `${name} (${d.who}): ${d.total} total across ${d.events.length} events`
+  ).join(', ');
+
+  try {
+    const res = await apiCall({
+      system: `You are a production quantity adjuster for Amioki amigurumi brand. Return ONLY a JSON array of changes. Start with [ end with ]. No other text.
+[{"item":"item name","change":"increase|decrease|set","amount":number,"reason":"brief reason"}]`,
+      messages: [{ role: 'user', content: `Current schedule: ${scheduleSummary}\n\nAdjustment request: "${note}"\n\nReturn JSON array of specific quantity changes.` }]
+    });
+
+    const data    = await res.json();
+    const raw     = data.content?.find(c => c.type === 'text')?.text || '';
+    const changes = extractJSON(raw, []);
+
+    if (!changes.length) {
+      resultEl.innerHTML = `<div class="insight-box" style="background:var(--yellow-soft);border-color:var(--yellow);">AI couldn't parse that — try being more specific about item names and quantities.</div>`;
+      return;
+    }
+
+    resultEl.innerHTML = `
+      <div style="background:var(--white);border-radius:10px;border:2px solid var(--lavender);overflow:hidden;">
+        <div style="padding:10px 14px;background:var(--lav-soft);font-weight:900;font-size:0.85em;">✨ Suggested Adjustments — Review & Approve</div>
+        ${changes.map((c, i) => `
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);">
+            <input type="checkbox" id="chg_${i}" checked style="width:16px;height:16px;accent-color:var(--rose);">
+            <div style="flex:1;">
+              <div style="font-weight:800;font-size:0.88em;">${c.item}</div>
+              <div style="font-size:0.75em;color:var(--text-soft);">${c.reason||''}</div>
+            </div>
+            <div style="font-weight:900;color:${c.change==='increase'?'#065F46':c.change==='decrease'?'#991B1B':'var(--text)'};">
+              ${c.change==='increase'?'↑ +':c.change==='decrease'?'↓ -':'→ '}${c.amount}
+            </div>
+          </div>
+        `).join('')}
+        <div style="padding:12px 14px;display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-primary btn-sm" onclick="applyScheduleChanges(${JSON.stringify(changes).replace(/"/g,'&quot;')})">✅ Apply Selected</button>
+          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('scheduleAdjustResult').style.display='none'">✕ Cancel</button>
+        </div>
+      </div>
+    `;
+    window._pendingScheduleChanges = changes;
+
+  } catch(e) {
+    resultEl.innerHTML = `<div class="insight-box" style="background:var(--coral-soft);border-color:var(--coral);">❌ Could not get AI adjustments. Check your connection.</div>`;
+  }
+}
+
+function applyScheduleChanges(changes) {
+  const schedule = window._productionSchedule;
+  if (!schedule) return;
+  const checked = changes.filter((c, i) => document.getElementById('chg_'+i)?.checked);
+
+  checked.forEach(change => {
+    const matchKey = Object.keys(schedule).find(k =>
+      k.toLowerCase().includes(change.item.toLowerCase()) ||
+      change.item.toLowerCase().includes(k.toLowerCase())
+    );
+    if (!matchKey) return;
+    const item = schedule[matchKey];
+    if (change.change === 'increase') {
+      const add = Math.ceil(change.amount / (item.events.length || 1));
+      item.events.forEach(ev => ev.qty += add);
+      item.total += change.amount;
+    } else if (change.change === 'decrease') {
+      const sub = Math.ceil(change.amount / (item.events.length || 1));
+      item.events.forEach(ev => ev.qty = Math.max(0, ev.qty - sub));
+      item.total = Math.max(0, item.total - change.amount);
+    } else if (change.change === 'set') {
+      const newPer = Math.ceil(change.amount / (item.events.length || 1));
+      item.events.forEach(ev => ev.qty = newPer);
+      item.total = change.amount;
+    }
+  });
+
+  toast(`✅ ${checked.length} adjustment${checked.length!==1?'s':''} applied!`);
+  document.getElementById('scheduleAdjustInput').value = '';
+  renderProductionSchedule();
+}
+
+function sendScheduleToPayTab(who) {
+  const schedule = window._productionSchedule;
+  if (!schedule) { toast('⚠️ Generate production schedule first!'); return; }
+  const entries = Object.entries(schedule)
+    .filter(([, d]) => d.who === who)
+    .map(([name, d]) => ({ itemName: name, qty: d.total, rate: 0, labor: 0, materials: 0 }));
+  if (!entries.length) { toast('No items for ' + who + ' in this schedule!'); return; }
+  window._pendingPayOrder = {
+    evName: `${planRange}-Month Production`,
+    ashley: who === 'ashley' ? entries : [],
+    liz:    who === 'liz'    ? entries : []
+  };
+  document.querySelectorAll('.tab-btn').forEach(b => { if (b.textContent.includes('Pay')) b.click(); });
+  setTimeout(() => { setContractor(who); loadPendingPayOrder(); }, 300);
+  toast('💸 Sent ' + (who==='ashley'?'Ashley':'Liz') + "'s items to Pay tab!");
+}
+
+async function getPrepList(planId) {
+  const ev = planEvents.find(e => e.id === planId);
+  if (!ev) return;
+  const wrap = document.getElementById('preplist_'+planId);
+  wrap.style.display = 'block';
+  wrap.innerHTML = `<div class="ai-loading"><div class="dots"><span></span><span></span><span></span></div> Building prep list...</div>`;
+
+  const itemAgg = {};
+  const pastSame = events.filter(e => e.name.replace(/\d{4}/,'').trim().toLowerCase() === ev.name.replace(/\d{4}/,'').trim().toLowerCase());
+  const similar  = events.filter(e => e.type === ev.type);
+  const relevantEvents = pastSame.length ? pastSame : similar;
+  relevantEvents.forEach(e => {
+    e.items?.forEach(item => {
+      if (!itemAgg[item.name]) itemAgg[item.name] = { qty: 0, rev: 0, count: 0 };
+      itemAgg[item.name].qty   += item.qty;
+      itemAgg[item.name].rev   += item.rev;
+      itemAgg[item.name].count += 1;
+    });
+  });
+
+  const historyStr = Object.entries(itemAgg)
+    .sort((a,b) => b[1].qty - a[1].qty)
+    .map(([n,d]) => `${n}: avg ${(d.qty/d.count).toFixed(1)} sold per event`)
+    .join(', ') || 'No past item history yet';
+
+  // Build available crocheter context from roster
+  const availStr = roster.filter(c => eventRosterState[c.id] !== false)
+    .map(c => `${c.name}: ${c.itemKeywords?.slice(0,4).join(', ')||'general'}`).join('; ');
+
+  try {
+    const res = await apiCall({
+      system: `You are an inventory prep planner for Amioki, a kawaii amigurumi brand in Virginia Beach VA. Known items: Pikachu, Axolotl, Kirby, Capybara, Snorlax, Mew, Miffy, Penguin, Whale, Baby Shark, Octopus, Jellyfish, Leggy Frog, Bee, Birb, Chicken, Baby Chick, Heart Keychain, Mini Loaf Cat. Respond with ONLY a raw JSON array. Start with [ end with ].
+[{"item":"name","qty":number,"who":"crocheter name or ami","reason":"brief reason"}]`,
+      messages: [{ role: 'user', content: `Suggest prep quantities for: ${ev.name}
+Type: ${ev.type}, Date: ${ev.date}, Location: ${ev.location||'TBD'}, Attendance: ${ev.attendance||'unknown'}
+Available crocheters: ${availStr}
+Past item sales at similar events: ${historyStr}
+Return 8-12 items with realistic quantities.` }]
+    });
+
+    const data  = await res.json();
+    const raw   = data.content?.find(c => c.type === 'text')?.text || '';
+    const items = extractJSON(raw, []);
+    renderPrepTable(planId, ev.name, items);
+
+  } catch(e) {
+    const fallback = Object.entries(itemAgg)
+      .sort((a,b) => b[1].qty - a[1].qty).slice(0,10)
+      .map(([name, d]) => ({ item: name, qty: Math.ceil(d.qty/d.count), who: getContractorForItem(name), reason: 'Based on past event averages' }));
+    if (fallback.length) { renderPrepTable(planId, ev.name, fallback); }
+    else { wrap.innerHTML = `<div class="insight-box" style="background:var(--coral-soft);border-color:var(--coral);">Could not generate prep list. Log more events or check your connection!</div>`; }
+  }
+}
+
+function renderPrepTable(planId, evName, items) {
+  const wrap = document.getElementById('preplist_'+planId);
+  wrap.innerHTML = `
+    <div style="font-size:0.78em;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-soft);margin-bottom:8px;">
+      🧶 Prep List — edit quantities & assignments, then send to Pay
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 70px 110px;gap:6px;padding:6px 8px;background:var(--lav-mid);border-radius:8px;margin-bottom:6px;">
+      <div style="font-size:0.72em;font-weight:900;text-transform:uppercase;color:var(--text-mid);">Item</div>
+      <div style="font-size:0.72em;font-weight:900;text-transform:uppercase;color:var(--text-mid);text-align:center;">Qty</div>
+      <div style="font-size:0.72em;font-weight:900;text-transform:uppercase;color:var(--text-mid);">Made by</div>
+    </div>
+    ${items.map((item, i) => {
+      // Match who to roster member name
+      const rosterMatch = roster.find(c => c.name.toLowerCase() === (item.who||'').toLowerCase());
+      const whoId = rosterMatch ? rosterMatch.id : getContractorForItem(item.item);
+      const rosterOpts = roster.map(c => `<option value="${c.id}" ${c.id===whoId?'selected':''}>${c.isAmi?'🌸':'👩'} ${c.name}</option>`).join('');
+      return `
+      <div data-item="${item.item.replace(/"/g,'&quot;')}" style="display:grid;grid-template-columns:1fr 70px 110px;gap:6px;align-items:center;padding:6px 8px;background:var(--white);border-radius:8px;margin-bottom:5px;border:1px solid var(--border);">
+        <div>
+          <div style="font-weight:800;font-size:0.85em;">${item.item}</div>
+          <div style="font-size:0.7em;color:var(--text-soft);">${item.reason||''}</div>
+        </div>
+        <div style="text-align:center;">
+          <input type="number" min="0" value="${item.qty}" id="prep_qty_${planId}_${i}"
+            style="width:55px;padding:5px;border:2px solid var(--rose-mid);border-radius:6px;text-align:center;font-weight:900;font-size:0.9em;">
+        </div>
+        <div>
+          <select id="prep_who_${planId}_${i}"
+            style="width:100%;padding:5px;border:2px solid var(--rose-mid);border-radius:6px;font-size:0.8em;font-weight:700;">
+            ${rosterOpts}
+          </select>
+        </div>
+      </div>
+    `}).join('')}
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+      <button class="btn btn-primary btn-sm" onclick="sendToPayTab(${planId}, ${items.length}, '${evName.replace(/'/g,"\\'")}')">
+        💸 Send to Pay Tab
+      </button>
+      <button class="btn btn-ghost btn-sm" onclick="getPrepList(${planId})">🔄 Regenerate</button>
+    </div>
+  `;
+}
+
+function sendToPayTab(planId, itemCount, evName) {
+  const ashleyItems = [];
+  const lizItems    = [];
+  const rows = document.querySelectorAll(`#preplist_${planId} [data-item]`);
+
+  rows.forEach((row, i) => {
+    const name  = row.dataset.item || '';
+    const qty   = parseInt(document.getElementById(`prep_qty_${planId}_${i}`)?.value) || 0;
+    const whoId = document.getElementById(`prep_who_${planId}_${i}`)?.value || 'ami';
+    if (qty === 0 || whoId === 'ami') return;
+    const ctr   = CONTRACTORS[whoId] || (whoId === 'ashley' ? CONTRACTORS.ashley : whoId === 'liz' ? CONTRACTORS.liz : null);
+    const match = ctr?.items?.find(it =>
+      name.toLowerCase().includes(it.name.toLowerCase()) ||
+      it.name.toLowerCase().includes(name.toLowerCase().split(' ')[0])
+    );
+    const entry = { itemName: name, qty, rate: match?.total || 0, labor: match?.labor || 0, materials: match?.materials || 0 };
+    if (whoId === 'ashley') ashleyItems.push(entry);
+    else if (whoId === 'liz') lizItems.push(entry);
+  });
+
+  window._pendingPayOrder = { evName, ashley: ashleyItems, liz: lizItems };
+  document.querySelectorAll('.tab-btn').forEach(b => { if (b.textContent.includes('Pay')) b.click(); });
+  toast('💸 Sent to Pay tab!');
+}
+
+function loadPendingPayOrder() {
+  const order = window._pendingPayOrder;
+  if (!order) return;
+  const items = activeContractor === 'ashley' ? order.ashley : order.liz;
+  if (!items?.length) { toast(`No ${activeContractor} items — switch contractors if needed.`); return; }
+  document.getElementById('ctr_order_label').value = (order.evName||'') + ' Prep';
+  const ctr = CONTRACTORS[activeContractor];
+  items.forEach(prep => {
+    ctr.items?.forEach((ctrItem, idx) => {
+      if (prep.itemName.toLowerCase().includes(ctrItem.name.toLowerCase()) ||
+          ctrItem.name.toLowerCase().includes(prep.itemName.toLowerCase().split(' ')[0])) {
+        const qtyEl = document.getElementById('ctr_qty_'+idx);
+        if (qtyEl) qtyEl.value = prep.qty;
+      }
+    });
+  });
+  updateCtrTotals();
+  toast('💸 Order loaded from plan!');
 }
 
 function initSettingsTab() {
