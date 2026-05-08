@@ -457,6 +457,7 @@ textarea { resize: vertical; min-height: 80px; }
     <button class="tab-btn" onclick="switchTab('notes')">📝 Notes</button>
     <button class="tab-btn" onclick="switchTab('contractors')">🧶 Pay</button>
     <button class="tab-btn" onclick="switchTab('settings')">⚙️ Settings</button>
+    <button class="tab-btn" onclick="switchTab('debrief')">🧾 Debrief</button>
   </div>
 
   <!-- TAB 1: LOG EVENT -->
@@ -1084,6 +1085,136 @@ textarea { resize: vertical; min-height: 80px; }
     </div>
   </div>
 
+  <!-- TAB 7: DEBRIEF -->
+  <div id="tab-debrief" class="tab-panel">
+
+    <div style="background:linear-gradient(135deg,var(--rose-soft),var(--lav-soft));border-radius:var(--radius);padding:20px 22px;margin-bottom:16px;border:2px solid var(--rose-mid);box-shadow:var(--shadow);">
+      <div style="font-size:1.15em;font-weight:900;color:var(--text);margin-bottom:4px;">🧾 Weekend Debrief</div>
+      <div style="font-size:0.85em;font-weight:700;color:var(--text-mid);">Upload your Square Sales Summary → see exactly where every dollar goes → get your Profit First splits in seconds.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span>📤</span> Upload Square Sales Summary PDF</div>
+      <div class="upload-zone" onclick="document.getElementById('debriefPdfInput').click()">
+        <input type="file" id="debriefPdfInput" accept=".pdf" onchange="handleDebriefPDF(event); this.value=''">
+        <div style="font-size:2em;">🧾</div>
+        <strong style="font-size:0.95em;color:var(--rose-deep);">Drop your Sales Summary PDF here or click to upload</strong>
+        <p>Square Dashboard → Reports → Sales Summary → Export → PDF</p>
+      </div>
+      <div id="debriefParsedPreview" style="margin-top:12px;display:none;"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span>✏️</span> Sales Figures <span style="font-size:0.72em;font-weight:700;color:var(--text-soft);text-transform:none;letter-spacing:0;margin-left:6px;">auto-filled from PDF · or enter manually</span></div>
+      <div class="grid-3">
+        <div class="form-group">
+          <label>Gross Sales ($) <span style="font-weight:600;font-size:0.85em;color:var(--rose-deep);text-transform:none;">= your true revenue</span></label>
+          <input type="number" id="db_gross" placeholder="517.98" step="0.01" oninput="runDebrief()">
+        </div>
+        <div class="form-group">
+          <label>Square Fees ($)</label>
+          <input type="number" id="db_fees" placeholder="16.37" step="0.01" oninput="runDebrief()">
+        </div>
+        <div class="form-group">
+          <label>VA Sales Tax Collected ($)</label>
+          <input type="number" id="db_tax" placeholder="31.07" step="0.01" oninput="runDebrief()">
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Weekend / Date Range</label>
+          <input type="text" id="db_daterange" placeholder="e.g., May 1–3, 2026">
+        </div>
+        <div class="form-group">
+          <label>Event Name (optional)</label>
+          <input type="text" id="db_eventname" placeholder="e.g., VB Farmers Market" list="eventNameList">
+        </div>
+      </div>
+      <div style="background:var(--lav-soft);border-radius:var(--radius-sm);padding:11px 14px;border:1px solid var(--lavender);font-size:0.78em;font-weight:700;color:var(--text-mid);line-height:1.7;">
+        💡 <strong>Reading your Square report:</strong> Gross Sales = your true net revenue (tax-inclusive). Square Fees only apply to card payments — cash has no fee.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span>🏪</span> Variable Costs <span style="font-size:0.72em;font-weight:700;color:var(--text-soft);text-transform:none;letter-spacing:0;margin-left:6px;">this weekend only</span></div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Booth Fee ($)</label>
+          <input type="number" id="db_booth" placeholder="0.00" step="0.01" oninput="runDebrief()">
+        </div>
+        <div class="form-group">
+          <label>Supply Runs / Misc ($)</label>
+          <input type="number" id="db_misc" placeholder="0.00" step="0.01" oninput="runDebrief()">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Contractor Costs This Weekend ($)</label>
+        <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
+          <input type="number" id="db_contractor" placeholder="0.00" step="0.01" oninput="runDebrief()" style="flex:1;min-width:140px;">
+          <button class="btn btn-secondary btn-sm" onclick="pullContractorCostsFromPayTab()" style="white-space:nowrap;">📋 Pull from Pay Tab</button>
+        </div>
+        <div id="db_contractor_detail" style="margin-top:6px;display:none;font-size:0.75em;font-weight:700;color:var(--text-soft);padding:6px 10px;background:var(--lav-soft);border-radius:8px;border:1px solid var(--lavender);"></div>
+      </div>
+    </div>
+
+    <div class="card" style="border:2px solid var(--lavender);">
+      <div class="card-title"><span>📆</span> Monthly Fixed Costs</div>
+      <p style="font-size:0.82em;font-weight:700;color:var(--text-mid);margin-bottom:14px;">Pre-loaded with your known recurring costs. Shown as monthly totals for overhead context.</p>
+      <div id="db_fixed_list"></div>
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:flex-end;padding-top:12px;border-top:1px dashed var(--border);">
+        <div style="flex:1;min-width:160px;"><label>Label</label><input type="text" id="db_fixed_label" placeholder="e.g., Booth Sponsorship"></div>
+        <div style="min-width:110px;"><label>Monthly ($)</label><input type="number" id="db_fixed_amt" placeholder="125.00" step="0.01"></div>
+        <button class="btn btn-primary btn-sm" onclick="addFixedCost()" style="align-self:flex-end;">+ Add</button>
+      </div>
+    </div>
+
+    <div id="debriefResults" style="display:none;">
+
+      <div class="card" style="background:linear-gradient(135deg,#FFF0F8,#F5F0FF);border:2px solid var(--rose-mid);">
+        <div class="card-title"><span>💸</span> Where Your Money Goes</div>
+        <div id="db_waterfall"></div>
+        <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="stat-box"><div class="stat-val" id="db_res_gross" style="font-size:1.3em;">$0</div><div class="stat-lbl">Gross Sales</div></div>
+          <div class="stat-box" style="background:linear-gradient(135deg,var(--rose-soft),var(--lav-mid));border:2px solid var(--rose);">
+            <div class="stat-val" style="font-size:1.6em;" id="db_res_spendable">$0</div>
+            <div class="stat-lbl">True Spendable 🩷</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="background:var(--yellow-soft);border:2px solid var(--yellow);">
+        <div class="card-title" style="color:#92400E;"><span>⚠️</span> Square Savings — Tax Reserve</div>
+        <p style="font-size:0.85em;font-weight:700;color:#92400E;margin-bottom:10px;">Move this to Square Savings now. This is your 22% SE tax reserve.</p>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:white;border-radius:var(--radius-sm);border:2px solid var(--yellow);">
+          <div style="font-weight:800;color:#92400E;">Move to Square Savings →</div>
+          <div style="font-size:1.8em;font-weight:900;color:#92400E;" id="db_tax_reserve">$0.00</div>
+        </div>
+        <div style="font-size:0.75em;font-weight:700;color:#92400E;margin-top:8px;">= 22% of gross sales · already auto-pulled by Square Savings if enabled</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span>🪣</span> Profit First Allocations</div>
+        <p style="font-size:0.82em;font-weight:700;color:var(--text-mid);margin-bottom:16px;">Applied to your true spendable after all deductions.</p>
+        <div id="db_pf_bars"></div>
+      </div>
+
+      <div class="card" id="db_fixed_context_card" style="display:none;">
+        <div class="card-title"><span>📆</span> Monthly Fixed Costs — Coverage Check</div>
+        <p style="font-size:0.82em;font-weight:700;color:var(--text-mid);margin-bottom:12px;">Did this weekend cover your standing overhead?</p>
+        <div id="db_fixed_context"></div>
+        <div id="db_coverage_bar" style="margin-top:14px;"></div>
+      </div>
+
+      <div class="card" style="background:var(--mint-soft);border:2px solid var(--mint);">
+        <div class="card-title" style="color:#065F46;"><span>💾</span> Save This Weekend to Event Log</div>
+        <p style="font-size:0.82em;font-weight:700;color:#065F46;margin-bottom:12px;">Log it so the Predict tab can learn from it!</p>
+        <button class="btn btn-primary" onclick="saveDebriefAsEvent()">🌸 Save to Event Log</button>
+        <div id="db_save_confirm" style="margin-top:10px;display:none;"></div>
+      </div>
+
+    </div>
+  </div>
+
   <!-- TAB 7: SETTINGS -->
   <div id="tab-settings" class="tab-panel">
     <div class="card" style="background:linear-gradient(135deg,var(--rose-soft),var(--lav-soft));border:2px solid var(--rose-mid);">
@@ -1317,6 +1448,14 @@ let ctrCustomItems = [];
 const KEY_TRACKER_CONTRACTS = 'amioki_tracker_contracts';
 let trackerContracts = load(KEY_TRACKER_CONTRACTS, []);
 
+const KEY_FIXED = 'amioki_fixed_costs';
+let fixedCosts  = load(KEY_FIXED, [
+  { id:'insurance',   label:'Farmers Insurance',             amt: 33.41  },
+  { id:'sponsorship', label:'VB Farmers Market Sponsorship', amt: 128.13 },
+  { id:'claude',      label:'Claude Subscription',           amt: 20.00  },
+  { id:'capcut',      label:'CapCut Subscription',           amt:  9.99  },
+]);
+
 // ═══════════════════════════════════════════════
 // TABS
 // ═══════════════════════════════════════════════
@@ -1335,6 +1474,7 @@ function switchTab(id) {
   }
   if (id==='contractors') { setContractor(activeContractor); setTimeout(loadPendingPayOrder, 200); }
   if (id==='settings') initSettingsTab();
+  if (id==='debrief')  initDebriefTab();
   refreshDataLists();
 }
 
@@ -3144,7 +3284,7 @@ function clearAllData() {
 }
 
 function confirmClearAll() {
-  [KEY_EVENTS, KEY_NOTES, KEY_PLAN, KEY_ORDERS, KEY_NAMES, KEY_LOCATIONS, KEY_RULES, KEY_ROSTER, KEY_CONTRACTS, KEY_TRACKER_CONTRACTS].forEach(k => localStorage.removeItem(k)); trackerContracts=[];
+  [KEY_EVENTS, KEY_NOTES, KEY_PLAN, KEY_ORDERS, KEY_NAMES, KEY_LOCATIONS, KEY_RULES, KEY_ROSTER, KEY_CONTRACTS, KEY_TRACKER_CONTRACTS, KEY_FIXED].forEach(k => localStorage.removeItem(k)); trackerContracts=[]; fixedCosts=[{id:'insurance',label:'Farmers Insurance',amt:33.41},{id:'sponsorship',label:'VB Farmers Market Sponsorship',amt:128.13},{id:'claude',label:'Claude Subscription',amt:20.00},{id:'capcut',label:'CapCut Subscription',amt:9.99}];
   events=[]; notes=[]; planEvents=[]; savedOrders=[]; aiRules=[]; roster=[...DEFAULT_ROSTER]; eventRosterState={}; contracts=[];
   savedNames = ['Cherry Blossom Fest','Neptune Festival','Water Lantern Festival','Chesapeake Jubilee','VB Farmers Market','Strawberry Festival'];
   savedLocations = ['Virginia Beach Farmers Market','Greenbrier Library','Central Library','Chesapeake City Park','Town Center Virginia Beach'];
@@ -4239,6 +4379,228 @@ async function pushOrderToSheet(order, status, itemsRemainingOverride) {
   } catch(e) {
     console.warn('Sheet sync failed (non-critical):', e);
   }
+}
+
+// ═══════════════════════════════════════════════
+// 🧾 WEEKEND DEBRIEF
+// ═══════════════════════════════════════════════
+function initDebriefTab() {
+  renderFixedCostsList();
+  runDebrief();
+}
+
+async function handleDebriefPDF(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const preview = document.getElementById('debriefParsedPreview');
+  preview.style.display = 'block';
+  preview.innerHTML = '<div class="ai-loading"><div class="dots"><span></span><span></span><span></span></div> Reading PDF numbers...</div>';
+  const reader = new FileReader();
+  reader.onload = async (ev) => {
+    try {
+      const base64 = ev.target.result.split(',')[1];
+      const res = await fetch(PROXY_URL, {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          system: 'Extract numbers from a Square Sales Summary PDF. Return ONLY raw JSON, no text, no markdown. {"gross_sales":number,"fees":number,"tax":number,"net_total":number,"date_range":"string","cash":number,"card":number}',
+          messages: [{role:'user',content:[
+            {type:'document',source:{type:'base64',media_type:'application/pdf',data:base64}},
+            {type:'text',text:'Extract: Gross Sales, Square payment processing fees (positive number), Taxes, Net total, date range, Cash, Card amounts. JSON only.'}
+          ]}]
+        })
+      });
+      const data   = await res.json();
+      const raw    = data.content?.find(c=>c.type==='text')?.text || '';
+      const parsed = extractJSON(raw, {});
+      if (parsed.gross_sales) {
+        document.getElementById('db_gross').value = parsed.gross_sales.toFixed(2);
+        if (parsed.fees)       document.getElementById('db_fees').value  = Math.abs(parsed.fees).toFixed(2);
+        if (parsed.tax)        document.getElementById('db_tax').value   = parsed.tax.toFixed(2);
+        if (parsed.date_range) document.getElementById('db_daterange').value = parsed.date_range;
+        preview.innerHTML = `<div class="insight-box" style="background:var(--mint-soft);border-color:var(--mint);">
+          <div class="insight-label">✅ PDF parsed!</div>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;">
+            <span>💰 Gross: <strong>$${parsed.gross_sales.toFixed(2)}</strong></span>
+            <span>🏦 Fees: <strong>$${Math.abs(parsed.fees||0).toFixed(2)}</strong></span>
+            <span>🏛️ Tax: <strong>$${parsed.tax?.toFixed(2)||'?'}</strong></span>
+            ${parsed.cash?`<span>💵 Cash: <strong>$${parsed.cash.toFixed(2)}</strong></span>`:''}
+          </div>
+        </div>`;
+        runDebrief(); toast('✅ PDF imported!');
+      } else {
+        preview.innerHTML = `<div class="insight-box" style="background:var(--yellow-soft);border-color:var(--yellow);"><div class="insight-label">⚠️ Couldn't auto-read PDF</div>Enter the numbers manually below!</div>`;
+      }
+    } catch(err) {
+      preview.innerHTML = '<div class="insight-box" style="background:var(--yellow-soft);border-color:var(--yellow);"><div class="insight-label">⚠️ PDF read issue</div>Enter numbers manually below.</div>';
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function pullContractorCostsFromPayTab() {
+  const today  = new Date();
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - today.getDay() + (today.getDay()===0 ? -6 : 1));
+  const mondayStr = monday.toISOString().split('T')[0];
+  const weekOrders = savedOrders.filter(o => o.date >= mondayStr && !o.paid);
+  if (!weekOrders.length) { toast('⚠️ No unpaid orders found this week!'); return; }
+  const total  = weekOrders.reduce((s,o)=>s+o.totalOwed,0);
+  const detail = weekOrders.map(o=>`${CONTRACTORS[o.contractor]?.name||o.contractor}: $${o.totalOwed.toFixed(2)} (${o.label})`).join(' · ');
+  document.getElementById('db_contractor').value = total.toFixed(2);
+  const detailEl = document.getElementById('db_contractor_detail');
+  detailEl.style.display = 'block';
+  detailEl.textContent   = '📋 ' + detail;
+  runDebrief();
+  toast(`💸 Pulled $${total.toFixed(2)} from ${weekOrders.length} order(s)!`);
+}
+
+function addFixedCost() {
+  const label = document.getElementById('db_fixed_label')?.value.trim();
+  const amt   = parseFloat(document.getElementById('db_fixed_amt')?.value)||0;
+  if (!label || !amt) { toast('⚠️ Enter a label and amount!'); return; }
+  fixedCosts.push({ id:'fc_'+Date.now(), label, amt });
+  save(KEY_FIXED, fixedCosts);
+  document.getElementById('db_fixed_label').value = '';
+  document.getElementById('db_fixed_amt').value   = '';
+  renderFixedCostsList(); runDebrief();
+  toast('✅ Fixed cost added!');
+}
+
+function deleteFixedCost(id) {
+  fixedCosts = fixedCosts.filter(f=>f.id!==id);
+  save(KEY_FIXED, fixedCosts);
+  renderFixedCostsList(); runDebrief();
+}
+
+function renderFixedCostsList() {
+  const wrap = document.getElementById('db_fixed_list'); if (!wrap) return;
+  const total = fixedCosts.reduce((s,f)=>s+f.amt,0);
+  wrap.innerHTML = fixedCosts.map(f=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--white);border-radius:var(--radius-sm);margin-bottom:7px;border:1px solid var(--border);">
+      <div style="flex:1;"><div style="font-weight:800;font-size:0.88em;">${f.label}</div><div style="font-size:0.72em;color:var(--text-soft);">monthly recurring</div></div>
+      <div style="font-weight:900;color:var(--rose-deep);">$${f.amt.toFixed(2)}/mo</div>
+      <button onclick="deleteFixedCost('${f.id}')" style="background:none;border:none;cursor:pointer;color:var(--coral);">🗑</button>
+    </div>`).join('') + (fixedCosts.length ? `
+    <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--lav-soft);border-radius:var(--radius-sm);border:1px solid var(--lavender);">
+      <span style="font-size:0.82em;font-weight:900;color:var(--text-mid);">Total monthly fixed</span>
+      <span style="font-weight:900;color:var(--rose-deep);">$${total.toFixed(2)}/mo</span>
+    </div>` : '');
+}
+
+function runDebrief() {
+  const gross      = parseFloat(document.getElementById('db_gross')?.value)      || 0;
+  const fees       = parseFloat(document.getElementById('db_fees')?.value)        || 0;
+  const taxColl    = parseFloat(document.getElementById('db_tax')?.value)         || 0;
+  const booth      = parseFloat(document.getElementById('db_booth')?.value)       || 0;
+  const misc       = parseFloat(document.getElementById('db_misc')?.value)        || 0;
+  const contractor = parseFloat(document.getElementById('db_contractor')?.value)  || 0;
+  if (!gross) { document.getElementById('debriefResults').style.display='none'; return; }
+  document.getElementById('debriefResults').style.display = 'block';
+
+  const afterFees     = gross - fees;
+  const spendable     = afterFees - taxColl;
+  const afterVariable = spendable - booth - misc - contractor;
+  const taxReserve    = gross * 0.22;
+  const pfBase        = Math.max(0, afterVariable);
+
+  document.getElementById('db_res_gross').textContent     = '$' + gross.toFixed(2);
+  document.getElementById('db_res_spendable').textContent = '$' + afterVariable.toFixed(2);
+  document.getElementById('db_tax_reserve').textContent   = '$' + taxReserve.toFixed(2);
+
+  const waterfallRows = [
+    { label:'Gross Sales (your revenue)',    val: gross,       cls:'positive', color:'#065F46' },
+    { label:'− Square Fees',                val: -fees,       cls:'negative', color:'#991B1B' },
+    { label:'− VA Sales Tax (goes to state)',val: -taxColl,   cls:'neutral',  color:'#92400E' },
+    booth      ? { label:'− Booth Fee',         val:-booth,       cls:'purple',   color:'#5B21B6' } : null,
+    misc       ? { label:'− Supplies / Misc',   val:-misc,        cls:'purple',   color:'#5B21B6' } : null,
+    contractor ? { label:'− Contractor Pay',    val:-contractor,  cls:'purple',   color:'#5B21B6' } : null,
+  ].filter(Boolean);
+
+  const clsMap = {
+    positive: 'background:var(--mint-soft);border:2px solid var(--mint);',
+    negative: 'background:var(--coral-soft);border:2px solid var(--coral);',
+    neutral:  'background:var(--yellow-soft);border:2px solid var(--yellow);',
+    purple:   'background:var(--lav-soft);border:2px solid var(--lavender);',
+  };
+
+  document.getElementById('db_waterfall').innerHTML = waterfallRows.map(r=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:var(--radius-sm);margin-bottom:6px;${clsMap[r.cls]}">
+      <div style="font-size:0.85em;font-weight:800;color:var(--text);">${r.label}</div>
+      <div style="font-weight:900;color:${r.color};">${r.val>=0?'':'-'}$${Math.abs(r.val).toFixed(2)}</div>
+    </div>`).join('') + `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:linear-gradient(135deg,var(--rose-soft),var(--lav-soft));border-radius:var(--radius-sm);border:3px solid var(--rose);margin-top:4px;">
+      <div style="font-size:0.9em;font-weight:900;color:var(--text);">= True Spendable 🩷</div>
+      <div style="font-weight:900;font-size:1.3em;color:var(--rose-deep);">$${afterVariable.toFixed(2)}</div>
+    </div>`;
+
+  const PF = [
+    { label:'🙏 Tithe',              pct:0.10, color:'var(--lavender)' },
+    { label:'🌸 Personal',            pct:0.06, color:'var(--rose)'     },
+    { label:'⚙️ Operations',          pct:0.74, color:'var(--mint)'     },
+    { label:'🚀 Innovation / Growth', pct:0.10, color:'var(--peach)'    },
+  ];
+  document.getElementById('db_pf_bars').innerHTML = PF.map(b => {
+    const amt = pfBase * b.pct;
+    return `<div style="margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+        <div style="font-weight:900;font-size:0.88em;">${b.label} <span style="font-size:0.8em;font-weight:700;color:var(--text-soft);">${(b.pct*100).toFixed(0)}%</span></div>
+        <div style="font-weight:900;font-size:1.05em;color:var(--rose-deep);">$${amt.toFixed(2)}</div>
+      </div>
+      <div style="height:12px;background:var(--rose-soft);border-radius:99px;overflow:hidden;">
+        <div style="height:12px;width:${b.pct*100}%;background:${b.color};border-radius:99px;"></div>
+      </div>
+    </div>`;
+  }).join('') + `<div style="margin-top:12px;padding:10px 14px;background:var(--lav-soft);border-radius:var(--radius-sm);border:1px solid var(--lavender);font-size:0.8em;font-weight:800;color:var(--text-mid);">
+    💡 Based on <strong>$${pfBase.toFixed(2)}</strong> after all deductions. Operations = $${(pfBase*0.74).toFixed(2)} for materials, supplies & reinvestment.
+  </div>`;
+
+  const totalFixed = fixedCosts.reduce((s,f)=>s+f.amt,0);
+  const fixedCard  = document.getElementById('db_fixed_context_card');
+  if (fixedCosts.length) {
+    fixedCard.style.display = 'block';
+    const covered = afterVariable >= totalFixed;
+    const pct     = Math.min(100, Math.round(afterVariable/totalFixed*100));
+    document.getElementById('db_fixed_context').innerHTML = fixedCosts.map(f=>`
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--white);border-radius:var(--radius-sm);margin-bottom:7px;border:1px solid var(--border);">
+        <div style="font-weight:800;font-size:0.88em;">${f.label}</div>
+        <div style="font-weight:900;color:var(--rose-deep);">$${f.amt.toFixed(2)}/mo</div>
+      </div>`).join('') + `
+      <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--lav-soft);border-radius:var(--radius-sm);border:1px solid var(--lavender);">
+        <span style="font-size:0.82em;font-weight:900;">Total monthly fixed</span>
+        <span style="font-weight:900;color:var(--rose-deep);">$${totalFixed.toFixed(2)}/mo</span>
+      </div>`;
+    document.getElementById('db_coverage_bar').innerHTML = `
+      <div style="margin-top:10px;">
+        <div style="display:flex;justify-content:space-between;font-size:0.78em;font-weight:900;color:var(--text-soft);margin-bottom:6px;">
+          <span>This weekend covered <strong style="color:${covered?'#065F46':'#991B1B'};">${pct}%</strong> of monthly fixed costs</span>
+          <span>${covered?'✅ fully covered':'⚠️ $'+(totalFixed-afterVariable).toFixed(2)+' gap'}</span>
+        </div>
+        <div style="height:10px;background:var(--rose-soft);border-radius:99px;overflow:hidden;">
+          <div style="height:10px;width:${pct}%;background:${covered?'linear-gradient(90deg,var(--mint),#059669)':'linear-gradient(90deg,var(--coral),#EF4444)'};border-radius:99px;transition:width .5s;"></div>
+        </div>
+        <div style="font-size:0.75em;font-weight:700;color:var(--text-soft);margin-top:5px;">
+          ${covered ? '🎉 This single weekend covers all your fixed overhead for the month!' : `You'll need ~${Math.ceil(totalFixed/(afterVariable||1))} weekends like this to cover monthly fixed costs.`}
+        </div>
+      </div>`;
+  } else { fixedCard.style.display = 'none'; }
+}
+
+function saveDebriefAsEvent() {
+  const gross   = parseFloat(document.getElementById('db_gross')?.value)||0;
+  const evName  = document.getElementById('db_eventname')?.value.trim()||'Weekend Market';
+  const dateStr = document.getElementById('db_daterange')?.value.trim()||'';
+  if (!gross) { toast('⚠️ Enter sales figures first!'); return; }
+  let isoDate = new Date().toISOString().split('T')[0];
+  if (dateStr) {
+    try { const p=new Date(dateStr.split('–')[0].trim()+', 2026'); if(!isNaN(p)) isoDate=p.toISOString().split('T')[0]; } catch(e){}
+  }
+  events.unshift({ id:Date.now(), name:evName, date:isoDate, type:marketTypes[0]?.id||'farmers_market',
+    revenue:gross, notes:`Saved from Debrief tab. Fees: $${document.getElementById('db_fees')?.value||0}. Tax: $${document.getElementById('db_tax')?.value||0}.`,
+    items:[], weather:'☀️ Sunny', crowd:'😊 Good Turnout', vendor:'Ami', juried:'Not juried', monopoly:'Unknown', competition:'Not assessed', attendance:0, itemsSold:0 });
+  save(KEY_EVENTS, events);
+  const conf = document.getElementById('db_save_confirm');
+  conf.style.display = 'block';
+  conf.innerHTML = '<div class="insight-box" style="background:var(--mint-soft);border-color:var(--mint);"><div class="insight-label">✅ Saved!</div>"'+evName+'" added to your Event Log. Head to the Log tab to add item details!</div>';
+  toast('🌸 Event saved!');
 }
 
 function initSettingsTab() {
