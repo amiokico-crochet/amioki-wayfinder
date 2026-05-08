@@ -1249,6 +1249,7 @@ const DEFAULT_ROSTER = [
   { id:'ami',    name:'Ami',    skuPrefix:'',   active:true,  isAmi:true,  leadDays:1, itemKeywords:['pikachu','axolotl','kirby','capybara','snorlax','mew','miffy','penguin','whale','baby shark'] },
   { id:'ashley', name:'Ashley', skuPrefix:'CA-',active:true,  isAmi:false, leadDays:5, itemKeywords:['chicken','baby chick','octop','heart keychain','mini loaf cat','bear coaster','cherry blossom pouch','apple coaster','pet rock','mama possum','baby possum','christmas baby chick','baby christmas tree'] },
   { id:'liz',    name:'Liz',    skuPrefix:'CL-',active:true,  isAmi:false, leadDays:5, itemKeywords:['leggy frog','bee','birb','jellyfish'] },
+  { id:'sydni',  name:'Sydni',  skuPrefix:'CS-',active:true,  isAmi:false, leadDays:5, itemKeywords:['turtle','flower coaster'] },
 ];
 let roster = load(KEY_ROSTER, DEFAULT_ROSTER);
 
@@ -1740,10 +1741,12 @@ function renderInsights() {
   const itemAgg = {};
   filtered.forEach(ev => {
     ev.items?.forEach(item => {
-      if (!itemAgg[item.name]) itemAgg[item.name] = {qty:0, rev:0, events:0};
-      itemAgg[item.name].qty += item.qty;
-      itemAgg[item.name].rev += item.rev;
-      itemAgg[item.name].events++;
+      // Normalize name — strips premium pricing decorators so variants group together
+      const key = normalizeItemName(item.name) || item.name;
+      if (!itemAgg[key]) itemAgg[key] = {qty:0, rev:0, events:0, displayName:key};
+      itemAgg[key].qty += item.qty;
+      itemAgg[key].rev += item.rev;
+      itemAgg[key].events++;
     });
   });
 
@@ -1833,8 +1836,9 @@ async function runPrediction() {
   events.forEach(ev => {
     ev.items?.forEach(item => {
       if (!item.name || !item.qty) return;
-      if (!itemHistory[item.name]) itemHistory[item.name] = { totalQty:0, totalRev:0, eventCount:0, qtySamples:[], byEventType:{}, byWeather:{}, byMonopoly:{} };
-      const h = itemHistory[item.name];
+      const _ikey = normalizeItemName(item.name) || item.name;
+      if (!itemHistory[_ikey]) itemHistory[_ikey] = { totalQty:0, totalRev:0, eventCount:0, qtySamples:[], byEventType:{}, byWeather:{}, byMonopoly:{} };
+      const h = itemHistory[_ikey];
       h.totalQty  += item.qty;
       h.totalRev  += (item.rev || item.qty * (item.grossEach || item.price || 0));
       h.eventCount++;
@@ -3344,8 +3348,10 @@ function addCrocheter() {
   renderRosterSettings();
   renderPredictRoster();
 
-  // Also add them to CONTRACTORS so Pay tab works
-  CONTRACTORS[id] = { name, note: `SKU prefix ${sku||'?'} · Added to roster`, anniversary: '', items: [] };
+  // Add to CONTRACTORS only if not already a known contractor
+  if (!CONTRACTORS[id]) {
+    CONTRACTORS[id] = { name, note: `SKU prefix ${sku||'?'} · Added to roster`, anniversary: '', rate: 12.77, rateLabel: '$12.77/hr', sheetsId: '', sheetsTab: '', items: [] };
+  }
 
   toast('🧶 ' + name + ' added to roster!');
 }
