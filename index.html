@@ -977,6 +977,22 @@ textarea { resize: vertical; min-height: 80px; }
       </div>
       <div id="new_contract_form" style="display:none;background:var(--lav-soft);border-radius:var(--radius-sm);padding:14px;margin-bottom:14px;border:2px solid var(--lavender);">
         <div style="font-size:0.78em;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-soft);margin-bottom:10px;">📋 New Contract</div>
+
+        <!-- PDF upload zone -->
+        <div style="margin-bottom:14px;">
+          <div style="font-size:0.72em;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-soft);margin-bottom:6px;">⚡ Auto-fill from signed PDF</div>
+          <div class="upload-zone" onclick="document.getElementById('nc_pdf_input').click()"
+            style="padding:16px;background:var(--white);border-color:var(--lavender);">
+            <input type="file" id="nc_pdf_input" accept=".pdf" onchange="readContractPDF(event); this.value=''">
+            <div style="font-size:1.4em;">📄</div>
+            <strong style="font-size:0.88em;color:var(--rose-deep);">Drop signed contract PDF here or click to upload</strong>
+            <p>Claude will read the quantities, dates & contractor name — you review before saving</p>
+          </div>
+          <div id="nc_pdf_status" style="display:none;margin-top:8px;"></div>
+        </div>
+
+        <div style="height:1px;background:var(--border);margin-bottom:14px;"></div>
+
         <div class="grid-2" style="gap:10px;margin-bottom:10px;">
           <div><label>Contract Name</label><input type="text" id="nc_label" placeholder="e.g., Neptune Prep — May 2026"></div>
           <div class="grid-2" style="gap:8px;">
@@ -1157,6 +1173,30 @@ textarea { resize: vertical; min-height: 80px; }
       <div style="font-size:0.78em;font-weight:700;color:var(--text-soft);margin-bottom:14px;padding:8px 12px;background:var(--lav-soft);border-radius:8px;border:1px solid var(--lavender);">
         📋 Your Sheet ID is the long string in the URL:<br>
         <code style="background:var(--lav-mid);padding:2px 6px;border-radius:4px;font-size:0.95em;display:inline-block;margin-top:4px;">docs.google.com/spreadsheets/d/<strong>[SHEET ID HERE]</strong>/edit</code>
+      </div>
+      <!-- Webhook URL for Google Sheet auto-update -->
+      <div style="margin-bottom:14px;padding:14px;background:linear-gradient(135deg,var(--mint-soft),var(--lav-soft));border-radius:var(--radius-sm);border:2px solid var(--mint);">
+        <div style="font-size:0.78em;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-soft);margin-bottom:8px;">📤 Order Log — Google Sheet Webhook</div>
+        <p style="font-size:0.8em;font-weight:700;color:var(--text-mid);margin-bottom:10px;">
+          Paste your Google Apps Script web app URL here. Every time you save or pay an order, it auto-logs to your pink Google Sheet. See setup instructions below.
+        </p>
+        <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
+          <div style="flex:1;min-width:220px;">
+            <label>Apps Script Web App URL</label>
+            <input type="text" id="sheet_webhook_url" placeholder="https://script.google.com/macros/s/..." 
+              value="${localStorage.getItem('amioki_sheet_webhook')||''}">
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="saveWebhookUrl()" style="align-self:flex-end;">💾 Save</button>
+          <button class="btn btn-secondary btn-sm" onclick="testWebhookUrl()" style="align-self:flex-end;">🧪 Test</button>
+        </div>
+        <div id="webhook_test_result" style="margin-top:8px;display:none;font-size:0.78em;font-weight:800;"></div>
+        <div style="margin-top:12px;padding:10px 12px;background:var(--white);border-radius:8px;border:1px solid var(--border);font-size:0.75em;font-weight:700;color:var(--text-mid);line-height:1.8;">
+          <strong>Setup (one time):</strong><br>
+          1. Download the <strong>Amioki Order Log.gs</strong> file below<br>
+          2. Open <a href="https://script.google.com" target="_blank" style="color:var(--rose-deep);">script.google.com</a> → New Project<br>
+          3. Paste the script → Save → Deploy → New deployment → Web app<br>
+          4. Set "Who has access" to <strong>Anyone</strong> → Deploy → Copy URL → paste above
+        </div>
       </div>
       <div id="sheets_settings_rows"></div>
     </div>
@@ -2373,6 +2413,116 @@ function showNewContractForm() {
   document.getElementById('new_contract_form').style.display = 'block';
 }
 
+async function readContractPDF(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const statusEl = document.getElementById('nc_pdf_status');
+  statusEl.style.display = 'block';
+  statusEl.innerHTML = `<div class="ai-loading"><div class="dots"><span></span><span></span><span></span></div> Reading contract PDF...</div>`;
+
+  // Read PDF as base64
+  const base64 = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload  = ev => resolve(ev.target.result.split(',')[1]);
+    reader.onerror = () => reject(new Error('Could not read file'));
+    reader.readAsDataURL(file);
+  });
+
+  // Build the list of known items for this contractor so Claude can fuzzy match
+  const ctr       = CONTRACTORS[activeContractor];
+  const knownItems = ctr.items.map((item, i) => `${i}: "${item.name}" ($${item.total.toFixed(2)}/ea)`).join(', ');
+
+  try {
+    const res = await fetch(PROXY_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system: `You are extracting contractor agreement data from a crochet production contract PDF for Amioki, a kawaii amigurumi brand. 
+Extract: contract label/name, start date, end date, and item quantities.
+The contractor is ${ctr.name}. Their known items (with index numbers) are: ${knownItems}.
+For each item found in the PDF, fuzzy match it to the closest known item by name — even if the PDF uses slightly different wording (e.g. "frogs" matches "Leggy Frog", "chicks" matches "Baby Chicks").
+Return ONLY raw JSON, no markdown, no backticks, no extra text:
+{"label":"contract name or description","date_from":"YYYY-MM-DD","date_to":"YYYY-MM-DD","items":[{"index":number,"name":"matched known item name","qty":number,"confidence":"exact|fuzzy|guess"}]}
+If a date is not found, use null. If a quantity is 0 or not mentioned, omit that item from the array.`,
+        messages: [{
+          role: 'user',
+          content: [
+            {
+              type: 'document',
+              source: { type: 'base64', media_type: 'application/pdf', data: base64 }
+            },
+            {
+              type: 'text',
+              text: `Extract the contract details from this PDF. Match item names to the known list as closely as possible. If an item in the PDF doesn't match any known item, make your best guess and mark it as "guess". Return JSON only.`
+            }
+          ]
+        }]
+      })
+    });
+
+    const data   = await res.json();
+    const rawText = data.content?.find(c => c.type === 'text')?.text || '';
+    const parsed  = extractJSON(rawText, null);
+
+    if (!parsed || !parsed.items?.length) {
+      statusEl.innerHTML = `<div class="insight-box" style="background:var(--yellow-soft);border-color:var(--yellow);">
+        <div class="insight-label">⚠️ Couldn't extract contract details</div>
+        Claude couldn't read quantities from this PDF. Fill in the fields manually below.
+      </div>`;
+      return;
+    }
+
+    // Auto-fill the form fields
+    if (parsed.label) document.getElementById('nc_label').value = parsed.label;
+    if (parsed.date_from) document.getElementById('nc_from').value = parsed.date_from;
+    if (parsed.date_to)   document.getElementById('nc_to').value   = parsed.date_to;
+
+    // Fill in quantities for matched items
+    let filledCount = 0;
+    parsed.items.forEach(extracted => {
+      const idx = extracted.index;
+      const el  = document.getElementById('nc_qty_' + idx);
+      if (el && extracted.qty > 0) {
+        el.value = extracted.qty;
+        // Highlight fuzzy/guess matches so Ami can review
+        el.style.borderColor = extracted.confidence === 'exact' ? 'var(--mint)' : 'var(--yellow)';
+        filledCount++;
+      }
+    });
+
+    // Build a review summary
+    const exactMatches = parsed.items.filter(i => i.confidence === 'exact');
+    const fuzzyMatches = parsed.items.filter(i => i.confidence === 'fuzzy');
+    const guessMatches = parsed.items.filter(i => i.confidence === 'guess');
+
+    statusEl.innerHTML = `
+      <div class="insight-box" style="background:var(--mint-soft);border-color:var(--mint);">
+        <div class="insight-label">✅ Contract read! Review the quantities below before saving.</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">
+          ${exactMatches.length ? `<span class="tag green">✓ ${exactMatches.length} exact match${exactMatches.length!==1?'es':''}</span>` : ''}
+          ${fuzzyMatches.length ? `<span class="tag" style="background:var(--yellow-soft);border-color:var(--yellow);color:#92400E;">~ ${fuzzyMatches.length} fuzzy match${fuzzyMatches.length!==1?'es':''} — verify</span>` : ''}
+          ${guessMatches.length ? `<span class="tag" style="background:var(--coral-soft);border-color:var(--coral);color:#991B1B;">? ${guessMatches.length} guess${guessMatches.length!==1?'es':''} — check carefully</span>` : ''}
+        </div>
+        ${fuzzyMatches.length || guessMatches.length ? `<div style="font-size:0.78em;font-weight:700;color:#92400E;margin-top:8px;">🟡 Yellow borders = fuzzy or guessed matches. Double-check these quantities!</div>` : ''}
+      </div>
+      ${parsed.items.map(i => {
+        const icon = i.confidence==='exact'?'✅':i.confidence==='fuzzy'?'🟡':'❓';
+        return `<div style="font-size:0.75em;font-weight:700;color:var(--text-mid);padding:3px 0;">${icon} "${i.name}" → <strong>${i.qty}</strong></div>`;
+      }).join('')}
+    `;
+
+    toast(`📄 Contract read! ${filledCount} item${filledCount!==1?'s':''} auto-filled.`);
+
+  } catch(err) {
+    statusEl.innerHTML = `<div class="insight-box" style="background:var(--coral-soft);border-color:var(--coral);">
+      <div class="insight-label">❌ PDF read failed</div>
+      Check your AI connection, or fill in the quantities manually below.
+    </div>`;
+    console.error(err);
+  }
+}
+
 function saveTrackerContract() {
   const label    = document.getElementById('nc_label')?.value.trim();
   const dateFrom = document.getElementById('nc_from')?.value;
@@ -2612,16 +2762,123 @@ function saveOrder() {
     if (qty > 0) { lines.push({name:item.name, qty, rate:item.total, labor:item.labor, materials:item.materials, subtotal:qty*item.total}); totalOwed+=qty*item.total; totalItems+=qty; }
   });
   if (!lines.length) { toast('⚠️ Add at least one item quantity first!'); return; }
-  savedOrders.unshift({id:Date.now(), label, contractor:activeContractor, date:new Date().toISOString().split('T')[0], items:lines, totalItems, totalOwed, paid:false});
+  const order = {id:Date.now(), label, contractor:activeContractor, date:new Date().toISOString().split('T')[0], items:lines, totalItems, totalOwed, paid:false, receivedDate:null, contractId:null};
+  savedOrders.unshift(order);
   save(KEY_ORDERS, savedOrders);
   document.getElementById('ctr_order_label').value = '';
   toast('💾 Order saved!');
   renderSavedOrders(); renderMonthlyBreakdown();
+
+  // Push new row to Google Sheet
+  pushOrderToSheet(order, 'pending');
+
+  // Prompt to apply to active contract
+  promptApplyToContract(order);
+}
+
+function promptApplyToContract(order) {
+  // Find active contracts for this contractor
+  const activeContracts = trackerContracts.filter(c =>
+    c.contractor === order.contractor && !c.paid
+  );
+  if (!activeContracts.length) return; // no active contracts, skip
+
+  // Build prompt banner below saved orders
+  const wrap = document.getElementById('ctr-saved-orders');
+  const existing = document.getElementById('contract_apply_prompt');
+  if (existing) existing.remove();
+
+  const banner = document.createElement('div');
+  banner.id = 'contract_apply_prompt';
+  banner.style.cssText = 'margin-top:10px;padding:14px;background:var(--lav-soft);border-radius:var(--radius-sm);border:2px solid var(--lavender);';
+
+  const contractOptions = activeContracts.map(c => {
+    const done  = c.items.reduce((s,i)=>s+(i.done||0),0);
+    const total = c.items.reduce((s,i)=>s+(i.contracted||0),0);
+    const pct   = total>0 ? Math.round(done/total*100) : 0;
+    return `<option value="${c.id}">${c.label} · ${pct}% done</option>`;
+  }).join('');
+
+  banner.innerHTML = `
+    <div style="font-weight:900;font-size:0.88em;margin-bottom:8px;">🔗 Apply this order to a contract?</div>
+    <div style="font-size:0.8em;font-weight:700;color:var(--text-mid);margin-bottom:10px;">
+      These items will count toward the contract's "done" progress.
+    </div>
+    <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
+      <div style="flex:1;min-width:180px;">
+        <label>Contract</label>
+        <select id="apply_contract_select" style="border-color:var(--lavender);">
+          ${contractOptions}
+        </select>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="applyOrderToContract(${order.id})" style="align-self:flex-end;">✅ Yes, apply</button>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('contract_apply_prompt').remove()" style="align-self:flex-end;">Skip</button>
+    </div>
+  `;
+  wrap.parentNode.insertBefore(banner, wrap);
+}
+
+function applyOrderToContract(orderId) {
+  const contractId = parseInt(document.getElementById('apply_contract_select')?.value);
+  if (!contractId) return;
+  const order    = savedOrders.find(o => o.id === orderId);
+  const contract = trackerContracts.find(c => c.id === contractId);
+  if (!order || !contract) return;
+
+  // Match order items to contract items and add to done count
+  let appliedCount = 0;
+  order.items.forEach(orderItem => {
+    const contractItem = contract.items.find(ci =>
+      ci.name.toLowerCase().includes(orderItem.name.toLowerCase().split(' ')[0]) ||
+      orderItem.name.toLowerCase().includes(ci.name.toLowerCase().split(' ')[0])
+    );
+    if (contractItem) {
+      contractItem.done = Math.min(
+        contractItem.contracted,
+        (contractItem.done||0) + orderItem.qty
+      );
+      appliedCount++;
+    }
+  });
+
+  // Link order to contract
+  order.contractId = contractId;
+  save(KEY_ORDERS, savedOrders);
+  save(KEY_TRACKER_CONTRACTS, trackerContracts);
+
+  document.getElementById('contract_apply_prompt')?.remove();
+  populateTrackerContractSelect();
+  renderSavedOrders();
+  toast(`✅ Order applied to "${contract.label}" — ${appliedCount} item${appliedCount!==1?'s':''} updated!`);
 }
 
 function toggleOrderPaid(id) {
   const order = savedOrders.find(o => o.id === id);
-  if (order) { order.paid = !order.paid; save(KEY_ORDERS, savedOrders); }
+  if (!order) return;
+  order.paid = !order.paid;
+  order.receivedDate = order.paid ? new Date().toISOString().split('T')[0] : null;
+  save(KEY_ORDERS, savedOrders);
+
+  if (order.paid) {
+    // Update Google Sheet row to paid
+    pushOrderToSheet(order, 'paid');
+
+    // Also mark contract paid if linked
+    if (order.contractId) {
+      const contract = trackerContracts.find(c => c.id === order.contractId);
+      if (contract) {
+        // Update sheet with items remaining on contract
+        const itemsRemaining = contract.items.map(i =>
+          `${i.name}: ${Math.max(0,(i.contracted||0)-(i.done||0))} left`
+        ).join(', ');
+        pushOrderToSheet(order, 'paid', itemsRemaining);
+      }
+    }
+    toast('✅ Order marked as paid & received!');
+  } else {
+    pushOrderToSheet(order, 'pending');
+    toast('↩️ Order marked as unpaid');
+  }
   renderSavedOrders(); renderMonthlyBreakdown();
 }
 
@@ -3934,11 +4191,83 @@ function loadPendingPayOrder() {
   toast('💸 Order loaded from plan!');
 }
 
+// ── Google Sheet sync ─────────────────────────────────────────────────────
+async function pushOrderToSheet(order, status, itemsRemainingOverride) {
+  const webhookUrl = localStorage.getItem('amioki_sheet_webhook') || '';
+  if (!webhookUrl) return; // not configured yet, skip silently
+
+  const contract = order.contractId
+    ? trackerContracts.find(c => c.id === order.contractId)
+    : null;
+
+  // Build items remaining string from contract if available
+  let itemsRemaining = itemsRemainingOverride || '';
+  if (!itemsRemaining && contract) {
+    itemsRemaining = contract.items
+      .map(i => `${i.name}: ${Math.max(0,(i.contracted||0)-(i.done||0))} left`)
+      .join(', ');
+  }
+
+  const payload = {
+    action:          status,           // 'pending' | 'paid'
+    orderId:         String(order.id),
+    contractor:      order.contractor,
+    label:           order.label,
+    orderDate:       order.date,
+    paidDate:        order.receivedDate || '',
+    totalOwed:       order.totalOwed.toFixed(2),
+    totalItems:      order.totalItems,
+    contractLabel:   contract ? contract.label : '',
+    itemsOrdered:    order.items.map(i => `${i.name} ×${i.qty}`).join(', '),
+    itemsRemaining:  itemsRemaining,
+    status:          status === 'paid' ? '✅ Paid' : '🟡 Pending',
+  };
+
+  try {
+    await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      mode: 'no-cors' // Apps Script web app requires no-cors
+    });
+  } catch(e) {
+    console.warn('Sheet sync failed (non-critical):', e);
+  }
+}
+
 function initSettingsTab() {
   renderDataStats();
   renderAIRules();
   renderRosterSettings();
   renderSheetsSettings();
+}
+
+function saveWebhookUrl() {
+  const url = document.getElementById('sheet_webhook_url')?.value.trim() || '';
+  localStorage.setItem('amioki_sheet_webhook', url);
+  toast(url ? '✅ Webhook URL saved! Orders will now sync to your Sheet.' : '🗑 Webhook URL cleared');
+}
+
+async function testWebhookUrl() {
+  const url = localStorage.getItem('amioki_sheet_webhook') || '';
+  const resultEl = document.getElementById('webhook_test_result');
+  if (!url) { toast('⚠️ Save a URL first!'); return; }
+  resultEl.style.display = 'block';
+  resultEl.style.color = 'var(--text-soft)';
+  resultEl.textContent = '⏳ Testing...';
+  try {
+    await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'test', contractor: 'test', label: 'Connection test', orderDate: new Date().toISOString().split('T')[0], totalOwed: '0.00', totalItems: 0, itemsOrdered: 'Test item ×1', status: '🧪 Test', contractLabel: '', itemsRemaining: '', paidDate: '', orderId: 'test_'+Date.now() }),
+      mode: 'no-cors'
+    });
+    resultEl.style.color = '#065F46';
+    resultEl.textContent = '✅ Request sent! Check your Google Sheet for a test row.';
+  } catch(e) {
+    resultEl.style.color = '#991B1B';
+    resultEl.textContent = '❌ Failed: ' + e.message;
+  }
 }
 
 function renderSheetsSettings() {
