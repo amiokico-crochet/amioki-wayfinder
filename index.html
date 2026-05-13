@@ -437,6 +437,7 @@ textarea { resize: vertical; min-height: 80px; }
   .app-header h1 { font-size: 1.6em; }
 }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body>
 
@@ -1393,23 +1394,25 @@ const CONTRACTORS = {
     name: 'Ashley',
     note: 'High-volume producer · SKU prefix CA-',
     anniversary: 'May 15',
+    rate: 13.00,
+    rateLabel: '$13.00/hr · Updated May 2026',
     items: [
-      { name: 'Chickens',               labor: 5.32, materials: 1.43, total: 6.75, time: 25 },
-      { name: 'Baby Chicks',            labor: 3.62, materials: 0.78, total: 4.40, time: 17 },
-      { name: 'Octopi (Juicy Couture)', labor: 4.90, materials: 0.55, total: 5.45, time: 23 },
-      { name: 'Octopi (Bernat Blanket)',labor: 4.90, materials: 1.28, total: 6.18, time: 23 },
-      { name: 'Octopi (Skinny Chenille)',labor:4.90, materials: 0.25, total: 5.15, time: 23 },
-      { name: 'Mama Possum',            labor: 5.74, materials: 1.14, total: 6.88, time: 27 },
-      { name: 'Baby Possum',            labor: 5.74, materials: 0.87, total: 6.61, time: 27 },
-      { name: 'Heart Keychain',         labor: 0.64, materials: 0.11, total: 0.75, time:  3 },
-      { name: 'Bear Coasters',          labor: 2.35, materials: 0.17, total: 2.52, time: 11 },
-      { name: 'Cherry Blossom Pouch',   labor: 9.58, materials: 0.34, total: 9.92, time: 45 },
-      { name: 'Apple Coasters',         labor: 3.62, materials: 0.19, total: 3.81, time: 17 },
-      { name: 'Pet Rock',               labor: 1.91, materials: 0.53, total: 2.44, time:  9 },
-      { name: 'Mini Loaf Cat',          labor: 3.19, materials: 0.79, total: 3.98, time: 15 },
-      { name: 'Mini Loaf Cat (Yarn Given)', labor: 3.19, materials: 0.09, total: 3.28, time: 15 },
-      { name: 'Christmas Baby Chick',   labor: 7.03, materials: 1.65, total: 8.68, time: 33 },
-      { name: 'Baby Christmas Tree',    labor: 8.74, materials: 1.85, total:10.59, time: 41 },
+      { name: 'Chickens',                   labor: 5.42, materials: 1.43, total: 6.85, time: 25 },
+      { name: 'Baby Chicks',                labor: 3.68, materials: 0.78, total: 4.46, time: 17 },
+      { name: 'Octopi (Juicy Couture)',      labor: 4.98, materials: 0.55, total: 5.53, time: 23 },
+      { name: 'Octopi (Bernat Blanket)',     labor: 4.98, materials: 1.28, total: 6.26, time: 23 },
+      { name: 'Octopi (Skinny Chenille)',    labor: 4.98, materials: 0.25, total: 5.23, time: 23 },
+      { name: 'Mama Possum',                labor: 5.85, materials: 1.14, total: 6.99, time: 27 },
+      { name: 'Baby Possum',                labor: 5.85, materials: 0.87, total: 6.72, time: 27 },
+      { name: 'Heart Keychain',             labor: 0.65, materials: 0.11, total: 0.76, time:  3 },
+      { name: 'Bear Coasters',              labor: 2.38, materials: 0.17, total: 2.55, time: 11 },
+      { name: 'Cherry Blossom Pouch',       labor: 9.75, materials: 0.34, total:10.09, time: 45 },
+      { name: 'Apple Coasters',             labor: 3.68, materials: 0.19, total: 3.87, time: 17 },
+      { name: 'Pet Rock',                   labor: 1.95, materials: 0.53, total: 2.48, time:  9 },
+      { name: 'Mini Loaf Cat',              labor: 3.25, materials: 0.79, total: 4.04, time: 15 },
+      { name: 'Mini Loaf Cat (Yarn Given)', labor: 3.25, materials: 0.09, total: 3.34, time: 15 },
+      { name: 'Christmas Baby Chick',       labor: 7.15, materials: 1.65, total: 8.80, time: 33 },
+      { name: 'Baby Christmas Tree',        labor: 8.88, materials: 1.85, total:10.73, time: 41 },
     ]
   },
   liz: {
@@ -2574,8 +2577,7 @@ async function readContractPDF(e) {
 
   let pdfText = '';
   try {
-    const pdfjsLib = await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.mjs');
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.mjs';
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
@@ -2587,7 +2589,7 @@ async function readContractPDF(e) {
     return;
   }
 
-  // Build the list of known items for this contractor so Claude can fuzzy match
+  // Build the list of known items for this contractor so Llama can fuzzy match
   const ctr       = CONTRACTORS[activeContractor];
   const knownItems = ctr.items.map((item, i) => `${i}: "${item.name}" ($${item.total.toFixed(2)}/ea)`).join(', ');
 
@@ -2596,25 +2598,10 @@ async function readContractPDF(e) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        system: `You are extracting contractor agreement data from a crochet production contract PDF for Amioki, a kawaii amigurumi brand. 
-Extract: contract label/name, start date, end date, and item quantities.
-The contractor is ${ctr.name}. Their known items (with index numbers) are: ${knownItems}.
-For each item found in the PDF, fuzzy match it to the closest known item by name — even if the PDF uses slightly different wording (e.g. "frogs" matches "Leggy Frog", "chicks" matches "Baby Chicks").
-Return ONLY raw JSON, no markdown, no backticks, no extra text:
-{"label":"contract name or description","date_from":"YYYY-MM-DD","date_to":"YYYY-MM-DD","items":[{"index":number,"name":"matched known item name","qty":number,"confidence":"exact|fuzzy|guess"}]}
-If a date is not found, use null. If a quantity is 0 or not mentioned, omit that item from the array.`,
+        system: `You are extracting contractor agreement data from a crochet production contract for Amioki, a kawaii amigurumi brand. Extract: contract label/name, start date, end date, and item quantities. The contractor is ${ctr.name}. Their known items (with index numbers) are: ${knownItems}. For each item found, fuzzy match it to the closest known item by name. Return ONLY raw JSON, no markdown, no backticks, no extra text: {"label":"contract name or description","date_from":"YYYY-MM-DD","date_to":"YYYY-MM-DD","items":[{"index":number,"name":"matched known item name","qty":number,"confidence":"exact|fuzzy|guess"}]} If a date is not found, use null. If a quantity is 0 or not mentioned, omit that item from the array.`,
         messages: [{
           role: 'user',
-          content: [
-            {
-              type: 'document',
-              source: { type: 'base64', media_type: 'application/pdf', data: base64 }
-            },
-            {
-              type: 'text',
-              text: `Extract the contract details from this PDF. Match item names to the known list as closely as possible. If an item in the PDF doesn't match any known item, make your best guess and mark it as "guess". Return JSON only.`
-            }
-          ]
+          content: 'Extract the contract details from this text. Match item names to the known list as closely as possible. Return JSON only.\n\nContract text:\n' + pdfText.slice(0, 4000)
         }]
       })
     });
@@ -4414,8 +4401,7 @@ async function handleDebriefPDF(e) {
       const typedArray = new Uint8Array(ev.target.result);
       let pdfText = '';
       try {
-        const pdfjsLib = await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.mjs');
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.mjs';
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
         const pdf = await pdfjsLib.getDocument({ data: typedArray }).promise;
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
