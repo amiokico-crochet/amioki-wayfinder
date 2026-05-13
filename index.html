@@ -2565,13 +2565,27 @@ async function readContractPDF(e) {
   statusEl.style.display = 'block';
   statusEl.innerHTML = `<div class="ai-loading"><div class="dots"><span></span><span></span><span></span></div> Reading contract PDF...</div>`;
 
-  // Read PDF as base64
-  const base64 = await new Promise((resolve, reject) => {
+  const arrayBuffer = await new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload  = ev => resolve(ev.target.result.split(',')[1]);
+    reader.onload  = ev => resolve(ev.target.result);
     reader.onerror = () => reject(new Error('Could not read file'));
-    reader.readAsDataURL(file);
+    reader.readAsArrayBuffer(file);
   });
+
+  let pdfText = '';
+  try {
+    const pdfjsLib = await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.mjs');
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.mjs';
+    const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      pdfText += content.items.map(item => item.str).join(' ') + '\n';
+    }
+  } catch(pdfErr) {
+    statusEl.innerHTML = `<div class="insight-box" style="background:var(--yellow-soft);border-color:var(--yellow);"><div class="insight-label">⚠️ Could not read PDF</div>Fill in quantities manually below.</div>`;
+    return;
+  }
 
   // Build the list of known items for this contractor so Claude can fuzzy match
   const ctr       = CONTRACTORS[activeContractor];
@@ -4397,15 +4411,26 @@ async function handleDebriefPDF(e) {
   const reader = new FileReader();
   reader.onload = async (ev) => {
     try {
-      const base64 = ev.target.result.split(',')[1];
+      const typedArray = new Uint8Array(ev.target.result);
+      let pdfText = '';
+      try {
+        const pdfjsLib = await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.mjs');
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.mjs';
+        const pdf = await pdfjsLib.getDocument({ data: typedArray }).promise;
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          pdfText += content.items.map(item => item.str).join(' ') + '\n';
+        }
+      } catch(pdfErr) {
+        preview.innerHTML = '<div class="insight-box" style="background:var(--yellow-soft);border-color:var(--yellow);"><div class="insight-label">⚠️ Could not read PDF</div>Enter the numbers manually below.</div>';
+        return;
+      }
       const res = await fetch(PROXY_URL, {
         method: 'POST', headers: {'Content-Type':'application/json'},
         body: JSON.stringify({
-          system: 'Extract numbers from a Square Sales Summary PDF. Return ONLY raw JSON, no text, no markdown. {"gross_sales":number,"fees":number,"tax":number,"net_total":number,"date_range":"string","cash":number,"card":number}',
-          messages: [{role:'user',content:[
-            {type:'document',source:{type:'base64',media_type:'application/pdf',data:base64}},
-            {type:'text',text:'Extract: Gross Sales, Square payment processing fees (positive number), Taxes, Net total, date range, Cash, Card amounts. JSON only.'}
-          ]}]
+          system: 'Extract numbers from Square Sales Summary report text. Return ONLY raw JSON, no text, no markdown. {"gross_sales":number,"fees":number,"tax":number,"net_total":number,"date_range":"string","cash":number,"card":number}',
+          messages: [{role:'user',content:'Extract: Gross Sales, Square payment processing fees (positive number), Taxes, Net total, date range, Cash, Card amounts. JSON only.\n\nReport text:\n'+pdfText.slice(0,4000)}]
         })
       });
       const data   = await res.json();
@@ -4433,7 +4458,7 @@ async function handleDebriefPDF(e) {
       preview.innerHTML = '<div class="insight-box" style="background:var(--yellow-soft);border-color:var(--yellow);"><div class="insight-label">⚠️ PDF read issue</div>Enter numbers manually below.</div>';
     }
   };
-  reader.readAsDataURL(file);
+  reader.readAsArrayBuffer(file);
 }
 
 function pullContractorCostsFromPayTab() {
