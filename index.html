@@ -1585,6 +1585,16 @@ function syncItemsTotal() {
 // ═══════════════════════════════════════════════
 // CSV IMPORT
 // ═══════════════════════════════════════════════
+function normalizeItemName(name) {
+  if (!name) return '';
+  // Strip kawaii/unicode decorators — keep letters, numbers, spaces, basic punctuation
+  return name
+    .replace(/[\u{1F300}-\u{1FFFF}]/gu, '')   // emoji blocks
+    .replace(/[^\p{L}\p{N}\s\-()&'.,!]/gu, '') // non-letter/number except basic punctuation
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 function parseCSVLine(line) {
   const result = []; let cur = '', inQuote = false;
   for (let i = 0; i < line.length; i++) {
