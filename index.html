@@ -1609,9 +1609,11 @@ function handleCSV(e) {
         return obj;
       }).filter(r => Object.values(r).some(v => v));
 
-      const isItemsReport  = headers.includes('item name') && headers.includes('items sold') && headers.includes('gross sales');
-      const isTransactions = headers.includes('transaction id') || (headers.includes('description') && headers.includes('amount'));
-      const isSalesSummary = headers.includes('gross sales') && !headers.includes('item name');
+      const isItemsReport  = (headers.includes('item name') || headers.includes('item')) &&
+                             (headers.includes('items sold') || headers.includes('qty')) &&
+                             headers.includes('gross sales');
+      const isTransactions = !isItemsReport && (headers.includes('transaction id') || (headers.includes('description') && headers.includes('amount')));
+      const isSalesSummary = !isItemsReport && headers.includes('gross sales');
 
       let totalRev = 0, itemsMap = {}, date = '', customSales = [];
 
