@@ -3135,8 +3135,7 @@ function rebuildTypeDropdowns() {
     const prev = el.value;
     el.innerHTML = opts;
     el.value = prev;
-    el.onchange = null;
-    el.addEventListener('change', function() { if (this.value === '__add_new__') { this.value=''; showInlineAddType(id); } });
+    el.onchange = function() { if (this.value === '__add_new__') { this.value=''; showInlineAddType(id); } };
   });
 }
 
