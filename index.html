@@ -465,11 +465,16 @@ textarea { resize: vertical; min-height: 80px; }
   <div id="tab-log" class="tab-panel active">
     <div class="card">
       <div class="card-title"><span>📤</span> Import from Square CSV</div>
+      <div style="background:var(--lav-soft);border:1px solid var(--lavender);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:12px;font-size:0.8em;font-weight:700;color:var(--text-mid);line-height:1.6;">
+        📋 <strong style="color:var(--text);">Which CSV to export from Square:</strong><br>
+        Square Dashboard → Reports → Sales → <strong style="color:var(--rose-deep);">Items</strong> → set your date range → Export CSV<br>
+        <span style="font-size:0.9em;color:var(--text-soft);">This gives you item names, quantities, and revenue all in one file.</span>
+      </div>
       <div class="upload-zone" onclick="document.getElementById('csvInput').click()">
         <input type="file" id="csvInput" accept=".csv" onchange="handleCSV(event); this.value=''">
         <div style="font-size:2em;">📂</div>
-        <strong style="font-size:0.95em;color:var(--rose-deep);">Drop Square CSV here or click to upload</strong>
-        <p>Items export OR Sales Summary — auto-maps item names & totals</p>
+        <strong style="font-size:0.95em;color:var(--rose-deep);">Drop your Square Items CSV here or click to upload</strong>
+        <p>Reports → Sales → Items → Export CSV</p>
       </div>
       <div id="csvPreview" style="margin-top:12px;display:none;"></div>
     </div>
@@ -1600,108 +1605,122 @@ function handleCSV(e) {
     try {
       const text = ev.target.result;
       const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+      if (!lines.length) throw new Error('File is empty');
+
+      // ── Detect format ──────────────────────────────────────────────
+      // Parse first line as headers, strip BOM and quotes
       const rawHeaders = parseCSVLine(lines[0]);
-      const headers = rawHeaders.map(h => h.replace(/"/g,'').trim().toLowerCase());
-      const rows = lines.slice(1).map(l => {
-        const cols = parseCSVLine(l);
-        const obj = {};
-        headers.forEach((h, i) => obj[h] = (cols[i] || '').replace(/"/g,'').trim());
-        return obj;
-      }).filter(r => Object.values(r).some(v => v));
+      const headers = rawHeaders.map(h => h.replace(/^[\uFEFF\s"]+|[\s"]+$/g,'').trim().toLowerCase());
 
-      const isItemsReport  = (headers.includes('item name') || headers.includes('item')) &&
-                             (headers.includes('items sold') || headers.includes('qty')) &&
-                             headers.includes('gross sales');
-      const isTransactions = !isItemsReport && (headers.includes('transaction id') || (headers.includes('description') && headers.includes('amount')));
-      const isSalesSummary = !isItemsReport && headers.includes('gross sales');
+      // Square Items export: has "item", "qty", "gross sales" (may also have "transaction id")
+      const isItemsExport = (headers.includes('item') || headers.includes('item name')) &&
+                            (headers.includes('qty') || headers.includes('items sold')) &&
+                            headers.includes('gross sales');
 
+      // Square Sales Summary (key-value): no tabular headers, just label/value pairs
+      const isKVSummary = !isItemsExport && lines.some(l =>
+        l.toLowerCase().replace(/"/g,'').trim().startsWith('gross sales'));
+
+      // ── Parse rows for items export ────────────────────────────────
       let totalRev = 0, itemsMap = {}, date = '', customSales = [];
 
-      if (isItemsReport) {
+      if (isItemsExport) {
+        const rows = lines.slice(1).map(l => {
+          const cols = parseCSVLine(l);
+          const obj = {};
+          headers.forEach((h, i) => obj[h] = (cols[i] || '').replace(/^"|"$/g,'').trim());
+          return obj;
+        }).filter(r => Object.values(r).some(v => v));
+
         rows.forEach(r => {
-          const name = normalizeItemName(r['item name'] || r['item'] || '');
-          const qty  = parseFloat(r['items sold'] || r['units sold'] || r['qty'] || '0') || 0;
-          const gross= parseFloat((r['gross sales'] || '0').replace(/[$,]/g,'')) || 0;
-          if (!name || ['custom amount','other','custom sale'].includes(name.toLowerCase())) {
-            if (gross > 0) customSales.push({ qty, gross }); return;
+          const rawName = r['item'] || r['item name'] || '';
+          const name    = normalizeItemName(rawName);
+          const qty     = parseFloat(r['qty'] || r['items sold'] || r['units sold'] || '1') || 1;
+          const gross   = parseFloat((r['gross sales'] || '0').replace(/[$,]/g,'')) || 0;
+          if (!date && r['date']) date = r['date'];
+
+          // Custom / unnamed amounts — bucket separately
+          if (!name || ['custom amount','custom sale','other'].includes(name.toLowerCase())) {
+            if (gross > 0) customSales.push({ qty, gross });
+            return;
           }
-          if (!date) date = r['date'] || '';
+
           if (!itemsMap[name]) itemsMap[name] = { qty: 0, rev: 0 };
           itemsMap[name].qty += qty;
           itemsMap[name].rev += gross;
           totalRev += gross;
         });
-      } else if (isTransactions) {
-        rows.forEach(r => {
-          const desc   = r['description'] || r['item'] || '';
-          const amount = parseFloat((r['amount'] || '0').replace(/[$,()-]/g,'')) || 0;
-          if (!date) date = r['date'] || '';
-          if (amount <= 0 || desc.toLowerCase().includes('fee')) return;
-          totalRev += amount;
-          if (desc && desc !== 'Square') {
-            if (!itemsMap[desc]) itemsMap[desc] = { qty: 0, rev: 0 };
-            itemsMap[desc].qty += 1; itemsMap[desc].rev += amount;
+
+      } else if (isKVSummary) {
+        // Key-value summary: each line is "Label","$Value"
+        const kvMap = {};
+        lines.forEach(l => {
+          const cols = parseCSVLine(l);
+          if (cols.length >= 2) {
+            const k = cols[0].replace(/"/g,'').trim().toLowerCase();
+            const v = cols[1].replace(/"/g,'').trim();
+            kvMap[k] = v;
           }
         });
+        totalRev = parseFloat((kvMap['gross sales'] || '0').replace(/[$,()]/g,'')) || 0;
+        // Pull date from filename hint in first line if present
+        const dateMatch = (lines[0] || '').match(/\d{4}-\d{2}-\d{2}/);
+        if (dateMatch) date = dateMatch[0];
+
       } else {
-        // Key-value sales summary format (e.g. Square "Sales summary" export)
-        const isKVReport = lines.some(l => l.toLowerCase().includes('gross sales'));
-        if (isKVReport) {
-          const kvMap = {};
-          lines.forEach(l => {
-            const cols = parseCSVLine(l);
-            if (cols.length >= 2) {
-              const k = cols[0].replace(/"/g,'').trim().toLowerCase();
-              const v = cols[1].replace(/"/g,'').trim();
-              kvMap[k] = v;
-            }
-          });
-          const gross = parseFloat((kvMap['gross sales'] || '0').replace(/[$,()]/g,'')) || 0;
-          totalRev += gross;
-          // Try to pull date from first line
-          const firstLine = lines[0] || '';
-          const dateMatch = firstLine.match(/\d{4}-\d{2}-\d{2}/);
-          if (dateMatch) date = dateMatch[0];
-        } else {
-          rows.forEach(r => {
-            const gross = parseFloat((r['gross sales'] || r['total collected'] || '0').replace(/[$,]/g,'')) || 0;
-            if (!date) date = r['date'] || '';
-            totalRev += gross;
-          });
-        }
+        throw new Error('Unrecognized CSV format. Please use Square → Reports → Sales → Items → Export CSV.');
       }
 
-      if (totalRev > 0) document.getElementById('ev_revenue').value = totalRev.toFixed(2);
-      if (date) { const d = new Date(date); if (!isNaN(d)) document.getElementById('ev_date').value = d.toISOString().split('T')[0]; }
-
-      document.getElementById('itemSalesRows').innerHTML = ''; itemRows = 0;
-      Object.entries(itemsMap).sort((a,b) => b[1].rev - a[1].rev).forEach(([name, {qty, rev}]) => {
-        addItemRow(name, qty, qty > 0 ? (rev/qty).toFixed(2) : '');
-      });
-
-      const customTotal = customSales.reduce((s,c) => s+c.gross, 0);
+      // ── Populate form ──────────────────────────────────────────────
+      // Add custom sale revenue to total (done after items so revenue field is final)
+      const customTotal = customSales.reduce((s,c) => s + c.gross, 0);
       totalRev += customTotal;
+
+      if (totalRev > 0) document.getElementById('ev_revenue').value = totalRev.toFixed(2);
+      if (date) {
+        const d = new Date(date);
+        if (!isNaN(d)) document.getElementById('ev_date').value = d.toISOString().split('T')[0];
+      }
+
+      // Render item rows sorted by revenue
+      document.getElementById('itemSalesRows').innerHTML = '';
+      itemRows = 0;
+      Object.entries(itemsMap)
+        .sort((a,b) => b[1].rev - a[1].rev)
+        .forEach(([name, {qty, rev}]) => addItemRow(name, qty, qty > 0 ? (rev/qty).toFixed(2) : ''));
+
+      // Custom sales as blank rows to fill in
       customSales.forEach(c => {
-        const perItem = c.qty > 1 ? (c.gross/c.qty).toFixed(2) : c.gross.toFixed(2);
-        for (let i = 0; i < (c.qty > 1 ? c.qty : 1); i++) addItemRow('', 1, perItem);
+        const perItem = (c.gross / Math.max(c.qty, 1)).toFixed(2);
+        addItemRow('', c.qty, perItem);
       });
+
       syncItemsTotal();
 
-      const count = Object.keys(itemsMap).length;
-      const exportType = isItemsReport ? 'Items report' : isTransactions ? 'Transactions export' : 'Sales summary';
+      // ── Success message ────────────────────────────────────────────
+      const itemCount = Object.keys(itemsMap).length;
+      const formatLabel = isItemsExport ? 'Square Items export' : 'Square Sales Summary';
       document.getElementById('csvPreview').style.display = 'block';
-      document.getElementById('csvPreview').innerHTML = `<div class="insight-box" style="background:var(--mint-soft);border-color:var(--mint);">
-        <div class="insight-label">✅ ${exportType} imported!</div>
-        <strong>$${totalRev.toFixed(2)}</strong> gross revenue detected${count ? ` across <strong>${count} item types</strong>` : ''}.
-      </div>
-      ${customSales.length > 0 ? `<div class="insight-box" style="background:var(--yellow-soft);border-color:var(--yellow);margin-top:10px;">
-        <div class="insight-label">✏️ ${customSales.length} custom sale${customSales.length > 1?'s':''} found</div>
-        Added as blank item rows — please fill in item names so the predictor can learn from them!
-      </div>` : ''}`;
-      toast('✅ CSV imported!');
+      document.getElementById('csvPreview').innerHTML = `
+        <div class="insight-box" style="background:var(--mint-soft);border-color:var(--mint);">
+          <div class="insight-label">✅ ${formatLabel} imported!</div>
+          <strong>$${totalRev.toFixed(2)}</strong> gross revenue
+          ${itemCount ? `across <strong>${itemCount} item type${itemCount !== 1 ? 's' : ''}</strong>` : '— no item breakdown (Sales Summary only)'}.
+        </div>
+        ${customSales.length ? `<div class="insight-box" style="background:var(--yellow-soft);border-color:var(--yellow);margin-top:10px;">
+          <div class="insight-label">✏️ ${customSales.length} custom/unnamed sale${customSales.length > 1 ? 's' : ''} found</div>
+          Added as blank rows — fill in item names so the predictor can learn from them!
+        </div>` : ''}`;
+      toast('🌸 CSV imported!');
+
     } catch(err) {
       document.getElementById('csvPreview').style.display = 'block';
-      document.getElementById('csvPreview').innerHTML = `<div class="insight-box" style="background:var(--coral-soft);border-color:var(--coral);"><div class="insight-label">⚠️ Import Issue</div>Couldn't parse this CSV. Use a Square Items, Transactions, or Sales Summary export.<br><small>${err.message}</small></div>`;
+      document.getElementById('csvPreview').innerHTML = `
+        <div class="insight-box" style="background:var(--coral-soft);border-color:var(--coral);">
+          <div class="insight-label">⚠️ Import Failed</div>
+          ${err.message || 'Could not read this file.'}<br>
+          <strong>Use: Square Dashboard → Reports → Sales → Items → Export CSV</strong>
+        </div>`;
     }
   };
   reader.readAsText(file);
