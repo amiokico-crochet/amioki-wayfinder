@@ -1619,8 +1619,8 @@ function handleCSV(e) {
 
       if (isItemsReport) {
         rows.forEach(r => {
-          const name = normalizeItemName(r['item name'] || '');
-          const qty  = parseFloat(r['items sold'] || r['units sold'] || '0') || 0;
+          const name = normalizeItemName(r['item name'] || r['item'] || '');
+          const qty  = parseFloat(r['items sold'] || r['units sold'] || r['qty'] || '0') || 0;
           const gross= parseFloat((r['gross sales'] || '0').replace(/[$,]/g,'')) || 0;
           if (!name || ['custom amount','other','custom sale'].includes(name.toLowerCase())) {
             if (gross > 0) customSales.push({ qty, gross }); return;
