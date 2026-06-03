@@ -1644,11 +1644,31 @@ function handleCSV(e) {
           }
         });
       } else {
-        rows.forEach(r => {
-          const gross = parseFloat((r['gross sales'] || r['total collected'] || '0').replace(/[$,]/g,'')) || 0;
-          if (!date) date = r['date'] || '';
+        // Key-value sales summary format (e.g. Square "Sales summary" export)
+        const isKVReport = lines.some(l => l.toLowerCase().includes('gross sales'));
+        if (isKVReport) {
+          const kvMap = {};
+          lines.forEach(l => {
+            const cols = parseCSVLine(l);
+            if (cols.length >= 2) {
+              const k = cols[0].replace(/"/g,'').trim().toLowerCase();
+              const v = cols[1].replace(/"/g,'').trim();
+              kvMap[k] = v;
+            }
+          });
+          const gross = parseFloat((kvMap['gross sales'] || '0').replace(/[$,()]/g,'')) || 0;
           totalRev += gross;
-        });
+          // Try to pull date from first line
+          const firstLine = lines[0] || '';
+          const dateMatch = firstLine.match(/\d{4}-\d{2}-\d{2}/);
+          if (dateMatch) date = dateMatch[0];
+        } else {
+          rows.forEach(r => {
+            const gross = parseFloat((r['gross sales'] || r['total collected'] || '0').replace(/[$,]/g,'')) || 0;
+            if (!date) date = r['date'] || '';
+            totalRev += gross;
+          });
+        }
       }
 
       if (totalRev > 0) document.getElementById('ev_revenue').value = totalRev.toFixed(2);
