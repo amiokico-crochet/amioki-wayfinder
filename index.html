@@ -3122,7 +3122,11 @@ const DEFAULT_MARKET_TYPES = [
   { id: 'holiday_market',    emoji: '🎄', label: 'Holiday Market' },
   { id: 'popup',             emoji: '🏪', label: 'Pop-Up / Indoor Venue' },
 ];
-let marketTypes = load(KEY_MARKET_TYPES, DEFAULT_MARKET_TYPES);
+let marketTypes = (function() {
+  const loaded = load(KEY_MARKET_TYPES, null);
+  if (!loaded || !Array.isArray(loaded) || loaded.length === 0) return DEFAULT_MARKET_TYPES;
+  return loaded;
+})();
 function saveMarketTypes() { save(KEY_MARKET_TYPES, marketTypes); }
 
 function rebuildTypeDropdowns() {
